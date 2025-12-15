@@ -152,10 +152,11 @@ export default function Onboarding() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <Link to="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">F</span>
-              </div>
-              <span className="text-xl font-bold text-foreground">FranchiseGrade</span>
+              <img 
+                src="/logo.svg" 
+                alt="FranchiseGrade" 
+                className="h-7 w-auto"
+              />
             </Link>
             <Link to="/">
               <Button variant="ghost" size="sm">

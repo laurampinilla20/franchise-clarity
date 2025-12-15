@@ -28,10 +28,11 @@ export function Footer() {
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">F</span>
-              </div>
-              <span className="text-xl font-bold">FranchiseGrade</span>
+              <img 
+                src="/logo-white.svg" 
+                alt="FranchiseGrade" 
+                className="h-7 w-auto"
+              />
             </Link>
             <p className="text-secondary-foreground/70 text-sm leading-relaxed">
               Your trusted partner in finding the perfect franchise opportunity. We put investors first.
