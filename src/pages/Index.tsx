@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import AnimatedFeatureModule from "@/components/AnimatedFeatureModule";
 import {
   ArrowRight,
   Target,
@@ -14,6 +15,7 @@ import {
   Sparkles,
   Users,
   CheckCircle2,
+  CheckCircle,
 } from "lucide-react";
 
 const features = [
@@ -90,248 +92,372 @@ const steps = [
 export default function Index() {
   return (
     <PageLayout>
-      {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 gradient-hero" />
-        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
-          <div className="max-w-4xl mx-auto text-center">
-            <Badge variant="info" className="mb-6 animate-fade-in">
-              <Sparkles className="w-3 h-3 mr-1" />
-              Investor-First Platform
-            </Badge>
+      <AnimatedFeatureModule />
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground tracking-tight animate-fade-up">
-              Find the franchise that
-              <span className="text-primary"> truly fits you</span>
-            </h1>
-
-            <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-up" style={{ animationDelay: "100ms" }}>
-              Your profile. Your goals. Your match. We guide you from curiosity to clarity to commitment.
-            </p>
-
-            <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center animate-fade-up" style={{ animationDelay: "200ms" }}>
-              <Link to="/onboarding">
-                <Button variant="cta" size="xl">
-                  Find Your Best Match
-                  <ArrowRight className="w-5 h-5" />
+      {/* Trust Section */}
+      <section className="pt-[60px] pb-[60px] bg-background md:pt-[120px] md:pb-[120px]">
+        <div className="container mx-auto px-0 md:px-4 lg:px-8 max-w-[1200px]">
+          <div className="flex flex-col gap-[40px]">
+            {/* First Row: Image Left, Content Right */}
+            <div className="flex flex-col lg:flex-row gap-[50px] lg:gap-[195px] items-center">
+              <div className="w-full lg:w-[480px] h-[342px] relative rounded-[30px] shrink-0">
+                <img
+                  src="https://mvp.franchisegrade.com/hubfs/New%20style/Home%20page/Find%20the%20best%20franchise%20home.png"
+                  alt="Trusted franchise advisor"
+                  className="w-full h-full object-contain rounded-[30px]"
+                />
+              </div>
+              <div className="flex flex-col gap-5 items-start w-full lg:w-[477px]">
+                <h2 className="font-normal text-3xl lg:text-4xl leading-normal text-foreground">
+                  +10,000 active buyers <br />
+                  trust us every year
+                </h2>
+                <p className="font-normal text-base leading-6 text-foreground">
+                  We've guided investors to better franchise decisions across all industries, always powered by data and deep market insight.
+                </p>
+                <Link to="/about/advisors">
+                  <Button variant="cta" size="lg" className="rounded-[30px] px-9 py-3">
+                    Talk to an advisor
                 </Button>
               </Link>
-              <Link to="/best-franchises">
-                <Button variant="navy-outline" size="xl">
-                  Explore Franchises
-                </Button>
-              </Link>
-            </div>
-
-            <div className="mt-12 flex items-center justify-center gap-8 text-sm text-muted-foreground animate-fade-up" style={{ animationDelay: "300ms" }}>
-              <div className="flex items-center gap-2">
-                <Shield className="w-4 h-4 text-primary" />
-                <span>No sales pressure</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-primary" />
-                <span>10,000+ investors helped</span>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Features Section */}
-      <section className="py-24 bg-background">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-              Built for investors, not brands
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Unlike other portals, we're designed around your success—not franchise sales quotas.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, i) => (
-              <Card key={feature.title} className="border-transparent bg-muted/50 hover:bg-muted transition-colors" style={{ animationDelay: `${i * 100}ms` }}>
-                <CardContent className="p-6">
-                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-                    <feature.icon className="w-6 h-6 text-primary" />
-                  </div>
-                  <h3 className="font-semibold text-foreground mb-2">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
+            {/* Second Row: Content Left, Image Right (image first on mobile) */}
+            <div className="flex flex-col lg:flex-row gap-[50px] lg:gap-[97px] items-center">
+              <div className="w-full lg:w-[626px] h-[446px] relative rounded-[30px] shrink-0 overflow-hidden order-1 lg:order-2">
+                <img
+                  src="https://mvp.franchisegrade.com/hubfs/New%20style/Home%20page/Best%20franchises%20usa.gif"
+                  alt="Best franchises USA"
+                  className="w-full h-full object-contain rounded-[30px]"
+                />
+              </div>
+              <div className="flex flex-col gap-5 items-start w-full lg:w-[477px] order-2 lg:order-1">
+                <h2 className="font-normal text-3xl lg:text-4xl leading-normal text-foreground w-full lg:w-[404px]">
+                  How data shapes your franchise decision
+                </h2>
+                <p className="font-normal text-base leading-6 text-foreground">
+                  A smart franchise move builds real wealth, a wrong one can cost you years. We'll show you how to choose right and win.
+                </p>
+                <Link to="/best-franchises">
+                  <Button variant="cta" size="lg" className="rounded-[30px] px-9 py-3">
+                    Find the best franchise for you
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-24 bg-muted/30">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-              Your path to ownership
+      <section id="how-it-works" className="pt-8 pb-8 md:pt-[80px] md:pb-[80px] bg-[#dee8f2] rounded-[30px] px-3 md:px-0">
+        <div className="container mx-auto px-0 md:px-4 lg:px-8 max-w-[1200px]">
+          <div className="flex flex-col gap-5 items-center text-center mb-10">
+            <h2 className="font-normal text-3xl lg:text-4xl leading-normal text-foreground">
+              Find the best franchise fit for you
             </h2>
-            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              A structured journey from exploration to decision, with support at every step.
+            <p className="font-normal text-base leading-6 text-foreground max-w-3xl">
+              Here's how we help you invest smarter, faster, and easier; with years of experience on your side.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {steps.map((step, i) => (
-              <div key={step.number} className="relative">
-                {i < steps.length - 1 && (
-                  <div className="hidden lg:block absolute top-8 left-full w-full h-0.5 bg-border -translate-x-4" />
-                )}
-                <div className="text-5xl font-bold text-primary/20 mb-4">{step.number}</div>
-                <h3 className="font-semibold text-foreground mb-2">{step.title}</h3>
-                <p className="text-sm text-muted-foreground">{step.description}</p>
+          <div className="flex flex-col lg:flex-row gap-8 lg:gap-[32px] items-center justify-center w-full">
+            {/* Territory Card */}
+            <div className="relative w-full lg:w-[363px] h-[450px] rounded-[33px] overflow-hidden group">
+              <div className="absolute inset-0 bg-[#446786] rounded-[33px]">
+                {/* Layer 3 & 4: Image and base background */}
+                <img
+                  src="https://www.figma.com/api/mcp/asset/34aefb97-346e-4ec7-9ffc-b29f9e9632ee"
+                  alt="Territory"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                {/* Layer 1: Linear gradient - always visible */}
+                <div
+                  className="absolute inset-0 rounded-[33px]"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(180deg, rgba(32, 61, 87, 0) 48.077%, rgba(32, 61, 87, 1) 100%)",
+                  }}
+                />
+                {/* Layer 2: #0E2438 overlay - 74% opacity by default, 0% on hover */}
+                <div
+                  className="absolute inset-0 rounded-[33px] bg-[#0E2438] opacity-[0.74] group-hover:opacity-0 transition-opacity"
+                />
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Preview Cards Section */}
-      <section className="py-24 bg-background">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Smart Match Card */}
-            <Card className="overflow-hidden">
-              <div className="h-2 bg-primary" />
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-lg text-foreground mb-4">Smart Match Grades</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/5">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center">A</div>
-                    <div>
-                      <div className="font-medium text-foreground">Excellent Match</div>
-                      <div className="text-xs text-muted-foreground">Territory, lifestyle, budget aligned</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-                    <div className="w-10 h-10 rounded-full bg-sky-light text-navy font-bold flex items-center justify-center">B</div>
-                    <div>
-                      <div className="font-medium text-foreground">Good Match</div>
-                      <div className="text-xs text-muted-foreground">Minor considerations to review</div>
+              <div className="relative h-full flex flex-col justify-between p-7">
+                <div className="flex justify-end">
+                  <div className="relative w-[25px] h-[25px] group cursor-pointer">
+                    <div className="absolute bg-[#FFFFFF] opacity-[0.33] group-hover:opacity-100 inset-0 rounded-[30px] transition-all" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <img
+                        src="https://www.figma.com/api/mcp/asset/2fc37f6e-2a82-4797-a992-58e2cc838e9e"
+                        alt=""
+                        className="arrow-icon block w-[14px] h-[10px] rotate-[284.751deg] scale-y-[-1]"
+                      />
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Comparison Preview */}
-            <Card className="overflow-hidden">
-              <div className="h-2 bg-navy" />
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-lg text-foreground mb-4">Side-by-Side Comparison</h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between py-2 border-b border-border">
-                    <span className="text-muted-foreground">Investment</span>
-                    <span className="font-medium">$50K – $500K</span>
+                <div className="flex flex-col gap-[17px]">
+                  <div className="bg-white flex items-center justify-center px-2 py-0.5 rounded-[30px] w-fit">
+                    <p className="font-bold text-xs leading-6 text-foreground">Territory</p>
                   </div>
-                  <div className="flex justify-between py-2 border-b border-border">
-                    <span className="text-muted-foreground">Avg. Revenue</span>
-                    <span className="font-medium">$450K/yr</span>
-                  </div>
-                  <div className="flex justify-between py-2">
-                    <span className="text-muted-foreground">Lifestyle Fit</span>
-                    <Badge variant="success" className="text-xs">Full-time</Badge>
-                  </div>
+                  <p className="font-normal text-[24px] leading-8 text-white">
+                    See the top franchise opportunities in your desired area,{" "}
+                    <span className="font-bold">backed by real market data.</span>
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
+          </div>
+        </div>
 
-            {/* Journey Preview */}
-            <Card className="overflow-hidden">
-              <div className="h-2 bg-gradient-to-r from-primary to-navy" />
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-lg text-foreground mb-4">Ownership Journey</h3>
-                <div className="space-y-3">
-                  {["Discovery Call", "Due Diligence", "Signing Day"].map((step, i) => (
-                    <div key={step} className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${i === 0 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-                        {i === 0 ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
-                      </div>
-                      <span className={i === 0 ? "font-medium text-foreground" : "text-muted-foreground"}>
-                        {step}
-                      </span>
+            {/* Financials Card */}
+            <div className="relative w-full lg:w-[363px] h-[450px] rounded-[33px] overflow-hidden group">
+              <div className="absolute inset-0 bg-[#446786] rounded-[33px]">
+                {/* Layer 3 & 4: Image and base background */}
+                <img
+                  src="https://www.figma.com/api/mcp/asset/a477852c-a016-4f58-925a-a155a91377f4"
+                  alt="Financials"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                {/* Layer 1: Linear gradient - always visible */}
+                <div
+                  className="absolute inset-0 rounded-[33px]"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(180deg, rgba(32, 61, 87, 0) 48.077%, rgba(32, 61, 87, 1) 100%)",
+                  }}
+                />
+                {/* Layer 2: #0E2438 overlay - 74% opacity by default, 0% on hover */}
+                <div
+                  className="absolute inset-0 rounded-[33px] bg-[#0E2438] opacity-[0.74] group-hover:opacity-0 transition-opacity"
+                />
+              </div>
+              <div className="relative h-full flex flex-col justify-between p-7">
+                <div className="flex justify-end">
+                  <div className="relative w-[25px] h-[25px] group cursor-pointer">
+                    <div className="absolute bg-[#FFFFFF] opacity-[0.33] group-hover:opacity-100 inset-0 rounded-[30px] transition-all" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <img
+                        src="https://www.figma.com/api/mcp/asset/2fc37f6e-2a82-4797-a992-58e2cc838e9e"
+                        alt=""
+                        className="arrow-icon block w-[14px] h-[10px] rotate-[284.751deg] scale-y-[-1]"
+                      />
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Advisors Section */}
-      <section id="advisors" className="py-24 bg-secondary text-secondary-foreground">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold">
-              Expert advisors by your side
-            </h2>
-            <p className="mt-4 text-lg text-secondary-foreground/70 max-w-2xl mx-auto">
-              Our franchise experts have helped thousands of investors find their perfect match.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            {advisors.map((advisor) => (
-              <Card key={advisor.name} className="bg-secondary-foreground/5 border-secondary-foreground/10 text-secondary-foreground">
-                <CardContent className="p-6 text-center">
-                  <img
-                    src={advisor.image}
-                    alt={advisor.name}
-                    className="w-20 h-20 rounded-full mx-auto mb-4 object-cover"
-                  />
-                  <h3 className="font-semibold">{advisor.name}</h3>
-                  <p className="text-sm text-secondary-foreground/70 mb-3">{advisor.role}</p>
-                  <div className="flex flex-wrap gap-1.5 justify-center">
-                    {advisor.specialties.map((s) => (
-                      <Badge key={s} variant="outline" className="text-xs border-secondary-foreground/20 text-secondary-foreground/80">
-                        {s}
-                      </Badge>
-                    ))}
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                </div>
+                <div className="flex flex-col gap-[17px]">
+                  <div className="bg-white flex items-center justify-center px-2 py-0.5 rounded-[30px] w-fit">
+                    <p className="font-bold text-xs leading-6 text-foreground">Financials</p>
+                  </div>
+                  <p className="font-normal text-[24px] leading-8 text-white">
+                    Match your budget to franchises with strong numbers,{" "}
+                    <span className="font-bold">using in-depth internal reports.</span>
+                  </p>
+                </div>
+              </div>
           </div>
 
-          <div className="mt-12 text-center">
-            <Link to="/onboarding">
-              <Button variant="cta" size="lg">
-                <MessageCircle className="w-4 h-4" />
-                Talk to an Advisor
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-24 bg-background">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-              Ready to find your match?
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              Take 5 minutes to build your profile and discover franchises that fit your life.
-            </p>
-            <div className="mt-8">
-              <Link to="/onboarding">
-                <Button variant="cta" size="xl">
-                  Start Your Journey
-                  <ArrowRight className="w-5 h-5" />
-                </Button>
-              </Link>
+            {/* Industries Card */}
+            <div className="relative w-full lg:w-[363px] h-[450px] rounded-[33px] overflow-hidden group">
+              <div className="absolute inset-0 bg-[#446786] rounded-[33px]">
+                {/* Layer 3 & 4: Image and base background */}
+                <img
+                  src="https://www.figma.com/api/mcp/asset/175278fc-ac43-4db0-b526-851784745bb1"
+                  alt="Industries"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                {/* Layer 1: Linear gradient - always visible */}
+                <div
+                  className="absolute inset-0 rounded-[33px]"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(180deg, rgba(32, 61, 87, 0) 48.077%, rgba(32, 61, 87, 1) 100%)",
+                  }}
+                />
+                {/* Layer 2: #0E2438 overlay - 74% opacity by default, 0% on hover */}
+                <div
+                  className="absolute inset-0 rounded-[33px] bg-[#0E2438] opacity-[0.74] group-hover:opacity-0 transition-opacity"
+                />
+              </div>
+              <div className="relative h-full flex flex-col justify-between p-7">
+                <div className="flex justify-end">
+                  <div className="relative w-[25px] h-[25px] group cursor-pointer">
+                    <div className="absolute bg-[#FFFFFF] opacity-[0.33] group-hover:opacity-100 inset-0 rounded-[30px] transition-all" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <img
+                        src="https://www.figma.com/api/mcp/asset/2fc37f6e-2a82-4797-a992-58e2cc838e9e"
+                        alt=""
+                        className="arrow-icon block w-[14px] h-[10px] rotate-[284.751deg] scale-y-[-1]"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-[17px]">
+                  <div className="bg-white flex items-center justify-center px-2 py-0.5 rounded-[30px] w-fit">
+                    <p className="font-bold text-xs leading-6 text-foreground">Industries</p>
+                  </div>
+                  <p className="font-normal text-[24px] leading-8 text-white">
+                    Align your lifestyle and long-term goals to{" "}
+                    <span className="font-bold">industries where you're most likely to thrive.</span>
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
+
+            {/* Explore Industries & Advisors Section */}
+            <section className="bg-background -mx-3 px-3 md:-mx-4 md:px-8 lg:-mx-8 lg:px-8">
+              <div className="flex flex-col lg:flex-row gap-8 items-stretch w-full mt-8">
+                {/* Industries Section */}
+                <div className="bg-[rgba(222,232,242,0.4)] flex flex-col gap-[68px] items-center px-[40px] md:px-[80px] py-[60px] md:py-[120px] rounded-[30px] w-full lg:w-1/2 lg:h-[780px]">
+                    <div className="flex flex-col font-normal gap-[5px] items-center text-navy text-center w-full max-w-[500px]">
+                      <p className="leading-normal text-3xl md:text-4xl w-full">
+                        Explore franchises by industry
+                      </p>
+                      <p className="leading-6 text-base w-full">
+                        See which segments outperform and where you truly fit. Here are some of the top industries we cover:
+                      </p>
+                    </div>
+                    <div className="flex flex-col md:flex-row gap-[32px] items-start justify-start w-full">
+                      {/* Left Column */}
+                      <div className="flex flex-col gap-[14px] items-start w-full md:w-auto">
+                        <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap">
+                          <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
+                          <p className="font-semibold leading-6 text-navy text-sm text-left">
+                            Business & Professional
+                          </p>
+                        </div>
+                        <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap">
+                          <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
+                          <p className="font-semibold leading-6 text-navy text-sm text-left">
+                            Pet Care
+                          </p>
+                        </div>
+                        <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap">
+                          <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
+                          <p className="font-semibold leading-6 text-navy text-sm text-left">
+                            Healthcare & Medical
+                          </p>
+                        </div>
+                        <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap">
+                          <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
+                          <p className="font-semibold leading-6 text-navy text-sm text-left">
+                            Retail Food & Convenience
+                          </p>
+                        </div>
+                        <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap">
+                          <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
+                          <p className="font-semibold leading-6 text-navy text-sm text-left">
+                            Real Estate & Lodging
+                          </p>
+                        </div>
+                      </div>
+                      {/* Right Column */}
+                      <div className="flex flex-col gap-[14px] items-start w-full md:w-auto">
+                        <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap">
+                          <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
+                          <p className="font-semibold leading-6 text-navy text-sm text-left">
+                            Personal Care & Lifestyle
+                          </p>
+                        </div>
+                        <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap">
+                          <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
+                          <p className="font-semibold leading-6 text-navy text-sm text-left">
+                            Home Services
+                          </p>
+                        </div>
+                        <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap">
+                          <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
+                          <p className="font-semibold leading-6 text-navy text-sm text-left">
+                            Fast Food Restaurants
+                          </p>
+                        </div>
+                        <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap">
+                          <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
+                          <p className="font-semibold leading-6 text-navy text-sm text-left">
+                            Retail Products
+                          </p>
+                        </div>
+                        <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap">
+                          <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
+                          <p className="font-semibold leading-6 text-navy text-sm text-left">
+                            Full Service Restaurants
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <Link to="/best-franchises/for">
+                      <Button variant="cta" size="lg" className="rounded-[30px] px-9 py-3">
+                        Find the best industry for you
+                      </Button>
+                    </Link>
+                  </div>
+
+                {/* Advisors Section */}
+                <div className="bg-[#f4f8fe] flex flex-col lg:h-[780px] items-center justify-between px-[50px] md:px-[100px] py-[40px] md:py-[120px] rounded-[30px] w-full lg:w-1/2">
+                    <div className="flex flex-col font-normal gap-4 items-center text-black text-center w-full">
+                      <p className="leading-normal text-3xl md:text-4xl">
+                        Find the best advisor for you
+                      </p>
+                      <p className="leading-6 text-base w-full max-w-[500px]">
+                        Get guidance from experts with 30+ years of experience. Our advisors specialize by industry to help you find the right franchise.
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-center relative w-full max-w-[550px] my-10 overflow-visible">
+                      <div className="relative flex items-center w-full h-[120px] md:h-[166px]">
+                        <div className="absolute left-0 top-0 w-[120px] h-[120px] md:w-[166px] md:h-[166px]">
+                          <div className="relative w-full h-full border-2 border-white rounded-full overflow-hidden">
+                            <div className="absolute inset-0 bg-[#acacac] rounded-full" />
+                            <img
+                              alt=""
+                              src="https://www.figma.com/api/mcp/asset/eae522ca-ae26-4c21-830a-bbf7b4db12ed"
+                              className="absolute inset-0 w-full h-full object-cover rounded-full"
+                            />
+                          </div>
+                        </div>
+                        <div className="absolute left-[22%] top-0 w-[120px] h-[120px] md:w-[166px] md:h-[166px] z-10">
+                          <div className="relative w-full h-full border-2 border-white rounded-full overflow-hidden">
+                            <div className="absolute inset-0 bg-[#acacac] rounded-full" />
+                            <img
+                              alt=""
+                              src="https://www.figma.com/api/mcp/asset/368cb21b-b49f-4f37-b78a-db807fb05990"
+                              className="absolute inset-0 w-full h-full object-cover rounded-full"
+                            />
+                          </div>
+                        </div>
+                        <div className="absolute left-[44%] top-0 w-[120px] h-[120px] md:w-[166px] md:h-[166px] z-20">
+                          <div className="relative w-full h-full border-2 border-white rounded-full overflow-hidden">
+                            <div className="absolute inset-0 bg-[#acacac] rounded-full" />
+                            <img
+                              alt=""
+                              src="https://www.figma.com/api/mcp/asset/a49e25ee-bc45-4df5-bfa2-8517a494fe7a"
+                              className="absolute inset-0 w-full h-full object-cover rounded-full"
+                            />
+                          </div>
+                        </div>
+                        <div className="absolute left-[66%] top-0 w-[120px] h-[120px] md:w-[166px] md:h-[166px] z-30">
+                          <div className="relative w-full h-full border-2 border-white rounded-full overflow-hidden">
+                            <div className="absolute inset-0 bg-[#acacac] rounded-full" />
+                            <img
+                              alt=""
+                              src="https://www.figma.com/api/mcp/asset/7b88cda7-8e16-4b84-8d78-ccaff27645ca"
+                              className="absolute inset-0 w-full h-full object-cover rounded-full"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <Link to="/about/advisors">
+                      <Button variant="cta" size="lg" className="rounded-[30px] px-9 py-3">
+                        Talk to an advisor
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </section>
+
     </PageLayout>
   );
 }

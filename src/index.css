@@ -134,6 +134,15 @@
     text-wrap: balance;
   }
 
+  .arrow-icon {
+    filter: brightness(0) saturate(100%) invert(100%);
+    transition: filter 0.3s ease;
+  }
+  
+  .group:hover .arrow-icon {
+    filter: brightness(0) saturate(100%) invert(27%) sepia(50%) saturate(500%) hue-rotate(195deg);
+  }
+
 
   .gradient-hero {
     background: var(--gradient-hero);

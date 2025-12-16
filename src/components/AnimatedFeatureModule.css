@@ -1,0 +1,214 @@
+/* General Module Styles */
+.animated-feature-module {
+  display: flex;
+  flex-direction: column;
+  justify-content: top;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  min-height: 50vh;
+  font-family: "Manrope", sans-serif;
+  color: white;
+  margin: 0 0 40px 0;
+  padding: 0;
+  background-color: #163552;
+  border-radius: 32px;
+}
+
+/* Content Styles */
+.content-wrapper {
+  max-width: 950px;
+  width: 100%;
+  padding: 40px 0 40px 0; /* Top padding 40px, bottom padding 40px, horizontal padding 0 */
+  order: 1;
+  align-items: center;
+  text-align: center;
+}
+
+.features-inner-section {
+  order: 4;
+  width: 100%;
+}
+
+.red-underline {
+  text-decoration: underline;
+  text-decoration-color: #54b936;
+}
+
+/* (These styles remain unchanged) */
+.subtitle-container {
+  border: 1px solid #54b936;
+  border-radius: 30px;
+  padding: 4px 12px;
+  margin-bottom: 20px;
+  display: inline-block;
+}
+.subtitle {
+  font-size: 16px;
+  color: white;
+  margin: 0;
+}
+.subtitle .highlight {
+  font-weight: 700;
+  color: #54b936;
+}
+.paragraph {
+  font-size: 16px;
+  color: white;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+.cta-button {
+  background-color: #54b936;
+  color: #ffffff !important;
+  border: 2px solid #54b936;
+  padding: 12px 36px;
+  text-decoration: none !important;
+  font-size: 16px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  border-radius: 50px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  display: inline-block;
+}
+.cta-button:hover {
+  background-color: transparent;
+  color: #54b936 !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  transform: scale(1.02);
+}
+.cta-button:active {
+  transform: scale(0.98);
+}
+
+/* (Animation styles remain unchanged) */
+.animated-title {
+  font-size: 48px;
+  font-weight: 400;
+  margin: 0 0 20px 0;
+  color: white;
+  /* La propiedad 'height' ha sido eliminada */
+}
+.animated-title .word-container {
+  display: inline-block;
+}
+.animated-title .animated-word {
+  font-weight: 700;
+  display: inline-block;
+}
+.animated-title .static-franchise-word {
+  font-weight: 400;
+}
+.fade-out {
+  animation: fadeOut 0.4s ease-in forwards;
+}
+.fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+/* --- IMAGE STYLES (THE FINAL SOLUTION) --- */
+.image-wrapper {
+  width: 100%;
+  padding-top: 0; /* Space between text and image on desktop */
+  order: 3;
+  align-items: center;
+  text-align: center;
+}
+
+.animated-images {
+  position: relative;
+  width: 100%;
+  align-items: center;
+  text-align: center;
+}
+
+.image-sizer {
+  position: relative;
+  width: 80%;
+  height: auto;
+  visibility: hidden;
+  align-items: center;
+  text-align: center;
+}
+
+.animated-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out;
+  align-items: center;
+  text-align: center;
+}
+
+.animated-image.active {
+  opacity: 1;
+}
+
+/* --- RESPONSIVE STYLES (SIMPLIFIED & CORRECTED) --- */
+@media (max-width: 991px) {
+  /* For Tablet */
+  .content-wrapper {
+    max-width: 850px;
+  }
+  .animated-title {
+    font-size: 40px;
+    /* La propiedad 'height' ha sido eliminada */
+  }
+}
+
+@media (max-width: 767px) {
+  /* For Mobile */
+  .animated-feature-module {
+    flex-direction: column-reverse;
+  }
+
+  .image-wrapper {
+    padding-top: 0;
+    margin-bottom: 0px;
+  }
+
+  .content-wrapper {
+    margin-bottom: 0;
+    padding: 40px 12px 40px 12px; /* Top 40px, horizontal 12px, bottom 40px */
+  }
+
+  .features-inner-section {
+    order: 0;
+  }
+
+  .animated-title {
+    font-size: 32px;
+    /* La propiedad 'height' ha sido eliminada */
+  }
+  .animated-title .title-first-line {
+    display: block;
+  }
+  .subtitle {
+    font-size: 12px !important;
+  }
+}
+

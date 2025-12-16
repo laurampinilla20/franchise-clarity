@@ -10,7 +10,9 @@ export function PageLayout({ children, showFooter = true }: PageLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
-      <main className="flex-1 pt-16">{children}</main>
+      <main className="flex-1 pt-16 px-3 md:px-4 lg:px-8 max-w-[1512px] mx-auto w-full">
+        {children}
+      </main>
       {showFooter && <Footer />}
     </div>
   );
