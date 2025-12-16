@@ -230,7 +230,7 @@ export default function Browse() {
               <div className="flex-1 h-full rounded-l-[32px] px-4 py-2 flex items-center bg-transparent">
                 <input
                   type="text"
-                  placeholder="Search a franchise    |    Location    |    Industry    |    Investment | Keywords"
+                  placeholder="Search a franchise    |    Location    |    Industry    |    Investment   |   Keywords"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchFocused(true)}
