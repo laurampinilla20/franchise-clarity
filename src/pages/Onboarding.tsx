@@ -13,7 +13,42 @@ import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
+  Star,
+  TrendingUp,
+  Briefcase,
+  RotateCcw,
+  PiggyBank,
+  Users,
+  HeartHandshake,
+  ThumbsUp,
+  Search,
+  HelpCircle,
+  X,
+  CircleCheck,
+  AlertCircle,
 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 const steps = [
@@ -50,12 +85,12 @@ const steps = [
 ];
 
 const goalOptions = [
-  { id: "financial-freedom", label: "Financial freedom", description: "Build long-term wealth" },
-  { id: "be-my-own-boss", label: "Be my own boss", description: "Independence and control" },
-  { id: "career-change", label: "Career change", description: "New chapter in life" },
-  { id: "semi-retirement", label: "Semi-retirement income", description: "Passive investment" },
-  { id: "family-business", label: "Family business", description: "Build something together" },
-  { id: "community-impact", label: "Community impact", description: "Make a difference locally" },
+  { id: "financial-freedom", label: "Financial freedom", description: "Build long-term wealth", icon: TrendingUp },
+  { id: "be-my-own-boss", label: "Be my own boss", description: "Independence and control", icon: Briefcase },
+  { id: "career-change", label: "Career change", description: "New chapter in life", icon: RotateCcw },
+  { id: "semi-retirement", label: "Semi-retirement income", description: "Passive investment", icon: PiggyBank },
+  { id: "family-business", label: "Family business", description: "Build something together", icon: Users },
+  { id: "community-impact", label: "Community impact", description: "Make a difference locally", icon: HeartHandshake },
 ];
 
 const timeOptions = [
@@ -86,6 +121,8 @@ const budgetOptions = [
   { id: "500k-plus", label: "$500K+" },
 ];
 
+const discussPrivatelyOption = { id: "discuss-privately", label: "I'd rather discuss this privately" };
+
 const timelineOptions = [
   { id: "asap", label: "As soon as possible" },
   { id: "3-6-months", label: "3-6 months" },
@@ -101,19 +138,74 @@ const skillAreas = [
   { id: "customer", label: "Customer Service" },
 ];
 
+const roleOptions = [
+  "Executive / C-Suite",
+  "Manager / Director",
+  "Sales Professional",
+  "Operations Manager",
+  "Marketing Professional",
+  "Finance Professional",
+  "Consultant",
+  "Entrepreneur",
+  "Retired",
+  "Student",
+  "Other",
+];
+
+const industryExperienceOptions = [
+  "Food & Beverage",
+  "Retail",
+  "Healthcare",
+  "Technology",
+  "Finance",
+  "Real Estate",
+  "Hospitality",
+  "Education",
+  "Manufacturing",
+  "Construction",
+  "Other",
+  "None",
+];
+
+const educationOptions = [
+  "High School",
+  "Associate's Degree",
+  "Bachelor's Degree",
+  "Master's Degree",
+  "MBA",
+  "Doctorate",
+  "Professional Certification",
+];
+
 export default function Onboarding() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
+  const [currentRoleOpen, setCurrentRoleOpen] = useState(false);
+  const [industryExperienceOpen, setIndustryExperienceOpen] = useState(false);
+  const [educationOpen, setEducationOpen] = useState(false);
   const [formData, setFormData] = useState({
     goals: [] as string[],
     timeCommitment: "",
     industries: [] as string[],
+    specificBrand: "",
+    exploringOtherFranchises: "",
     budget: "",
-    timeline: "",
+    creditScore: "",
+    currentRole: "",
+    industryExperience: "",
+    education: "",
     skills: {} as Record<string, number>,
   });
 
-  const progress = (currentStep / steps.length) * 100;
+  // Progress aligned with icons: 1%, 25%, 50%, 75%, 100%
+  const progressMap: Record<number, number> = {
+    1: 1,
+    2: 25,
+    3: 50,
+    4: 75,
+    5: 100,
+  };
+  const progress = progressMap[currentStep] || 1;
 
   const toggleArrayItem = (field: "goals" | "industries", value: string) => {
     setFormData((prev) => ({
@@ -167,59 +259,59 @@ export default function Onboarding() {
         </div>
       </header>
 
-      <main className="pt-16">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-3xl">
-          {/* Progress */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-3">
+      <main className="pt-16 flex flex-col h-screen">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl flex flex-col h-full">
+          {/* Progress with Step Indicators */}
+          <div className="mb-8 pt-1 relative">
+            <div className="flex items-center mb-5 relative">
               <span className="text-sm text-muted-foreground">
                 Step {currentStep} of {steps.length}
               </span>
-              <span className="text-sm font-medium text-foreground">{Math.round(progress)}%</span>
-            </div>
-            <Progress value={progress} className="h-2" />
-          </div>
-
-          {/* Step Indicators */}
-          <div className="flex justify-between mb-12">
-            {steps.map((step) => (
-              <div
-                key={step.id}
-                className={cn(
-                  "flex flex-col items-center gap-2",
-                  step.id === currentStep
-                    ? "text-primary"
-                    : step.id < currentStep
-                    ? "text-primary/60"
-                    : "text-muted-foreground"
-                )}
-              >
-                <div
-                  className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center transition-colors",
-                    step.id === currentStep
-                      ? "bg-primary text-primary-foreground"
-                      : step.id < currentStep
-                      ? "bg-primary/20 text-primary"
-                      : "bg-muted text-muted-foreground"
-                  )}
-                >
-                  {step.id < currentStep ? (
-                    <CheckCircle2 className="w-5 h-5" />
-                  ) : (
-                    <step.icon className="w-5 h-5" />
-                  )}
-                </div>
-                <span className="text-xs font-medium hidden sm:block">{step.title}</span>
+              {/* Percentage aligned with last icon */}
+              <div className="absolute left-0 right-0 flex justify-between pointer-events-none">
+                {steps.map((step, index) => (
+                  <div key={step.id} className="w-10 flex justify-center">
+                    {index === steps.length - 1 && (
+                      <span className="text-sm font-medium text-foreground">{Math.round(progress)}%</span>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+            <div className="relative">
+              <div className="relative z-[1]">
+                <Progress value={progress} className="h-2" />
+              </div>
+              {/* Step Icons positioned on progress bar */}
+              <div className="absolute top-1/2 left-0 right-0 flex justify-between -translate-y-1/2 pointer-events-none z-[100]">
+                {steps.map((step) => (
+                  <div
+                    key={step.id}
+                    className={cn(
+                      "w-10 h-10 rounded-full flex items-center justify-center transition-colors pointer-events-auto relative z-[100]",
+                      step.id === currentStep
+                        ? "bg-primary text-primary-foreground"
+                        : step.id < currentStep
+                        ? "bg-primary/20 text-primary"
+                        : "bg-muted text-muted-foreground"
+                    )}
+                  >
+                    {step.id < currentStep ? (
+                      <CheckCircle2 className="w-5 h-5" />
+                    ) : (
+                      <step.icon className="w-5 h-5" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          {/* Step Content */}
-          <div className="animate-fade-in">
+          {/* Step Content - Scrollable */}
+          <div className="flex-1 overflow-y-auto animate-fade-in">
             {currentStep === 1 && (
               <div className="space-y-8">
-                <div className="text-center">
+                <div className="text-center pt-8">
                   <h1 className="text-2xl md:text-3xl font-bold text-foreground">
                     What are your goals?
                   </h1>
@@ -233,18 +325,26 @@ export default function Onboarding() {
                     <Card
                       key={option.id}
                       className={cn(
-                        "cursor-pointer transition-all",
+                        "cursor-pointer transition-all rounded-[20px] border",
                         formData.goals.includes(option.id)
                           ? "border-primary bg-primary/5"
-                          : "hover:border-primary/50"
+                          : "border-[#dee8f2] hover:border-primary/50"
                       )}
                       onClick={() => toggleArrayItem("goals", option.id)}
                     >
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div>
+                      <CardContent className="p-5">
+                        <div className="flex items-start gap-3">
+                          <div className={cn(
+                            "w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0",
+                            formData.goals.includes(option.id)
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-[#f4f8fe] text-[#446786]"
+                          )}>
+                            <option.icon className="w-5 h-5" />
+                          </div>
+                          <div className="flex-1">
                             <h3 className="font-medium text-foreground">{option.label}</h3>
-                            <p className="text-sm text-muted-foreground">{option.description}</p>
+                            <p className="text-sm text-muted-foreground mt-1">{option.description}</p>
                           </div>
                           {formData.goals.includes(option.id) && (
                             <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
@@ -255,29 +355,108 @@ export default function Onboarding() {
                   ))}
                 </div>
 
-                <div>
-                  <h2 className="text-lg font-semibold text-foreground mb-4">
+                <div className="space-y-2">
+                  <label className="text-lg font-semibold text-foreground">
                     Time commitment preference
-                  </h2>
+                  </label>
+                  <Select
+                    value={formData.timeCommitment}
+                    onValueChange={(value) => setFormData({ ...formData, timeCommitment: value })}
+                  >
+                    <SelectTrigger className="h-12 text-base rounded-[30px] border-border">
+                      <SelectValue placeholder="Select your time commitment" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {timeOptions.map((option) => (
+                        <SelectItem key={option.id} value={option.id}>
+                          {option.label} - {option.description}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+
+            {currentStep === 2 && (
+              <div className="space-y-8">
+                <div className="text-center pt-8">
+                  <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+                    Industry preferences
+                  </h1>
+                </div>
+
+                {/* Q3: Specific franchise brand or industry */}
+                <div className="space-y-4">
+                  <label className="text-lg font-semibold text-foreground block">
+                    Do you have a specific franchise brand or industry in mind?
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="Type here..."
+                    value={formData.specificBrand}
+                    onChange={(e) => setFormData({ ...formData, specificBrand: e.target.value })}
+                    className="h-12 rounded-[30px] border-[#dee8f2] focus:border-primary"
+                  />
+                </div>
+
+                {/* Q4: Exploring other franchises */}
+                <div className="space-y-4">
+                  <label className="text-lg font-semibold text-foreground block">
+                    Are you open to exploring other franchises?
+                  </label>
                   <div className="grid sm:grid-cols-2 gap-4">
-                    {timeOptions.map((option) => (
+                    {[
+                      {
+                        id: "yes-best-match",
+                        label: "Yes, I'm open to finding the best match",
+                        icon: ThumbsUp,
+                      },
+                      {
+                        id: "yes-compare",
+                        label: "Yes, I'd compare similar franchises",
+                        icon: Search,
+                      },
+                      {
+                        id: "maybe",
+                        label: "Maybe, only if my preferred choice isn't available",
+                        icon: HelpCircle,
+                      },
+                      {
+                        id: "no",
+                        label: "No, this franchise only",
+                        icon: X,
+                      },
+                    ].map((option) => (
                       <Card
                         key={option.id}
                         className={cn(
-                          "cursor-pointer transition-all",
-                          formData.timeCommitment === option.id
+                          "cursor-pointer transition-all border rounded-[20px]",
+                          formData.exploringOtherFranchises === option.id
                             ? "border-primary bg-primary/5"
-                            : "hover:border-primary/50"
+                            : "border-[#dee8f2] hover:border-primary/50"
                         )}
-                        onClick={() => setFormData({ ...formData, timeCommitment: option.id })}
+                        onClick={() => setFormData({ ...formData, exploringOtherFranchises: option.id })}
                       >
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h3 className="font-medium text-foreground">{option.label}</h3>
-                              <p className="text-sm text-muted-foreground">{option.description}</p>
+                        <CardContent className="p-5">
+                          <div className="flex items-start gap-3">
+                            <div className={cn(
+                              "w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0",
+                              formData.exploringOtherFranchises === option.id
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-[#f4f8fe] text-[#446786]"
+                            )}>
+                              <option.icon className="w-5 h-5" />
                             </div>
-                            {formData.timeCommitment === option.id && (
+                            <p className={cn(
+                              "text-sm font-medium flex-1",
+                              formData.exploringOtherFranchises === option.id
+                                ? "text-primary"
+                                : "text-foreground"
+                            )}>
+                              {option.label}
+                            </p>
+                            {formData.exploringOtherFranchises === option.id && (
                               <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
                             )}
                           </div>
@@ -289,35 +468,9 @@ export default function Onboarding() {
               </div>
             )}
 
-            {currentStep === 2 && (
-              <div className="space-y-8">
-                <div className="text-center">
-                  <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-                    Industry preferences
-                  </h1>
-                  <p className="mt-2 text-muted-foreground">
-                    Select the industries that interest you most.
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap gap-3 justify-center">
-                  {industryOptions.map((industry) => (
-                    <Badge
-                      key={industry}
-                      variant={formData.industries.includes(industry) ? "chipActive" : "chip"}
-                      className="text-sm py-2 px-4 cursor-pointer"
-                      onClick={() => toggleArrayItem("industries", industry)}
-                    >
-                      {industry}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {currentStep === 3 && (
               <div className="space-y-8">
-                <div className="text-center">
+                <div className="text-center pt-8">
                   <h1 className="text-2xl md:text-3xl font-bold text-foreground">
                     Financial details
                   </h1>
@@ -326,54 +479,114 @@ export default function Onboarding() {
                   </p>
                 </div>
 
-                <div>
-                  <h2 className="text-lg font-semibold text-foreground mb-4">Investment budget</h2>
-                  <div className="grid sm:grid-cols-3 gap-3">
-                    {budgetOptions.map((option) => (
-                      <Card
-                        key={option.id}
-                        className={cn(
-                          "cursor-pointer transition-all",
-                          formData.budget === option.id
-                            ? "border-primary bg-primary/5"
-                            : "hover:border-primary/50"
-                        )}
-                        onClick={() => setFormData({ ...formData, budget: option.id })}
-                      >
-                        <CardContent className="p-4 text-center">
-                          <span className={cn(
-                            "font-medium",
-                            formData.budget === option.id ? "text-primary" : "text-foreground"
-                          )}>
-                            {option.label}
-                          </span>
-                        </CardContent>
-                      </Card>
-                    ))}
+                <div className="relative z-10 space-y-4">
+                  <div>
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Investment budget</h2>
+                    <div className="flex flex-wrap gap-3">
+                      {budgetOptions.map((option) => (
+                        <button
+                          key={option.id}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, budget: option.id })}
+                          className={cn(
+                            "text-sm py-2.5 px-5 rounded-[30px] cursor-pointer transition-all border font-medium relative z-10",
+                            formData.budget === option.id
+                              ? "bg-[#203d57] text-white border-[#203d57] shadow-sm"
+                              : "bg-white text-[#446786] border-[#dee8f2] hover:bg-[#f4f8fe]"
+                          )}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, budget: discussPrivatelyOption.id })}
+                      className={cn(
+                        "text-sm py-2.5 px-5 rounded-[30px] cursor-pointer transition-all border font-medium relative z-10",
+                        formData.budget === discussPrivatelyOption.id
+                          ? "bg-[#203d57] text-white border-[#203d57] shadow-sm"
+                          : "bg-white text-[#446786] border-[#dee8f2] hover:bg-[#f4f8fe]"
+                      )}
+                    >
+                      {discussPrivatelyOption.label}
+                    </button>
                   </div>
                 </div>
 
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground mb-4">Timeline to start</h2>
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    {timelineOptions.map((option) => (
+                  <h2 className="text-lg font-semibold text-foreground mb-4">
+                    What is your approximate credit score?
+                  </h2>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {[
+                      {
+                        id: "amazing",
+                        label: "Amazing (720+)",
+                        icon: CircleCheck,
+                        color: "#54b936",
+                      },
+                      {
+                        id: "very-good",
+                        label: "Very Good (680–719)",
+                        icon: CircleCheck,
+                        color: "#FFB800",
+                      },
+                      {
+                        id: "not-bad",
+                        label: "Not bad (620–679)",
+                        icon: AlertCircle,
+                        color: "#FF8C00",
+                      },
+                      {
+                        id: "working-on-it",
+                        label: "Working on it (under 620)",
+                        icon: AlertCircle,
+                        color: "#ee2524",
+                      },
+                      {
+                        id: "not-sure",
+                        label: "Not sure",
+                        icon: HelpCircle,
+                        color: "#446786",
+                      },
+                    ].map((option) => (
                       <Card
                         key={option.id}
                         className={cn(
-                          "cursor-pointer transition-all",
-                          formData.timeline === option.id
+                          "cursor-pointer transition-all rounded-[20px] border",
+                          formData.creditScore === option.id
                             ? "border-primary bg-primary/5"
-                            : "hover:border-primary/50"
+                            : "border-[#dee8f2] hover:border-primary/50"
                         )}
-                        onClick={() => setFormData({ ...formData, timeline: option.id })}
+                        onClick={() => setFormData({ ...formData, creditScore: option.id })}
                       >
-                        <CardContent className="p-4 text-center">
-                          <span className={cn(
-                            "font-medium",
-                            formData.timeline === option.id ? "text-primary" : "text-foreground"
-                          )}>
-                            {option.label}
-                          </span>
+                        <CardContent className="p-5">
+                          <div className="flex items-center gap-3">
+                            <div 
+                              className={cn(
+                                "w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0",
+                                formData.creditScore === option.id
+                                  ? "bg-primary text-primary-foreground"
+                                  : ""
+                              )}
+                              style={formData.creditScore === option.id ? {} : { backgroundColor: `${option.color}20`, color: option.color }}
+                            >
+                              <option.icon className="w-5 h-5" />
+                            </div>
+                            <span className={cn(
+                              "font-medium flex-1",
+                              formData.creditScore === option.id ? "text-primary" : "text-foreground"
+                            )}>
+                              {option.label}
+                            </span>
+                            {formData.creditScore === option.id && (
+                              <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
+                            )}
+                          </div>
                         </CardContent>
                       </Card>
                     ))}
@@ -384,7 +597,7 @@ export default function Onboarding() {
 
             {currentStep === 4 && (
               <div className="space-y-8">
-                <div className="text-center">
+                <div className="text-center pt-8">
                   <h1 className="text-2xl md:text-3xl font-bold text-foreground">
                     Tell us about yourself
                   </h1>
@@ -393,65 +606,191 @@ export default function Onboarding() {
                   </p>
                 </div>
 
-                <Card>
-                  <CardContent className="p-6 space-y-4">
-                    <div>
-                      <label className="text-sm font-medium text-foreground">Current role</label>
-                      <input
-                        type="text"
-                        placeholder="e.g., Marketing Manager"
-                        className="w-full mt-2 px-4 py-3 rounded-xl bg-muted border-transparent text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-foreground">Industry experience</label>
-                      <input
-                        type="text"
-                        placeholder="e.g., Technology, Finance"
-                        className="w-full mt-2 px-4 py-3 rounded-xl bg-muted border-transparent text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-foreground">Education</label>
-                      <input
-                        type="text"
-                        placeholder="e.g., Bachelor's in Business"
-                        className="w-full mt-2 px-4 py-3 rounded-xl bg-muted border-transparent text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary"
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Current role</label>
+                    <Popover open={currentRoleOpen} onOpenChange={setCurrentRoleOpen}>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          role="combobox"
+                          aria-expanded={currentRoleOpen}
+                          className={cn(
+                            "flex h-12 w-full items-center justify-between rounded-[30px] border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                            !formData.currentRole && "text-muted-foreground"
+                          )}
+                        >
+                          {formData.currentRole || "Select your current role"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                        <Command>
+                          <CommandInput placeholder="Type here..." />
+                          <CommandList>
+                            <CommandEmpty>No role found.</CommandEmpty>
+                            <CommandGroup>
+                              {roleOptions.map((role) => (
+                                <CommandItem
+                                  key={role}
+                                  value={role}
+                                  onSelect={() => {
+                                    setFormData({ ...formData, currentRole: role === formData.currentRole ? "" : role });
+                                    setCurrentRoleOpen(false);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      formData.currentRole === role ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  {role}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Industry experience</label>
+                    <Popover open={industryExperienceOpen} onOpenChange={setIndustryExperienceOpen}>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          role="combobox"
+                          aria-expanded={industryExperienceOpen}
+                          className={cn(
+                            "flex h-12 w-full items-center justify-between rounded-[30px] border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                            !formData.industryExperience && "text-muted-foreground"
+                          )}
+                        >
+                          {formData.industryExperience || "Select your industry experience"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                        <Command>
+                          <CommandInput placeholder="Type here..." />
+                          <CommandList>
+                            <CommandEmpty>No industry found.</CommandEmpty>
+                            <CommandGroup>
+                              {industryExperienceOptions.map((industry) => (
+                                <CommandItem
+                                  key={industry}
+                                  value={industry}
+                                  onSelect={() => {
+                                    setFormData({ ...formData, industryExperience: industry === formData.industryExperience ? "" : industry });
+                                    setIndustryExperienceOpen(false);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      formData.industryExperience === industry ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  {industry}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Education</label>
+                    <Popover open={educationOpen} onOpenChange={setEducationOpen}>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          role="combobox"
+                          aria-expanded={educationOpen}
+                          className={cn(
+                            "flex h-12 w-full items-center justify-between rounded-[30px] border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                            !formData.education && "text-muted-foreground"
+                          )}
+                        >
+                          {formData.education || "Select your education level"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                        <Command>
+                          <CommandInput placeholder="Type here..." />
+                          <CommandList>
+                            <CommandEmpty>No education level found.</CommandEmpty>
+                            <CommandGroup>
+                              {educationOptions.map((edu) => (
+                                <CommandItem
+                                  key={edu}
+                                  value={edu}
+                                  onSelect={() => {
+                                    setFormData({ ...formData, education: edu === formData.education ? "" : edu });
+                                    setEducationOpen(false);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      formData.education === edu ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  {edu}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
               </div>
             )}
 
             {currentStep === 5 && (
               <div className="space-y-8">
-                <div className="text-center">
+                <div className="text-center pt-8">
                   <h1 className="text-2xl md:text-3xl font-bold text-foreground">
                     Rate your skills
                   </h1>
                   <p className="mt-2 text-muted-foreground">
-                    How confident are you in each area? (1 = Low, 5 = High)
+                    How confident are you in each area? Click on the stars to rate.
                   </p>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-8">
                   {skillAreas.map((skill) => (
-                    <div key={skill.id} className="space-y-3">
-                      <label className="text-sm font-medium text-foreground">{skill.label}</label>
-                      <div className="flex gap-2">
+                    <div key={skill.id} className="space-y-2">
+                      <label className="text-base font-semibold text-foreground block text-center">
+                        {skill.label}
+                      </label>
+                      <div className="flex gap-3 justify-center items-center">
                         {[1, 2, 3, 4, 5].map((level) => (
                           <button
                             key={level}
+                            type="button"
                             className={cn(
-                              "flex-1 py-3 rounded-xl font-medium transition-all",
-                              formData.skills[skill.id] === level
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                              "transition-all hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm",
+                              formData.skills[skill.id] >= level
+                                ? "text-[#FFB800]"
+                                : "text-[#dee8f2] hover:text-[#FFB800]/70"
                             )}
                             onClick={() => setSkillLevel(skill.id, level)}
+                            aria-label={`Rate ${level} out of 5 stars`}
                           >
-                            {level}
+                            <Star
+                              className={cn(
+                                "w-8 h-8 transition-all",
+                                formData.skills[skill.id] >= level ? "fill-current" : "stroke-2"
+                              )}
+                            />
                           </button>
                         ))}
                       </div>
@@ -462,8 +801,8 @@ export default function Onboarding() {
             )}
           </div>
 
-          {/* Navigation */}
-          <div className="flex justify-between mt-12">
+          {/* Navigation - Sticky */}
+          <div className="flex justify-between pt-3 pb-3 bg-background border-t border-border mt-auto">
             <Button
               variant="ghost"
               onClick={handleBack}
