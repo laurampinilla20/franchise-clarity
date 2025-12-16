@@ -5,11 +5,16 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Browse from "./pages/Browse";
+import BrowseByLocation from "./pages/BrowseByLocation";
+import BrowseByIndustry from "./pages/BrowseByIndustry";
 import BrandDetail from "./pages/BrandDetail";
 import Compare from "./pages/Compare";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import OwnershipPath from "./pages/OwnershipPath";
+import Academy from "./pages/Academy";
+import About from "./pages/About";
+import Advisors from "./pages/Advisors";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,11 +28,16 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/best-franchises" element={<Browse />} />
+          <Route path="/best-franchises/in" element={<BrowseByLocation />} />
+          <Route path="/best-franchises/for" element={<BrowseByIndustry />} />
           <Route path="/brand/:slug" element={<BrandDetail />} />
           <Route path="/compare" element={<Compare />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/ownership-path" element={<OwnershipPath />} />
+          <Route path="/academy" element={<Academy />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/about/advisors" element={<Advisors />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

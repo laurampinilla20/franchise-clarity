@@ -64,7 +64,7 @@ export function Navbar() {
                   {link.submenu ? (
                     <span
                       className={cn(
-                        "flex items-center gap-1 text-sm font-medium transition-colors cursor-pointer",
+                        "flex items-center gap-1 text-base font-normal tracking-normal transition-colors cursor-pointer",
                         openDropdown === link.name
                           ? "text-[#446786]"
                           : "text-muted-foreground hover:text-[#446786]"
@@ -77,9 +77,9 @@ export function Navbar() {
                     <Link
                       to={link.href || "#"}
                       className={cn(
-                        "text-sm font-medium transition-colors",
+                        "text-base font-normal tracking-normal transition-colors",
                         location.pathname === link.href
-                          ? "text-foreground font-semibold"
+                          ? "text-foreground"
                           : "text-muted-foreground hover:text-[#446786]"
                       )}
                     >
@@ -90,31 +90,25 @@ export function Navbar() {
                   {/* Dropdown Menu */}
                   {link.submenu && openDropdown === link.name && (
                     <div 
-                      className="absolute top-full left-0 pt-2 w-56 z-50"
+                      className="absolute top-full left-0 pt-1 w-56 z-50"
                       onMouseEnter={() => setOpenDropdown(link.name)}
                       onMouseLeave={() => setOpenDropdown(null)}
                     >
                       <div className="bg-background border border-border rounded-xl shadow-lg overflow-hidden">
                       <div className="p-1.5">
                         {link.submenu.map((subItem) => {
-                          const isSelected = location.pathname === subItem.href;
                           return (
                             <Link
                               key={subItem.name}
                               to={subItem.href}
-                              className={cn(
-                                "group flex items-center justify-between px-4 py-2.5 text-sm transition-colors rounded-[30px]",
-                                isSelected
-                                  ? "bg-[#F4F8FE] text-[#446786] font-bold"
-                                  : "text-muted-foreground hover:bg-[#F4F8FE] hover:text-[#446786]"
-                              )}
+                              className="group flex items-center justify-between px-4 py-2.5 text-base font-normal tracking-normal transition-colors rounded-[30px] text-muted-foreground hover:bg-[#F4F8FE] hover:text-[#446786]"
                               onClick={() => setOpenDropdown(null)}
                             >
-                              <span className={cn(isSelected && "font-bold")}>{subItem.name}</span>
+                              <span>{subItem.name}</span>
                               <img 
                                 src="/arrow.svg" 
                                 alt="" 
-                                className={cn("w-5 h-3 opacity-0 group-hover:opacity-100 transition-opacity", isSelected && "opacity-100")}
+                                className="w-5 h-3 opacity-0 group-hover:opacity-100 transition-opacity"
                               />
                             </Link>
                           );
@@ -140,12 +134,12 @@ export function Navbar() {
             ) : (
               <>
                 <Link to="/onboarding">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="text-base font-normal tracking-normal px-9 py-2 text-muted-foreground">
                     Sign In
                   </Button>
                 </Link>
                 <Link to="/onboarding">
-                  <Button variant="cta" size="sm">
+                  <Button variant="cta" size="sm" className="text-base px-9 py-2">
                     Find the Best Match
                   </Button>
                 </Link>
@@ -175,7 +169,7 @@ export function Navbar() {
                   {link.submenu ? (
                     <>
                       <button
-                        className="w-full px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex items-center justify-between"
+                        className="w-full px-4 py-3 rounded-xl text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex items-center justify-between"
                         onClick={() => setOpenDropdown(openDropdown === link.name ? null : link.name)}
                       >
                         <span>{link.name}</span>
@@ -187,7 +181,7 @@ export function Navbar() {
                             <Link
                               key={subItem.name}
                               to={subItem.href}
-                              className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                              className="px-4 py-2 rounded-lg text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                               onClick={() => {
                                 setMobileMenuOpen(false);
                                 setOpenDropdown(null);
@@ -202,7 +196,7 @@ export function Navbar() {
                   ) : (
                     <Link
                       to={link.href || "#"}
-                      className="px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                      className="px-4 py-3 rounded-xl text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {link.name}
