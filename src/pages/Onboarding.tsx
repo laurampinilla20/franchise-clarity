@@ -155,7 +155,7 @@ export default function Onboarding() {
               <img 
                 src="/logo.svg" 
                 alt="FranchiseGrade" 
-                className="h-7 w-auto"
+                className="h-5 w-auto"
               />
             </Link>
             <Link to="/">

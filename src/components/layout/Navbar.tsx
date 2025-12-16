@@ -1,22 +1,45 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X, User, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-const navLinks = [
-  { name: "Find a Franchise", href: "/browse" },
-  { name: "Academy", href: "/#how-it-works" },
-  { name: "About us", href: "/#advisors" },
+interface NavLink {
+  name: string;
+  href?: string;
+  submenu?: Array<{ name: string; href: string }>;
+}
+
+const navLinks: NavLink[] = [
+  {
+    name: "Find a Franchise",
+    href: "/best-franchises",
+    submenu: [
+      { name: "By company", href: "/best-franchises" },
+      { name: "By industry", href: "/best-franchises/for" },
+      { name: "By location", href: "/best-franchises/in" },
+      { name: "Search all", href: "/best-franchises" },
+    ],
+  },
+  { name: "Academy", href: "/academy" },
+  {
+    name: "About us",
+    href: "/about",
+    submenu: [
+      { name: "Our Company", href: "/about" },
+      { name: "Advisors", href: "/about/advisors" },
+    ],
+  },
 ];
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const location = useLocation();
   const isLoggedIn = false; // This would come from auth context
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg">
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo and Navigation */}
@@ -25,25 +48,82 @@ export function Navbar() {
               <img 
                 src="/logo.svg" 
                 alt="FranchiseGrade" 
-                className="h-7 w-auto"
+                className="h-5 w-auto"
               />
             </Link>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-8">
               {navLinks.map((link) => (
-                <Link
+                <div
                   key={link.name}
-                  to={link.href}
-                  className={cn(
-                    "text-sm font-medium transition-colors hover:text-primary",
-                    location.pathname === link.href
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  )}
+                  className="relative"
+                  onMouseEnter={() => link.submenu && setOpenDropdown(link.name)}
+                  onMouseLeave={() => setOpenDropdown(null)}
                 >
-                  {link.name}
-                </Link>
+                  {link.submenu ? (
+                    <span
+                      className={cn(
+                        "flex items-center gap-1 text-sm font-medium transition-colors cursor-pointer",
+                        openDropdown === link.name
+                          ? "text-[#446786]"
+                          : "text-muted-foreground hover:text-[#446786]"
+                      )}
+                    >
+                      {link.name}
+                      <ChevronDown className="w-4 h-4" />
+                    </span>
+                  ) : (
+                    <Link
+                      to={link.href || "#"}
+                      className={cn(
+                        "text-sm font-medium transition-colors",
+                        location.pathname === link.href
+                          ? "text-foreground font-semibold"
+                          : "text-muted-foreground hover:text-[#446786]"
+                      )}
+                    >
+                      {link.name}
+                    </Link>
+                  )}
+
+                  {/* Dropdown Menu */}
+                  {link.submenu && openDropdown === link.name && (
+                    <div 
+                      className="absolute top-full left-0 pt-2 w-56 z-50"
+                      onMouseEnter={() => setOpenDropdown(link.name)}
+                      onMouseLeave={() => setOpenDropdown(null)}
+                    >
+                      <div className="bg-background border border-border rounded-xl shadow-lg overflow-hidden">
+                      <div className="p-1.5">
+                        {link.submenu.map((subItem) => {
+                          const isSelected = location.pathname === subItem.href;
+                          return (
+                            <Link
+                              key={subItem.name}
+                              to={subItem.href}
+                              className={cn(
+                                "group flex items-center justify-between px-4 py-2.5 text-sm transition-colors rounded-[30px]",
+                                isSelected
+                                  ? "bg-[#F4F8FE] text-[#446786] font-bold"
+                                  : "text-muted-foreground hover:bg-[#F4F8FE] hover:text-[#446786]"
+                              )}
+                              onClick={() => setOpenDropdown(null)}
+                            >
+                              <span className={cn(isSelected && "font-bold")}>{subItem.name}</span>
+                              <img 
+                                src="/arrow.svg" 
+                                alt="" 
+                                className={cn("w-5 h-3 opacity-0 group-hover:opacity-100 transition-opacity", isSelected && "opacity-100")}
+                              />
+                            </Link>
+                          );
+                        })}
+                      </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </div>
@@ -66,7 +146,7 @@ export function Navbar() {
                 </Link>
                 <Link to="/onboarding">
                   <Button variant="cta" size="sm">
-                    Get Started
+                    Find the Best Match
                   </Button>
                 </Link>
               </>
@@ -91,19 +171,49 @@ export function Navbar() {
           <div className="md:hidden py-4 border-t border-border animate-fade-in">
             <div className="flex flex-col gap-2">
               {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  to={link.href}
-                  className="px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {link.name}
-                </Link>
+                <div key={link.name}>
+                  {link.submenu ? (
+                    <>
+                      <button
+                        className="w-full px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex items-center justify-between"
+                        onClick={() => setOpenDropdown(openDropdown === link.name ? null : link.name)}
+                      >
+                        <span>{link.name}</span>
+                        <ChevronDown className={cn("w-4 h-4 transition-transform", openDropdown === link.name && "rotate-180")} />
+                      </button>
+                      {openDropdown === link.name && (
+                        <div className="pl-4 flex flex-col gap-1">
+                          {link.submenu.map((subItem) => (
+                            <Link
+                              key={subItem.name}
+                              to={subItem.href}
+                              className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                              onClick={() => {
+                                setMobileMenuOpen(false);
+                                setOpenDropdown(null);
+                              }}
+                            >
+                              {subItem.name}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Link
+                      to={link.href || "#"}
+                      className="px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {link.name}
+                    </Link>
+                  )}
+                </div>
               ))}
               <div className="pt-4 px-4 flex flex-col gap-2">
                 <Link to="/onboarding" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="cta" className="w-full">
-                    Get Started
+                    Find the Best Match
                   </Button>
                 </Link>
               </div>

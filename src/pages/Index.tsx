@@ -116,7 +116,7 @@ export default function Index() {
                   <ArrowRight className="w-5 h-5" />
                 </Button>
               </Link>
-              <Link to="/browse">
+              <Link to="/best-franchises">
                 <Button variant="navy-outline" size="xl">
                   Explore Franchises
                 </Button>

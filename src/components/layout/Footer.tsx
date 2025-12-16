@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 const footerLinks = {
   platform: [
-    { name: "Browse Franchises", href: "/browse" },
+    { name: "Browse Franchises", href: "/best-franchises" },
     { name: "How It Works", href: "/#how-it-works" },
     { name: "Advisors", href: "/#advisors" },
     { name: "Pricing", href: "/pricing" },
@@ -31,7 +31,7 @@ export function Footer() {
               <img 
                 src="/logo-white.svg" 
                 alt="FranchiseGrade" 
-                className="h-7 w-auto"
+                className="h-5 w-auto"
               />
             </Link>
             <p className="text-secondary-foreground/70 text-sm leading-relaxed">
