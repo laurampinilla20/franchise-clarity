@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect, useRef, useMemo } from "react";
@@ -43,7 +44,12 @@ export default function BrandDetail() {
   const [activeSection, setActiveSection] = useState("snapshot");
   const sectionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const navRef = useRef<HTMLDivElement>(null);
+  const navInitialTopRef = useRef<number>(0);
   const advisorCardBottomRef = useRef<HTMLDivElement>(null);
+  const advisorCardInitialTopRef = useRef<number>(0);
+  const advisorCardInitialWidthRef = useRef<number>(0);
+  const advisorCardInitialLeftRef = useRef<number>(0);
+  const footerRef = useRef<HTMLDivElement>(null);
   const [isNavSticky, setIsNavSticky] = useState(false);
   const isNavStickyRef = useRef(false);
   const [isAdvisorCardBottomSticky, setIsAdvisorCardBottomSticky] = useState(false);
@@ -94,26 +100,126 @@ export default function BrandDetail() {
     isNavStickyRef.current = isNavSticky;
   }, [isNavSticky]);
 
+  // Store initial nav position on mount
   useEffect(() => {
-    const handleScroll = () => {
-      // Check if nav should be sticky
+    const updateNavInitialTop = () => {
       if (navRef.current) {
         const rect = navRef.current.getBoundingClientRect();
-        setIsNavSticky(rect.top <= 64);
+        const scrollY = window.scrollY || window.pageYOffset;
+        navInitialTopRef.current = rect.top + scrollY;
+      }
+    };
+    
+    const updateAdvisorCardInitialTop = () => {
+      if (advisorCardBottomRef.current) {
+        const rect = advisorCardBottomRef.current.getBoundingClientRect();
+        const scrollY = window.scrollY || window.pageYOffset;
+        advisorCardInitialTopRef.current = rect.top + scrollY;
+        advisorCardInitialWidthRef.current = rect.width;
+        advisorCardInitialLeftRef.current = rect.left;
+      }
+    };
+    
+    if (currentBrandData) {
+      // Wait for layout to complete, then update
+      const timer = setTimeout(() => {
+        updateNavInitialTop();
+        updateAdvisorCardInitialTop();
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [currentBrandData]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Nav is always sticky, but we track when it's "active" (scrolled past initial position)
+      if (navRef.current) {
+        const scrollY = window.scrollY || window.pageYOffset;
+        
+        // Update initial position on first scroll or if not set
+        if (navInitialTopRef.current === 0 && scrollY === 0) {
+          const rect = navRef.current.getBoundingClientRect();
+          navInitialTopRef.current = rect.top + scrollY;
+        }
+        
+        // Nav is "active" (shows shadow) when scrolled past its initial position
+        // Since nav is always sticky, we just need to check if we've scrolled
+        const shouldBeActive = navInitialTopRef.current > 0 
+          ? scrollY > navInitialTopRef.current - 64
+          : scrollY > 0;
+        
+        setIsNavSticky(shouldBeActive);
       }
 
       // Check if second advisor card should be sticky (only on desktop/iPad - lg breakpoint)
-      // Calculate top offset: navbar (64px) + nav bar height (if sticky, ~56px with padding) + 12px gap = 132px when nav is sticky, or 76px when nav is not sticky
-      const stickyNavHeight = isNavStickyRef.current ? 56 : 0; // Approximate nav bar height with padding
-      const stickyTopOffset = 64 + stickyNavHeight + 12; // navbar + sticky nav + 12px gap
-      
-      if (window.innerWidth >= 1024) {
-        if (advisorCardBottomRef.current) {
-          const rect = advisorCardBottomRef.current.getBoundingClientRect();
-          setIsAdvisorCardBottomSticky(rect.top <= stickyTopOffset);
+      if (window.innerWidth >= 1024 && advisorCardBottomRef.current && advisorCardInitialTopRef.current > 0) {
+        // Calculate top offset: navbar (64px) + sticky nav height (43px) + 12px gap = 119px
+        const stickyNavHeight = navRef.current?.offsetHeight || 43; // Sticky nav height
+        const stickyTopOffset = 64 + stickyNavHeight + 12; // navbar (64px) + sticky nav (43px) + gap (12px) = 119px
+        
+        const scrollY = window.scrollY || window.pageYOffset;
+        const rect = advisorCardBottomRef.current.getBoundingClientRect();
+        
+        // Check if footer is visible or near
+        let footerTop = Infinity;
+        if (footerRef.current) {
+          const footerRect = footerRef.current.getBoundingClientRect();
+          footerTop = footerRect.top;
         }
-      } else {
+        
+        // Make sticky when:
+        // 1. We've scrolled past the element's initial position
+        // 2. Footer is not visible or not near (footer top should be below the sticky position + card height)
+        const cardHeight = advisorCardInitialWidthRef.current > 0 ? 293 : rect.height; // Approximate card height
+        const shouldBeSticky = scrollY >= advisorCardInitialTopRef.current - stickyTopOffset && 
+                                footerTop > (stickyTopOffset + cardHeight);
+        setIsAdvisorCardBottomSticky(shouldBeSticky);
+        
+        // Update fixed position styles when sticky to maintain width and position
+        if (shouldBeSticky && advisorCardBottomRef.current) {
+          const card = advisorCardBottomRef.current;
+          // Use stored initial values to maintain consistent size and position
+          // Disable transitions for position changes to avoid weird animations
+          card.style.transition = 'none';
+          card.style.position = 'fixed';
+          card.style.top = `${stickyTopOffset}px`;
+          card.style.left = `${advisorCardInitialLeftRef.current}px`;
+          card.style.width = `${advisorCardInitialWidthRef.current}px`;
+          // Re-enable transition for shadow after a brief moment
+          setTimeout(() => {
+            if (card) {
+              card.style.transition = '';
+            }
+          }, 0);
+        } else if (advisorCardBottomRef.current) {
+          // Reset styles when not sticky
+          const card = advisorCardBottomRef.current;
+          // Disable transitions for position changes
+          card.style.transition = 'none';
+          card.style.position = '';
+          card.style.top = '';
+          card.style.left = '';
+          card.style.width = '';
+          // Re-enable transition after a brief moment
+          setTimeout(() => {
+            if (card) {
+              card.style.transition = '';
+            }
+          }, 0);
+          // Update initial values when not sticky
+          advisorCardInitialLeftRef.current = rect.left;
+          advisorCardInitialWidthRef.current = rect.width;
+        }
+      } else if (window.innerWidth < 1024) {
+        // Mobile: never sticky, reset styles
         setIsAdvisorCardBottomSticky(false);
+        if (advisorCardBottomRef.current) {
+          const card = advisorCardBottomRef.current;
+          card.style.position = '';
+          card.style.top = '';
+          card.style.left = '';
+          card.style.width = '';
+        }
       }
 
       // Update active section based on scroll position
@@ -131,13 +237,25 @@ export default function BrandDetail() {
       }
     };
 
+    const handleResize = () => {
+      // Update initial values on resize when not sticky
+      if (advisorCardBottomRef.current && !isAdvisorCardBottomSticky) {
+        const rect = advisorCardBottomRef.current.getBoundingClientRect();
+        const scrollY = window.scrollY || window.pageYOffset;
+        advisorCardInitialTopRef.current = rect.top + scrollY;
+        advisorCardInitialWidthRef.current = rect.width;
+        advisorCardInitialLeftRef.current = rect.left;
+      }
+      handleScroll();
+    };
+
     window.addEventListener("scroll", handleScroll);
-    window.addEventListener("resize", handleScroll);
+    window.addEventListener("resize", handleResize);
     handleScroll();
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -258,18 +376,14 @@ export default function BrandDetail() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
-      <main className="flex-1 pt-16 w-full">
-        <div className="bg-white w-full">
-        {/* Sticky Navigation */}
-        <div
-          ref={navRef}
-          className={`w-full bg-white transition-all ${
-            isNavSticky 
-              ? "sticky top-16 z-40" 
-              : ""
-          }`}
-        >
-          <div className="flex items-center gap-8 overflow-x-auto border-b border-[#dee8f2] pb-2 scrollbar-hide px-4 sm:px-6 lg:px-8 max-w-[1270px] mx-auto w-full">
+      {/* Sticky Navigation - Sticky on all screens, positioned below navbar */}
+      <div
+        ref={navRef}
+        className={`w-full bg-white transition-all sticky top-16 z-40 ${
+          isNavSticky ? "shadow-sm" : ""
+        }`}
+      >
+        <div className="flex items-center gap-8 overflow-x-auto border-b border-[#dee8f2] pb-2 scrollbar-hide px-4 sm:px-6 lg:px-8 max-w-[1350px] mx-auto w-full">
           <button
             onClick={() => scrollToSection("snapshot")}
             className={`px-[14px] py-[6px] rounded-[30px] text-sm transition-all whitespace-nowrap flex-shrink-0 ${
@@ -293,13 +407,15 @@ export default function BrandDetail() {
               {section.label}
             </button>
           ))}
-          </div>
         </div>
+      </div>
 
-        {/* Main Content - Mobile: Single flex column with all items, Desktop: Two columns */}
-        <div className="flex flex-col gap-5 pb-8 pt-6 sm:pt-8 px-4 sm:px-6 lg:px-8 max-w-[1270px] mx-auto w-full lg:flex-row lg:gap-6 lg:gap-8">
+      <main className="flex-1 w-full overflow-x-hidden pt-[43px]">
+        <div className="bg-white w-full overflow-x-hidden">
+          {/* Main Content - Mobile: Single flex column with all items, Desktop: Two columns */}
+          <div className="flex flex-col gap-5 pb-8 pt-6 sm:pt-8 px-4 sm:px-6 lg:px-8 max-w-[1350px] mx-auto w-full lg:flex-row lg:gap-6 lg:gap-8 overflow-x-hidden">
           {/* Mobile: All content flows in single column, Desktop: Left Column */}
-          <div className="contents lg:flex lg:flex-col gap-5 flex-1 w-full lg:w-1/2">
+          <div className="[display:contents] lg:flex lg:flex-col gap-5 w-full lg:flex-[1_1_50%] lg:min-w-0 xl:flex-[0_0_65%] xl:min-w-0">
             {/* Franchise Review Card */}
             <div className="bg-[#f4f8fe] flex flex-col rounded-[20px] order-1">
               <div className="bg-white border-2 border-[#dee8f2] rounded-[20px] flex flex-col">
@@ -359,14 +475,15 @@ export default function BrandDetail() {
 
                   {/* Action Buttons */}
                   <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 items-stretch sm:items-start">
-                    <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-5 py-2 text-base font-bold text-white">
-                      Unlock for the Full Report
+                    <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-5 py-2 text-base font-bold text-white" asChild>
+                      <Link to={`/best-franchises/brand/${slug}/unlock`}>Unlock for the Full Report</Link>
                     </Button>
                     <Button
                       variant="outline"
                       className="border-foreground rounded-[30px] px-5 py-2 text-base font-bold text-foreground"
+                      asChild
                     >
-                      Compare to similar franchises
+                      <Link to="/compare">Compare to similar franchises</Link>
                     </Button>
                   </div>
                 </div>
@@ -411,15 +528,15 @@ export default function BrandDetail() {
 
               <p className="text-base font-normal text-foreground">
                 The initial cost of a franchise includes several fees --{" "}
-                <Link to="/unlock" className="font-bold text-[#54b936] underline">
+                <Link to={`/best-franchises/brand/${slug}/unlock`} className="font-bold text-[#54b936] underline">
                   Unlock this franchise
                 </Link>{" "}
                 to better understand the costs such as training and territory fees.{" "}
                 <span className="font-bold">Sign Up to Unlock Full Cost Breakdown:</span>
               </p>
 
-              <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-5 py-2 text-base font-bold text-white w-fit">
-                Unlock for the Full Report
+              <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-5 py-2 text-base font-bold text-white w-fit" asChild>
+                <Link to={`/best-franchises/brand/${slug}/unlock`}>Unlock for the Full Report</Link>
               </Button>
 
               <div className="flex flex-col gap-5">
@@ -429,7 +546,7 @@ export default function BrandDetail() {
                   <br />
                   <br />
                   This franchise is expanding into new markets and might be available near you. One of our franchise experts will have detailed knowledge about this brand.{" "}
-                  <Link to="/unlock" className="font-bold text-[#54b936] underline">
+                  <Link to={`/best-franchises/brand/${slug}/unlock`} className="font-bold text-[#54b936] underline">
                     Unlock to learn more
                   </Link>{" "}
                   and connect with our experts.
@@ -440,7 +557,7 @@ export default function BrandDetail() {
             {/* Investment Overview Section */}
             <div
               ref={(el) => (sectionRefs.current.investment = el)}
-              className="bg-white border-2 border-[#dee8f2] rounded-[20px] flex flex-col gap-4 p-4 sm:p-6 lg:p-8 order-4"
+              className="bg-white border-2 border-[#dee8f2] rounded-[20px] flex flex-col gap-4 p-4 sm:p-6 lg:p-8 lg:order-3 order-5"
             >
               <div className="flex items-center gap-3">
                 <DollarSign className="w-6 h-6 text-[#203d57]" />
@@ -451,7 +568,7 @@ export default function BrandDetail() {
                 <p className="font-bold mb-2">How much does a {currentBrandData.name} franchise cost?</p>
                 <p>
                   The initial cost of a franchise includes several fees --{" "}
-                  <Link to="/unlock" className="font-bold text-[#54b936] underline">
+                  <Link to={`/best-franchises/brand/${slug}/unlock`} className="font-bold text-[#54b936] underline">
                     Unlock this franchise
                   </Link>{" "}
                   to better understand the costs such as training and territory fees.
@@ -502,7 +619,7 @@ export default function BrandDetail() {
                 </div>
 
                 {/* Right side: Investment Breakdown Chart */}
-                <div className="w-full lg:w-[400px] lg:flex-shrink-0 h-[300px] sm:h-[350px] lg:h-[350px]">
+                <div className="w-full lg:max-w-[400px] lg:flex-shrink-0 h-[300px] sm:h-[350px] lg:h-[350px]">
                   <ChartContainer
                     config={{
                       franchiseFee: { label: "Franchise Fee", color: "#446786" },
@@ -574,7 +691,7 @@ export default function BrandDetail() {
             {/* Profitability Section */}
             <div
               ref={(el) => (sectionRefs.current.profitability = el)}
-              className="bg-white border-2 border-[#dee8f2] rounded-[20px] flex flex-col gap-6 p-4 sm:p-6 lg:p-8 lg:order-[16] order-[16]"
+              className="bg-white border-2 border-[#dee8f2] rounded-[20px] flex flex-col gap-6 p-4 sm:p-6 lg:p-8 lg:order-4 order-8"
             >
               <div className="flex items-center gap-3">
                 <BarChart3 className="w-6 h-6 text-[#203d57]" />
@@ -585,7 +702,7 @@ export default function BrandDetail() {
                 <p className="font-bold mb-2">How much does a {currentBrandData.name} franchise make?</p>
                 <p>
                   Franchise revenue and profits depend on a number of unique variables, including local demand for your product, labor costs, commercial lease rates and several other factors. We can help you figure out how much money you can make by reviewing your specific situation. Please{" "}
-                  <Link to="/unlock" className="font-bold text-[#54b936] underline">
+                  <Link to={`/best-franchises/brand/${slug}/unlock`} className="font-bold text-[#54b936] underline">
                     unlock this franchise
                   </Link>{" "}
                   for more information.
@@ -623,25 +740,25 @@ export default function BrandDetail() {
             {/* Comparison Section */}
             <div
               ref={(el) => (sectionRefs.current.comparison = el)}
-              className="bg-white border-2 border-[#dee8f2] rounded-[20px] flex flex-col gap-6 p-4 sm:p-6 lg:p-8 order-10"
+              className="bg-white border-2 border-[#dee8f2] rounded-[20px] flex flex-col gap-6 p-4 sm:p-6 lg:p-8 lg:order-5 order-10"
             >
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-6 sm:gap-4">
-                <div className="flex flex-col gap-4 sm:gap-5 items-start w-full sm:max-w-[488px]">
+                <div className="flex flex-col gap-4 sm:gap-5 items-start w-full min-w-0">
                   <div className="flex items-center gap-3">
-                    <BarChart3 className="w-6 h-6 text-[#203d57]" />
+                    <BarChart3 className="w-6 h-6 text-[#203d57] flex-shrink-0" />
                     <h2 className="text-xl sm:text-2xl font-bold text-foreground">Comparison & Analysis</h2>
                   </div>
-                  <p className="text-sm sm:text-base font-bold text-foreground">Where {currentBrandData.name} stands out:</p>
+                  <p className="text-sm sm:text-base font-bold text-foreground w-full">Where {currentBrandData.name} stands out:</p>
                   
-                  <div className="flex flex-col items-start w-full">
+                  <div className="flex flex-col items-start w-full min-w-0">
                     {(currentBrandData.comparisonStrengths || [
                       "Performs above category benchmarks in {top strengths}",
                       "Stronger growth and more consistent performance in {top strengths}",
                       "Lower risk indicators than similar brands in {top strengths}",
                     ]).map((item, index) => (
-                      <div key={index} className="bg-transparent flex gap-2 items-center pl-2 sm:pl-4 pr-4 sm:pr-6 py-2 rounded-[30px] w-full">
-                        <img src="/check-filled.svg" alt="" className="w-4 h-4 flex-shrink-0" />
-                        <p className="text-sm sm:text-base font-normal text-foreground">{item}</p>
+                      <div key={index} className="bg-transparent flex gap-2 items-start sm:items-center pl-2 sm:pl-4 pr-4 sm:pr-6 py-2 rounded-[30px] w-full min-w-0">
+                        <img src="/check-filled.svg" alt="" className="w-4 h-4 flex-shrink-0 mt-0.5 sm:mt-0" />
+                        <p className="text-sm sm:text-base font-normal text-foreground break-words w-full">{item}</p>
                       </div>
                     ))}
                   </div>
@@ -649,75 +766,78 @@ export default function BrandDetail() {
               </div>
 
               <div className="flex flex-col gap-6 items-start w-full">
-                <h3 className="text-base sm:text-lg font-bold text-foreground">
+                <h3 className="text-base sm:text-lg font-bold text-foreground w-full">
                   {currentBrandData.industryBenchmarking || `${currentBrandData.category || "Industry"} Benchmarking`}
                 </h3>
                 
-                {/* Royalty Comparison Chart */}
-                <div className="bg-white border-2 border-[#dee8f2] rounded-[20px] flex flex-col gap-4 p-4 sm:p-6 w-full">
-                  <p className="text-base sm:text-lg font-bold text-foreground">Royalty Rate</p>
-                  <ChartContainer
-                    config={{
-                      brand: {
-                        label: currentBrandData.name,
-                        color: "#446786",
-                      },
-                      competitors: {
-                        label: "Competitors",
-                        color: "#54b936",
-                      },
-                    }}
-                    className="h-[200px] sm:h-[250px] w-full"
-                  >
-                    <BarChart
-                      data={royaltyComparisonData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                {/* Charts Grid - 1 column on mobile, 2 columns on larger screens */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 w-full">
+                  {/* Royalty Comparison Chart */}
+                  <div className="bg-white border-2 border-[#dee8f2] rounded-[20px] flex flex-col gap-4 p-4 sm:p-6 w-full min-w-0">
+                    <p className="text-base sm:text-lg font-bold text-foreground">Royalty Rate</p>
+                    <ChartContainer
+                      config={{
+                        brand: {
+                          label: currentBrandData.name,
+                          color: "#446786",
+                        },
+                        competitors: {
+                          label: "Competitors",
+                          color: "#54b936",
+                        },
+                      }}
+                      className="h-[200px] sm:h-[250px] w-full"
                     >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#dee8f2" />
-                      <XAxis dataKey="name" stroke="#8c9aa5" style={{ fontSize: '12px' }} />
-                      <YAxis stroke="#8c9aa5" style={{ fontSize: '12px' }} domain={[0, 8]} />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="brand" fill="#446786" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="competitors" fill="#54b936" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ChartContainer>
-                  <p className="text-sm text-muted-foreground">Note(s): {currentBrandData.investment.royalty || "N/A"} of Gross Revenues</p>
-                </div>
+                      <BarChart
+                        data={royaltyComparisonData}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#dee8f2" />
+                        <XAxis dataKey="name" stroke="#8c9aa5" style={{ fontSize: '12px' }} />
+                        <YAxis stroke="#8c9aa5" style={{ fontSize: '12px' }} domain={[0, 8]} />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Bar dataKey="brand" fill="#446786" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="competitors" fill="#54b936" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ChartContainer>
+                    <p className="text-sm text-muted-foreground break-words">Note(s): {currentBrandData.investment.royalty || "N/A"} of Gross Revenues</p>
+                  </div>
 
-                {/* Initial Term Comparison Chart */}
-                <div className="bg-white border-2 border-[#dee8f2] rounded-[20px] flex flex-col gap-4 p-4 sm:p-6 w-full">
-                  <p className="text-base sm:text-lg font-bold text-foreground">Initial Term</p>
-                  <ChartContainer
-                    config={{
-                      brand: {
-                        label: currentBrandData.name,
-                        color: "#446786",
-                      },
-                      competitors: {
-                        label: "Competitors",
-                        color: "#54b936",
-                      },
-                    }}
-                    className="h-[200px] sm:h-[250px] w-full"
-                  >
-                    <BarChart
-                      data={initialTermComparisonData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  {/* Initial Term Comparison Chart */}
+                  <div className="bg-white border-2 border-[#dee8f2] rounded-[20px] flex flex-col gap-4 p-4 sm:p-6 w-full min-w-0">
+                    <p className="text-base sm:text-lg font-bold text-foreground">Initial Term</p>
+                    <ChartContainer
+                      config={{
+                        brand: {
+                          label: currentBrandData.name,
+                          color: "#446786",
+                        },
+                        competitors: {
+                          label: "Competitors",
+                          color: "#54b936",
+                        },
+                      }}
+                      className="h-[200px] sm:h-[250px] w-full"
                     >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#dee8f2" />
-                      <XAxis dataKey="name" stroke="#8c9aa5" style={{ fontSize: '12px' }} />
-                      <YAxis stroke="#8c9aa5" style={{ fontSize: '12px' }} domain={[0, 25]} />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="brand" fill="#446786" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="competitors" fill="#54b936" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ChartContainer>
-                  <p className="text-sm text-muted-foreground">Note(s): {currentBrandData.investment.initialTerm || "N/A"}</p>
+                      <BarChart
+                        data={initialTermComparisonData}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#dee8f2" />
+                        <XAxis dataKey="name" stroke="#8c9aa5" style={{ fontSize: '12px' }} />
+                        <YAxis stroke="#8c9aa5" style={{ fontSize: '12px' }} domain={[0, 25]} />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Bar dataKey="brand" fill="#446786" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="competitors" fill="#54b936" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ChartContainer>
+                    <p className="text-sm text-muted-foreground break-words">Note(s): {currentBrandData.investment.initialTerm || "N/A"}</p>
+                  </div>
                 </div>
 
                 {/* Unlock CTA */}
-                <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-8 py-2 text-base font-bold text-white w-full">
-                  Unlock to see the complete comparison
+                <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-8 py-2 text-base font-bold text-white w-full" asChild>
+                  <Link to={`/best-franchises/brand/${slug}/unlock`}>Unlock to see the complete comparison</Link>
                 </Button>
               </div>
 
@@ -736,7 +856,7 @@ export default function BrandDetail() {
             {/* Territories Section */}
             <div
               ref={(el) => (sectionRefs.current.territories = el)}
-              className="bg-white border-2 border-[#dee8f2] rounded-[20px] flex flex-col gap-5 p-4 sm:p-6 lg:p-8 order-12"
+              className="bg-white border-2 border-[#dee8f2] rounded-[20px] flex flex-col gap-5 p-4 sm:p-6 lg:p-8 lg:order-6 order-12"
             >
               <div className="flex flex-col sm:flex-row gap-5 items-start w-full">
                 <div className="flex flex-col gap-5 items-start w-full sm:w-2/3">
@@ -774,7 +894,7 @@ export default function BrandDetail() {
                 <p>
                   <br />
                   This franchise is expanding into new markets and might be available near you. One of our franchise experts will have detailed knowledge about this brand.{" "}
-                  <Link to="/unlock" className="font-bold text-[#54b936] underline">
+                  <Link to={`/best-franchises/brand/${slug}/unlock`} className="font-bold text-[#54b936] underline">
                     Unlock to learn more
                   </Link>{" "}
                   and connect with our experts.
@@ -785,15 +905,15 @@ export default function BrandDetail() {
             {/* Requirements Section - Placeholder */}
             <div
               ref={(el) => (sectionRefs.current.requirements = el)}
-              className="bg-white border-2 border-[#dee8f2] rounded-[20px] flex flex-col gap-5 p-4 sm:p-6 lg:p-8 order-13"
+              className="bg-white border-2 border-[#dee8f2] rounded-[20px] flex flex-col gap-5 p-4 sm:p-6 lg:p-8 lg:order-7 order-[100]"
             >
-              <div className="flex items-center justify-between w-full">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-3 w-full">
                 <div className="flex items-center gap-3">
-                  <Lock className="w-6 h-6 text-[#203d57]" />
-                  <h2 className="text-2xl font-bold text-foreground">Requirements</h2>
+                  <Lock className="w-6 h-6 text-[#203d57] flex-shrink-0" />
+                  <h2 className="text-xl sm:text-2xl font-bold text-foreground">Requirements</h2>
                 </div>
-                <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-5 py-2 text-base font-bold text-white">
-                  Unlock This Brand
+                <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-5 py-2 text-base font-bold text-white w-full sm:w-auto" asChild>
+                  <Link to={`/best-franchises/brand/${slug}/unlock`}>Unlock This Brand</Link>
                 </Button>
               </div>
               {/* Add requirements content here */}
@@ -802,15 +922,15 @@ export default function BrandDetail() {
             {/* Next Steps Section - Placeholder */}
             <div
               ref={(el) => (sectionRefs.current["next-steps"] = el)}
-              className="bg-white border-2 border-[#dee8f2] rounded-[20px] flex flex-col gap-5 p-4 sm:p-6 lg:p-8 order-14"
+              className="bg-white border-2 border-[#dee8f2] rounded-[20px] flex flex-col gap-5 p-4 sm:p-6 lg:p-8 lg:order-8 order-[101]"
             >
-              <div className="flex items-center justify-between w-full">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-3 w-full">
                 <div className="flex items-center gap-3">
-                  <Lock className="w-6 h-6 text-[#203d57]" />
-                  <h2 className="text-2xl font-bold text-foreground">Next Steps</h2>
+                  <Lock className="w-6 h-6 text-[#203d57] flex-shrink-0" />
+                  <h2 className="text-xl sm:text-2xl font-bold text-foreground">Next Steps</h2>
                 </div>
-                <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-5 py-2 text-base font-bold text-white">
-                  Unlock This Brand
+                <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-5 py-2 text-base font-bold text-white w-full sm:w-auto" asChild>
+                  <Link to={`/best-franchises/brand/${slug}/unlock`}>Unlock This Brand</Link>
                 </Button>
               </div>
               {/* Add next steps content here */}
@@ -819,15 +939,15 @@ export default function BrandDetail() {
             {/* FAQs Section - Placeholder */}
             <div
               ref={(el) => (sectionRefs.current.faqs = el)}
-              className="bg-white border-2 border-[#dee8f2] rounded-[20px] flex flex-col gap-5 p-4 sm:p-6 lg:p-8 order-15"
+              className="bg-white border-2 border-[#dee8f2] rounded-[20px] flex flex-col gap-5 p-4 sm:p-6 lg:p-8 lg:order-9 order-[102]"
             >
-              <div className="flex items-center justify-between w-full">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-3 w-full">
                 <div className="flex items-center gap-3">
-                  <Lock className="w-6 h-6 text-[#203d57]" />
+                  <Lock className="w-6 h-6 text-[#203d57] flex-shrink-0" />
                   <h2 className="text-xl sm:text-2xl font-bold text-foreground">Additional Questions</h2>
                 </div>
-                <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-5 py-2 text-base font-bold text-white">
-                  Unlock This Brand
+                <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-5 py-2 text-base font-bold text-white w-full sm:w-auto" asChild>
+                  <Link to={`/best-franchises/brand/${slug}/unlock`}>Unlock This Brand</Link>
                 </Button>
               </div>
               {/* Add FAQs content here */}
@@ -835,9 +955,9 @@ export default function BrandDetail() {
           </div>
 
           {/* Mobile: Same wrapper (content flows after left), Desktop: Right Column */}
-          <div className="contents lg:flex lg:flex-col gap-5 items-start justify-start w-full lg:w-1/2">
+          <div className="[display:contents] lg:flex lg:flex-col gap-5 items-start justify-start w-full lg:flex-[1_1_50%] lg:min-w-0 xl:flex-[0_0_35%] xl:min-w-0">
             {/* Talk to Advisor Card */}
-            <div className="bg-[#203d57] flex flex-col items-start px-[29px] py-8 rounded-[20px] w-full lg:order-3 order-3">
+            <div className="bg-[#203d57] flex flex-col items-start px-[29px] py-8 rounded-[20px] w-full lg:order-1 order-3">
               <div className="flex flex-col gap-8 items-center justify-center w-full">
                 <div className="flex flex-col gap-5 items-center w-full">
                   {/* Profile Images */}
@@ -853,20 +973,20 @@ export default function BrandDetail() {
                     <span> a wrong choice could cost you thousands</span>
                   </p>
                 </div>
-                <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-8 py-2 text-base font-bold text-white w-full">
-                  Talk With an Advisor
+                <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-8 py-2 text-base font-bold text-white w-full" asChild>
+                  <Link to="/about/advisors">Talk With an Advisor</Link>
                 </Button>
               </div>
             </div>
 
             {/* Why buyers like this brand */}
-            <div className="bg-[#fdfdfd] border-2 border-[#dee8f2] flex flex-col gap-2 items-start px-[29px] py-8 rounded-[20px] w-full lg:order-5 order-5">
-              <p className="text-lg font-bold text-foreground">Why buyers like this brand</p>
+            <div className="bg-[#fdfdfd] border-2 border-[#dee8f2] flex flex-col gap-2 items-start px-[29px] py-8 rounded-[20px] w-full lg:order-2 order-4">
+              <p className="text-lg font-bold text-foreground w-full">Why buyers like this brand</p>
               {(currentBrandData.whyBuyersLike || []).map((item, index) => (
-                <div key={index} className="w-full">
-                  <div className="bg-white flex gap-2 items-center justify-start pl-0 pr-6 py-1 rounded-[30px] w-full">
-                    <img src="/check-filled.svg" alt="" className="w-4 h-4 flex-shrink-0" />
-                    <p className="text-base font-normal text-left text-foreground">{item}</p>
+                <div key={index} className="w-full min-w-0">
+                  <div className="bg-white flex gap-2 items-start sm:items-center justify-start pl-0 pr-6 py-1 rounded-[30px] w-full min-w-0">
+                    <img src="/check-filled.svg" alt="" className="w-4 h-4 flex-shrink-0 mt-0.5 sm:mt-0" />
+                    <p className="text-base font-normal text-left text-foreground break-words w-full">{item}</p>
                   </div>
                   {index < (currentBrandData.whyBuyersLike?.length || 0) - 1 && (
                     <div className="h-px w-full bg-[#dee8f2]" />
@@ -876,96 +996,80 @@ export default function BrandDetail() {
             </div>
 
             {/* Similar Brands */}
-            <div className="bg-[#fdfdfd] border-2 border-[#dee8f2] flex flex-col gap-2 items-start px-[29px] py-8 rounded-[20px] w-full lg:order-7 order-7">
+            <div className="bg-[#fdfdfd] border-2 border-[#dee8f2] flex flex-col gap-2 items-start px-[29px] py-8 rounded-[20px] w-full lg:order-3 order-11">
               <p className="text-lg font-bold text-foreground">Similar Brands</p>
-              {(currentBrandData.similarBrands || []).map((brand, index) => (
+              {((currentBrandData.similarBrands || []).slice(0, 3)).map((brand, index) => (
                 <div key={index} className="w-full">
-                  <div className="bg-white flex gap-5 items-start pl-0 pr-6 py-1 rounded-[30px] w-full">
+                  <div className="bg-white flex gap-5 items-start pl-0 pr-6 py-1 rounded-[30px] w-full min-w-0">
                     <div className="size-[66px] rounded-full flex-shrink-0" style={{ backgroundColor: brand.logoColor || "#dee8f2" }} />
-                    <div className="flex flex-col gap-5 items-start justify-center flex-1 max-w-[293px]">
-                      <div className="text-base text-foreground">
-                        <p className="font-bold mb-0">{brand.name}</p>
-                        <p className="font-normal">{brand.description}</p>
+                    <div className="flex flex-col gap-5 items-start justify-center flex-1 min-w-0">
+                      <div className="text-base text-foreground w-full min-w-0">
+                        <p className="font-bold mb-0 break-words">{brand.name}</p>
+                        <p className="font-normal break-words">{brand.description}</p>
                       </div>
                       <Button
                         variant="outline"
                         className="border-foreground rounded-[30px] px-5 py-2 text-base font-bold text-foreground w-full"
+                        asChild
                       >
-                        Learn More
+                        <Link to={`/best-franchises/brand/${brand.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`}>
+                          Learn More
+                        </Link>
                       </Button>
                     </div>
                   </div>
-                  {index < (currentBrandData.similarBrands?.length || 0) - 1 && (
+                  {index < Math.min((currentBrandData.similarBrands?.length || 0), 3) - 1 && (
                     <div className="h-px w-full bg-[#dee8f2] my-3" />
                   )}
                 </div>
               ))}
             </div>
 
-            {/* How Franchise Grade helps you */}
-            <div className="hidden lg:flex bg-[#f4f8fe] border-2 border-[#dee8f2] flex-col gap-8 items-start px-[29px] py-8 rounded-[20px] w-full">
-              <div className="flex flex-col gap-0">
-                <p className="text-[24px] font-bold text-[#446786] mb-0">How Franchise Grade helps you</p>
-                <p className="text-base font-normal text-foreground mt-4">
-                  We help you evaluate {currentBrandData.name} with data, not emotions. We show you the numbers that matter: financial transparency, profitability indicators, territory saturation, owner turnover, growth quality, and day-to-day operational expectations.
-                </p>
-              </div>
-              <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-8 py-2 text-base font-bold text-white w-full">
-                Talk With an Advisor
-              </Button>
-            </div>
-
             {/* Ongoing Fees & Recurring Costs */}
-            <div className="bg-[#fdfdfd] border-2 border-[#dee8f2] flex flex-col gap-2 items-start px-[29px] py-8 rounded-[20px] w-full lg:order-6 order-6">
-              <p className="text-lg font-bold text-foreground h-[40px]">Ongoing Fees & Recurring Costs</p>
-              <div className="flex gap-20 items-center w-full">
-                <div className="bg-white flex gap-2 items-center pl-0 pr-6 py-1 rounded-[30px] w-[164px]">
-                  <div className="bg-[#203d57] rounded-full size-[15px] flex items-center justify-center flex-shrink-0 ">
-                    <p className="text-[#dee8f2] text-[9.37px] font-semibold leading-[14.055px]">$</p>
-                  </div>
-                  <p className="text-base font-normal text-foreground whitespace-nowrap w-[104px]">Royalty fees</p>
-                </div>
-                <div className="bg-white flex gap-2 items-center pl-0 pr-6 py-1 rounded-[30px] w-[164px]">
+            <div className="bg-[#fdfdfd] border-2 border-[#dee8f2] flex flex-col gap-4 items-start px-[29px] py-8 rounded-[20px] w-full lg:order-4 order-7">
+              <p className="text-lg font-bold text-foreground mb-2">Ongoing Fees & Recurring Costs</p>
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 xl:gap-4 w-full">
+                <div className="bg-white flex gap-2 items-center pl-0 pr-6 py-2 rounded-[30px] w-full min-w-0">
                   <div className="bg-[#203d57] rounded-full size-[15px] flex items-center justify-center flex-shrink-0">
                     <p className="text-[#dee8f2] text-[9.37px] font-semibold leading-[14.055px]">$</p>
                   </div>
-                  <p className="text-base font-normal text-[#203d57] whitespace-nowrap w-[104px]">Marketing fund</p>
+                  <p className="text-base font-normal text-foreground whitespace-nowrap overflow-hidden text-ellipsis">Royalty fees</p>
                 </div>
-              </div>
-              <div className="h-px w-full bg-[#dee8f2] my-2" />
-              <div className="flex gap-20 items-center w-full">
-                <div className="bg-white flex gap-2 items-center pl-0 pr-6 py-1 rounded-[30px] w-[164px]">
+                <div className="bg-white flex gap-2 items-center pl-0 pr-6 py-2 rounded-[30px] w-full min-w-0">
                   <div className="bg-[#203d57] rounded-full size-[15px] flex items-center justify-center flex-shrink-0">
                     <p className="text-[#dee8f2] text-[9.37px] font-semibold leading-[14.055px]">$</p>
                   </div>
-                  <p className="text-base font-normal text-[#203d57] whitespace-nowrap w-[104px]">Tech subscriptions</p>
+                  <p className="text-base font-normal text-[#203d57] whitespace-nowrap overflow-hidden text-ellipsis">Marketing fund</p>
                 </div>
-                <div className="bg-white flex gap-2 items-center pl-0 pr-6 py-1 rounded-[30px] w-[164px]">
+                <div className="bg-white flex gap-2 items-center pl-0 pr-6 py-2 rounded-[30px] w-full min-w-0">
                   <div className="bg-[#203d57] rounded-full size-[15px] flex items-center justify-center flex-shrink-0">
                     <p className="text-[#dee8f2] text-[9.37px] font-semibold leading-[14.055px]">$</p>
                   </div>
-                  <p className="text-base font-normal text-[#203d57] whitespace-nowrap w-[104px]">Renewal fees</p>
+                  <p className="text-base font-normal text-[#203d57] whitespace-nowrap overflow-hidden text-ellipsis">Tech subscriptions</p>
                 </div>
-              </div>
-              <div className="h-px w-full bg-[#dee8f2] my-2" />
-              <div className="flex gap-20 items-center w-full">
-                <div className="bg-white flex gap-2 items-center pl-0 pr-6 py-1 rounded-[30px] w-[164px]">
+                <div className="bg-white flex gap-2 items-center pl-0 pr-6 py-2 rounded-[30px] w-full min-w-0">
                   <div className="bg-[#203d57] rounded-full size-[15px] flex items-center justify-center flex-shrink-0">
                     <p className="text-[#dee8f2] text-[9.37px] font-semibold leading-[14.055px]">$</p>
                   </div>
-                  <p className="text-base font-normal text-[#203d57] whitespace-nowrap w-[104px]">Compliance costs</p>
+                  <p className="text-base font-normal text-[#203d57] whitespace-nowrap overflow-hidden text-ellipsis">Renewal fees</p>
                 </div>
-                <div className="bg-white flex gap-2 items-center pl-0 pr-6 py-1 rounded-[30px] w-[164px]">
+                <div className="bg-white flex gap-2 items-center pl-0 pr-6 py-2 rounded-[30px] w-full min-w-0">
                   <div className="bg-[#203d57] rounded-full size-[15px] flex items-center justify-center flex-shrink-0">
                     <p className="text-[#dee8f2] text-[9.37px] font-semibold leading-[14.055px]">$</p>
                   </div>
-                  <p className="text-base font-normal text-[#203d57] whitespace-nowrap w-[104px]">Training fees</p>
+                  <p className="text-base font-normal text-[#203d57] whitespace-nowrap overflow-hidden text-ellipsis">Compliance costs</p>
+                </div>
+                <div className="bg-white flex gap-2 items-center pl-0 pr-6 py-2 rounded-[30px] w-full min-w-0">
+                  <div className="bg-[#203d57] rounded-full size-[15px] flex items-center justify-center flex-shrink-0">
+                    <p className="text-[#dee8f2] text-[9.37px] font-semibold leading-[14.055px]">$</p>
+                  </div>
+                  <p className="text-base font-normal text-[#203d57] whitespace-nowrap overflow-hidden text-ellipsis">Training fees</p>
                 </div>
               </div>
             </div>
 
             {/* Not sure you can afford this franchise? */}
-            <div className="border-2 border-[#54b936] flex flex-col items-start px-[29px] py-8 rounded-[20px] w-full lg:order-8 order-8">
+            <div className="border-2 border-[#54b936] flex flex-col items-start px-[29px] py-8 rounded-[20px] w-full lg:order-5 order-6">
               {/* Title - 1 column */}
               <p className="text-[24px] font-bold text-[#26780e] mb-6 w-full">
                 Not sure you can afford this franchise?
@@ -979,7 +1083,7 @@ export default function BrandDetail() {
                     <p className="mb-0">Figuring out the type of franchise you can afford doesn't have to be rocket science.</p>
                   </div>
                 </div>
-                <div className="w-full md:w-[145px] flex-shrink-0">
+                <div className="w-full md:w-[145px] flex-shrink-0 hidden md:block">
                   <img 
                     src="https://mvp.franchisegrade.com/hubfs/Website/Listing/person-affod-cal-cta.png" 
                     alt="Affordability Calculator" 
@@ -989,62 +1093,13 @@ export default function BrandDetail() {
               </div>
               
               {/* Button - 1 column */}
-              <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-8 py-2 text-base font-bold text-white w-full">
-                Try it now!
+              <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-8 py-2 text-base font-bold text-white w-full" asChild>
+                <Link to="/form-affordability-calulator">Try it now!</Link>
               </Button>
             </div>
 
-            {/* Common Cost Drivers */}
-            <div className="hidden lg:flex bg-[#fdfdfd] border-2 border-[#dee8f2] flex-col gap-2 items-start px-[29px] py-8 rounded-[20px] w-full">
-              <p className="text-lg font-bold text-foreground h-[40px]">Common Cost Drivers</p>
-              <div className="flex gap-20 items-center w-full">
-                <div className="bg-white flex gap-2 items-center pl-0 pr-6 py-1 rounded-[30px] w-[164px]">
-                  <div className="bg-[#203d57] rounded-full size-[15px] flex items-center justify-center flex-shrink-0">
-                    <p className="text-[#dee8f2] text-[9.37px] font-extrabold leading-[14.055px]">!</p>
-                  </div>
-                  <p className="text-base font-normal text-[#203d57] whitespace-nowrap w-[104px]">Real estate</p>
-                </div>
-                <div className="bg-white flex gap-2 items-center pl-0 pr-6 py-1 rounded-[30px] w-[164px]">
-                  <div className="bg-[#203d57] rounded-full size-[15px] flex items-center justify-center flex-shrink-0">
-                    <p className="text-[#dee8f2] text-[9.37px] font-extrabold leading-[14.055px]">!</p>
-                  </div>
-                  <p className="text-base font-normal text-[#203d57] whitespace-nowrap w-[104px]">Staffing costs</p>
-                </div>
-              </div>
-              <div className="h-px w-full bg-[#dee8f2] my-2" />
-              <div className="flex gap-20 items-center w-full">
-                <div className="bg-white flex gap-2 items-center pl-0 pr-6 py-1 rounded-[30px] w-[164px]">
-                  <div className="bg-[#203d57] rounded-full size-[15px] flex items-center justify-center flex-shrink-0">
-                    <p className="text-[#dee8f2] text-[9.37px] font-extrabold leading-[14.055px]">!</p>
-                  </div>
-                  <p className="text-base font-normal text-[#203d57] whitespace-nowrap w-[104px]">Build-out</p>
-                </div>
-                <div className="bg-white flex gap-2 items-center pl-0 pr-6 py-1 rounded-[30px] w-[164px]">
-                  <div className="bg-[#203d57] rounded-full size-[15px] flex items-center justify-center flex-shrink-0">
-                    <p className="text-[#dee8f2] text-[9.37px] font-extrabold leading-[14.055px]">!</p>
-                  </div>
-                  <p className="text-base font-normal text-[#203d57] whitespace-nowrap w-[104px]">Local demand</p>
-                </div>
-              </div>
-              <div className="h-px w-full bg-[#dee8f2] my-2" />
-              <div className="flex gap-20 items-center w-full">
-                <div className="bg-white flex gap-2 items-center pl-0 pr-6 py-1 rounded-[30px] w-[164px]">
-                  <div className="bg-[#203d57] rounded-full size-[15px] flex items-center justify-center flex-shrink-0">
-                    <p className="text-[#dee8f2] text-[9.37px] font-extrabold leading-[14.055px]">!</p>
-                  </div>
-                  <p className="text-base font-normal text-[#203d57] whitespace-nowrap w-[104px]">Equipment</p>
-                </div>
-                <div className="bg-white flex gap-2 items-center pl-0 pr-6 py-1 rounded-[30px] w-[164px]">
-                  <div className="bg-[#203d57] rounded-full size-[15px] flex items-center justify-center flex-shrink-0">
-                    <p className="text-[#dee8f2] text-[9.37px] font-extrabold leading-[14.055px]">!</p>
-                  </div>
-                  <p className="text-base font-normal text-[#203d57] whitespace-nowrap w-[104px]">Licensing</p>
-                </div>
-              </div>
-            </div>
-
             {/* Unlock full profitability analysis */}
-            <div className="bg-[#fdfdfd] border-2 border-[#54b936] flex flex-col items-start px-[29px] py-8 rounded-[20px] w-full lg:order-9 order-9">
+            <div className="bg-[#fdfdfd] border-2 border-[#54b936] flex flex-col items-start px-[29px] py-8 rounded-[20px] w-full lg:order-6 order-9">
               <div className="flex flex-col gap-5 items-start w-full">
                 <p className="text-[24px] font-bold text-[#26780e] whitespace-pre-wrap">
                   Unlock full profitability analysis
@@ -1068,44 +1123,77 @@ export default function BrandDetail() {
                     </div>
                   ))}
                 </div>
-                <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-5 py-2 text-base font-bold text-white w-full mt-4">
-                  Talk With an Advisor
+                <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-5 py-2 text-base font-bold text-white w-full mt-4" asChild>
+                  <Link to="/about/advisors">Talk With an Advisor</Link>
                 </Button>
               </div>
             </div>
 
             {/* Extended Similar Brands */}
-            <div className="hidden lg:flex bg-[#fdfdfd] border-2 border-[#dee8f2] flex-col gap-2 items-start px-[29px] py-8 rounded-[20px] w-full">
+            <div className="hidden lg:flex bg-[#fdfdfd] border-2 border-[#dee8f2] flex-col gap-2 items-start px-[29px] py-8 rounded-[20px] w-full lg:order-7">
               <p className="text-lg font-bold text-foreground">Similar Brands</p>
-              {(currentBrandData.similarBrands || []).map((brand, index) => (
+              {((currentBrandData.similarBrands || []).slice(0, 5)).map((brand, index) => (
                 <div key={index} className="w-full">
-                  <div className="bg-white flex gap-5 items-start pl-0 pr-6 py-1 rounded-[30px] w-full">
+                  <div className="bg-white flex gap-5 items-start pl-0 pr-6 py-1 rounded-[30px] w-full min-w-0">
                     <div className="size-[66px] rounded-full flex-shrink-0" style={{ backgroundColor: brand.logoColor || "#dee8f2" }} />
-                    <div className="flex flex-col gap-5 items-start justify-center flex-1 max-w-[293px]">
-                      <div className="text-base text-foreground">
-                        <p className="font-bold mb-0">{brand.name}</p>
-                        <p className="font-normal">{brand.description}</p>
+                    <div className="flex flex-col gap-5 items-start justify-center flex-1 min-w-0">
+                      <div className="text-base text-foreground w-full min-w-0">
+                        <p className="font-bold mb-0 break-words">{brand.name}</p>
+                        <p className="font-normal break-words">{brand.description}</p>
                       </div>
                       <Button
                         variant="outline"
                         className="border-foreground rounded-[30px] px-5 py-2 text-base font-bold text-foreground w-full"
+                        asChild
                       >
-                        Learn More
+                        <Link to={`/best-franchises/brand/${brand.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`}>
+                          Learn More
+                        </Link>
                       </Button>
                     </div>
                   </div>
-                  {index < (currentBrandData.similarBrands?.length || 0) - 1 && (
+                  {index < Math.min((currentBrandData.similarBrands?.length || 0), 5) - 1 && (
                     <div className="h-px w-full bg-[#dee8f2] my-2" />
                   )}
                 </div>
               ))}
             </div>
 
-            {/* Talk to Advisor Card - Bottom */}
+            {/* Similar Brands - Duplicate before CTA advisors 2 */}
+            <div className="bg-[#fdfdfd] border-2 border-[#dee8f2] flex flex-col gap-2 items-start px-[29px] py-8 rounded-[20px] w-full lg:order-8 hidden lg:flex">
+              <p className="text-lg font-bold text-foreground">Similar Brands</p>
+              {((currentBrandData.similarBrands || []).slice(0, 5)).map((brand, index) => (
+                <div key={`duplicate-${index}`} className="w-full">
+                  <div className="bg-white flex gap-5 items-start pl-0 pr-6 py-1 rounded-[30px] w-full min-w-0">
+                    <div className="size-[66px] rounded-full flex-shrink-0" style={{ backgroundColor: brand.logoColor || "#dee8f2" }} />
+                    <div className="flex flex-col gap-5 items-start justify-center flex-1 min-w-0">
+                      <div className="text-base text-foreground w-full min-w-0">
+                        <p className="font-bold mb-0 break-words">{brand.name}</p>
+                        <p className="font-normal break-words">{brand.description}</p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        className="border-foreground rounded-[30px] px-5 py-2 text-base font-bold text-foreground w-full"
+                        asChild
+                      >
+                        <Link to={`/best-franchises/brand/${brand.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`}>
+                          Learn More
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                  {index < Math.min((currentBrandData.similarBrands?.length || 0), 5) - 1 && (
+                    <div className="h-px w-full bg-[#dee8f2] my-3" />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Talk to Advisor Card - Bottom - Sticky only on desktop (lg breakpoint) */}
             <div 
               ref={advisorCardBottomRef}
-              className={`bg-[#203d57] flex flex-col items-start px-[29px] py-8 rounded-[20px] w-full transition-all lg:order-11 order-11 ${
-                isAdvisorCardBottomSticky ? `lg:sticky lg:z-30 ${isNavSticky ? "lg:top-[132px]" : "lg:top-[76px]"}` : ""
+              className={`bg-[#203d57] flex flex-col items-start px-[29px] py-8 rounded-[20px] w-full transition-shadow lg:order-8 order-[99] lg:z-30 ${
+                isAdvisorCardBottomSticky ? "lg:shadow-lg" : ""
               }`}
             >
               <div className="flex flex-col gap-8 items-center justify-center w-full">
@@ -1118,7 +1206,7 @@ export default function BrandDetail() {
                       className="w-[220px] h-auto object-contain"
                     />
                   </div>
-                  <p className="text-2xl text-center text-white max-w-[375px]">
+                  <p className="text-2xl text-center text-white w-full break-words">
                     <span className="font-bold">Leave it to the experts,</span>
                     <span> a wrong choice could cost you thousands</span>
                   </p>
@@ -1132,6 +1220,9 @@ export default function BrandDetail() {
         </div>
       </div>
       </main>
+      <div ref={footerRef}>
+        <Footer />
+      </div>
     </div>
   );
 }

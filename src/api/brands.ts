@@ -188,7 +188,7 @@ const mockBrandData: BrandData = {
   tagline: "Eat Fresh",
   description: "Subway is the world's largest submarine sandwich franchise, with more than 37,000 locations in over 100 countries.",
   logo: null,
-  grade: "B" as const,
+  grade: "?" as const,
   sector: "Food & Beverage",
   category: "Quick Service",
   investment: {
