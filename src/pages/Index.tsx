@@ -18,76 +18,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 
-const features = [
-  {
-    icon: Target,
-    title: "Investor-First Matching",
-    description:
-      "Our algorithm puts your goals first, analyzing 50+ factors to find franchises that truly fit your life.",
-  },
-  {
-    icon: GitCompare,
-    title: "Clear Comparisons",
-    description:
-      "Side-by-side analysis of investment, profitability, territory, and lifestyle factors.",
-  },
-  {
-    icon: MapPin,
-    title: "Territory Validation",
-    description:
-      "Real-time territory availability checks so you know exactly where you can operate.",
-  },
-  {
-    icon: Route,
-    title: "Guided Journey",
-    description:
-      "Step-by-step guidance from curiosity to commitment, with expert support at every stage.",
-  },
-];
 
-const advisors = [
-  {
-    name: "Sarah Chen",
-    role: "Senior Franchise Advisor",
-    specialties: ["Food & Beverage", "Multi-Unit"],
-    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&h=200&fit=crop&crop=face",
-  },
-  {
-    name: "Marcus Johnson",
-    role: "Investment Specialist",
-    specialties: ["Healthcare", "Senior Care"],
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face",
-  },
-  {
-    name: "Elena Rodriguez",
-    role: "Franchise Consultant",
-    specialties: ["Retail", "Home Services"],
-    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=face",
-  },
-];
-
-const steps = [
-  {
-    number: "01",
-    title: "Build Your Profile",
-    description: "Answer a few questions about your goals, lifestyle, and investment capacity.",
-  },
-  {
-    number: "02",
-    title: "Get Matched",
-    description: "Our algorithm analyzes 500+ franchises to find your best fits.",
-  },
-  {
-    number: "03",
-    title: "Compare & Decide",
-    description: "Use our tools to compare options and understand the trade-offs.",
-  },
-  {
-    number: "04",
-    title: "Connect & Commit",
-    description: "Work with an advisor to validate your choice and start your journey.",
-  },
-];
 
 export default function Index() {
   return (
@@ -102,7 +33,7 @@ export default function Index() {
             <div className="flex flex-col lg:flex-row gap-[50px] lg:gap-[195px] items-center">
               <div className="w-full lg:w-[480px] h-[342px] relative rounded-[30px] shrink-0">
                 <img
-                  src="https://mvp.franchisegrade.com/hubfs/New%20style/Home%20page/Find%20the%20best%20franchise%20home.png"
+                  src="https://mvp.franchisegrade.com/hubfs/Website/Home/person-advise.png"
                   alt="Trusted franchise advisor"
                   className="w-full h-full object-contain rounded-[30px]"
                 />
@@ -127,7 +58,7 @@ export default function Index() {
             <div className="flex flex-col lg:flex-row gap-[50px] lg:gap-[97px] items-center">
               <div className="w-full lg:w-[626px] h-[446px] relative rounded-[30px] shrink-0 overflow-hidden order-1 lg:order-2">
                 <img
-                  src="https://mvp.franchisegrade.com/hubfs/New%20style/Home%20page/Best%20franchises%20usa.gif"
+                  src="https://mvp.franchisegrade.com/hubfs/Website/Home/gif-how-fg-work.gif"
                   alt="Best franchises USA"
                   className="w-full h-full object-contain rounded-[30px]"
                 />
@@ -405,50 +336,13 @@ export default function Index() {
                         Get guidance from experts with 30+ years of experience. Our advisors specialize by industry to help you find the right franchise.
                       </p>
                     </div>
-                    <div className="flex items-center justify-center relative w-full max-w-[550px] my-10 overflow-visible">
-                      <div className="relative flex items-center w-full h-[120px] md:h-[166px]">
-                        <div className="absolute left-0 top-0 w-[120px] h-[120px] md:w-[166px] md:h-[166px]">
-                          <div className="relative w-full h-full border-2 border-white rounded-full overflow-hidden">
-                            <div className="absolute inset-0 bg-[#acacac] rounded-full" />
-                            <img
-                              alt=""
-                              src="https://www.figma.com/api/mcp/asset/eae522ca-ae26-4c21-830a-bbf7b4db12ed"
-                              className="absolute inset-0 w-full h-full object-cover rounded-full"
-                            />
-                          </div>
-                        </div>
-                        <div className="absolute left-[22%] top-0 w-[120px] h-[120px] md:w-[166px] md:h-[166px] z-10">
-                          <div className="relative w-full h-full border-2 border-white rounded-full overflow-hidden">
-                            <div className="absolute inset-0 bg-[#acacac] rounded-full" />
-                            <img
-                              alt=""
-                              src="https://www.figma.com/api/mcp/asset/368cb21b-b49f-4f37-b78a-db807fb05990"
-                              className="absolute inset-0 w-full h-full object-cover rounded-full"
-                            />
-                          </div>
-                        </div>
-                        <div className="absolute left-[44%] top-0 w-[120px] h-[120px] md:w-[166px] md:h-[166px] z-20">
-                          <div className="relative w-full h-full border-2 border-white rounded-full overflow-hidden">
-                            <div className="absolute inset-0 bg-[#acacac] rounded-full" />
-                            <img
-                              alt=""
-                              src="https://www.figma.com/api/mcp/asset/a49e25ee-bc45-4df5-bfa2-8517a494fe7a"
-                              className="absolute inset-0 w-full h-full object-cover rounded-full"
-                            />
-                          </div>
-                        </div>
-                        <div className="absolute left-[66%] top-0 w-[120px] h-[120px] md:w-[166px] md:h-[166px] z-30">
-                          <div className="relative w-full h-full border-2 border-white rounded-full overflow-hidden">
-                            <div className="absolute inset-0 bg-[#acacac] rounded-full" />
-                            <img
-                              alt=""
-                              src="https://www.figma.com/api/mcp/asset/7b88cda7-8e16-4b84-8d78-ccaff27645ca"
-                              className="absolute inset-0 w-full h-full object-cover rounded-full"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    <div className="flex justify-center my-10">
+                    <img
+                      src="https://mvp.franchisegrade.com/hubfs/Website/Home/best-advisors-franchises.png"
+                      alt=""
+                      className="w-full max-w-[550px] h-auto"
+                    />
+                  </div>
                     <Link to="/about/advisors">
                       <Button variant="cta" size="lg" className="rounded-[30px] px-9 py-3">
                         Talk to an advisor

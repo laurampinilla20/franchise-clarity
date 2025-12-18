@@ -1,0 +1,171 @@
+/* --- Contenedor Principal del Grid --- */
+.accordion-module{
+  background-color: #F4F8FE;
+  padding: 40px;
+  border-radius: 33px;
+}
+.accordion-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto;
+  gap: 30px;
+  align-items: flex-start;
+}
+.titlemain{
+  text-align: center;
+  padding-top: 20px;
+  padding-bottom: 20px;
+
+}
+/* --- Posicionamiento Explícito de los Elementos --- */
+.accordion-image-wrapper {
+  grid-area: 1 / 1 / 2 / 2; /* Fila 1, Columna 1 */
+}
+
+#accordion-list {
+  grid-area: 1 / 2 / 2 / 3; /* Fila 1, Columna 2 */
+}
+
+#accordion-detail {
+  grid-area: 1 / 2 / 2 / 3; /* EXACTAMENTE MISMA CELDA que la lista */
+}
+
+/* --- Control de Visibilidad (CRUCIAL) --- */
+/* Esta regla es la que oculta y muestra los contenedores.
+   El !important evita que otros estilos de la plantilla interfieran. */
+.hidden {
+  display: none !important;
+}
+
+
+/* --- Estilos Generales de los Componentes --- */
+.accordion-image-wrapper img {
+  width: 100%;
+  height: auto;
+  border-radius: 22px;
+  object-fit: cover;
+}
+
+.province-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+#accordion-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.province-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 4px 20px;
+  background-color: #ffffff;
+  border-radius: 33px;
+  color: #000000 !important;
+  border: 1px solid #ffffff !important;
+  font-size: 18px;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 400;
+  text-decoration: none !important;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  position: relative; /* Necesario para que z-index funcione si fuera necesario */
+  z-index: 1;
+  cursor: pointer;
+}
+
+.province-link:hover {
+  background-color: #DEE8F2;
+  color: #000000 !important;
+  z-index: 2;
+  border: 1px solid #DEE8F2 !important;
+  
+
+}
+
+.province-link:hover .location-icon {
+  display: inline-block;
+}
+
+.province-icon {
+  display: none;
+  max-height: 14px;
+  margin-left: 10px;
+}
+
+.province-description-box {
+  border: 1px solid #DEE8F2;
+  border-radius: 22px;
+  padding: 20px;
+}
+
+.cta-btn {
+  margin-top: 10px;
+  display: inline-block;
+  background-color: #203D57;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 33px;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+
+.back-button {
+  background-color: #DEE8F2;
+  color: #203D57;
+  border: none;
+  border-radius: 33px;
+  padding: 10px 20px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* --- Estilos para Móviles --- */
+@media (max-width: 768px) {
+  .accordion-grid {
+    grid-template-columns: 1fr; /* Una sola columna */
+  }
+  .province-name .detail-title{
+    font-size: 20px;
+    padding: 0px !important;
+  }
+  
+  .titlemain{
+  text-align: center;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  font-size: 20px;
+
+
+}
+  .accordion-module{
+  padding: 10px;
+  border-radius: 33px;
+}
+  .accordion-image-wrapper img {
+  width: 80%;
+  height: auto;
+  object-fit: cover;
+   align-content: center;
+}
+
+  /* Se apilan verticalmente */
+  .accordion-image-wrapper {
+    grid-area: 1 / 1 / 2 / 2; /* Fila 1 */
+  }
+  #accordion-list {
+    grid-area: 2 / 1 / 3 / 2; /* Fila 2 */
+  }
+  #accordion-detail {
+    grid-area: 2 / 1 / 3 / 2; /* Fila 2 (reemplaza a la lista) */
+  }
+}
+

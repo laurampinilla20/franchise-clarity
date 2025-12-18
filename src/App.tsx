@@ -9,6 +9,7 @@ import Browse from "./pages/Browse";
 import BrowseByLocation from "./pages/BrowseByLocation";
 import BrowseByIndustry from "./pages/BrowseByIndustry";
 import BrandDetail from "./pages/BrandDetail";
+import StateDetail from "./pages/StateDetail";
 import Compare from "./pages/Compare";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
@@ -31,8 +32,9 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/best-franchises" element={<Browse />} />
           <Route path="/best-franchises/in" element={<BrowseByLocation />} />
+          <Route path="/best-franchises/in/:stateName" element={<StateDetail />} />
           <Route path="/best-franchises/for" element={<BrowseByIndustry />} />
-          <Route path="/brand/:slug" element={<BrandDetail />} />
+          <Route path="/best-franchises/brand/:slug" element={<BrandDetail />} />
           <Route path="/compare" element={<Compare />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/dashboard" element={<Dashboard />} />

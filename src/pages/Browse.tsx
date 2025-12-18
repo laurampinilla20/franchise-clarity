@@ -204,6 +204,18 @@ export default function Browse() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Scroll to franchise grid on mount if hash is present
+  useEffect(() => {
+    if (window.location.hash === "#franchise-grid") {
+      const element = document.getElementById("franchise-grid");
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 100);
+      }
+    }
+  }, []);
+
   return (
     <PageLayout>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -616,7 +628,7 @@ export default function Browse() {
         </div>
 
         {/* Franchise Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div id="franchise-grid" className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 scroll-mt-32">
           {franchises.slice(0, Math.max(12, franchises.length)).map((franchise) => (
             <FranchiseCard
               key={franchise.id}

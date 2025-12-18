@@ -25,18 +25,18 @@ export default function AnimatedFeatureModule() {
   ];
 
   const images = [
-    "https://mvp.franchisegrade.com/hubfs/New%20style/Home%20page/1.png",
-    "https://mvp.franchisegrade.com/hubfs/New%20style/Home%20page/2.png",
-    "https://mvp.franchisegrade.com/hubfs/New%20style/Home%20page/3.png",
-    "https://mvp.franchisegrade.com/hubfs/New%20style/Home%20page/4.png",
-    "https://mvp.franchisegrade.com/hubfs/New%20style/Home%20page/5.png",
-    "https://mvp.franchisegrade.com/hubfs/New%20style/Home%20page/6.png",
-    "https://mvp.franchisegrade.com/hubfs/New%20style/Home%20page/7.png",
-    "https://mvp.franchisegrade.com/hubfs/New%20style/Home%20page/8.png",
-    "https://mvp.franchisegrade.com/hubfs/New%20style/Home%20page/9.png",
-    "https://mvp.franchisegrade.com/hubfs/New%20style/Home%20page/10.png",
-    "https://mvp.franchisegrade.com/hubfs/New%20style/Home%20page/11.png",
-    "https://mvp.franchisegrade.com/hubfs/New%20style/Home%20page/12.png",
+    "https://mvp.franchisegrade.com/hubfs/Website/Home/1.png",
+    "https://mvp.franchisegrade.com/hubfs/Website/Home/2.png",
+    "https://mvp.franchisegrade.com/hubfs/Website/Home/3.png",
+    "https://mvp.franchisegrade.com/hubfs/Website/Home/4.png",
+    "https://mvp.franchisegrade.com/hubfs/Website/Home/5.png",
+    "https://mvp.franchisegrade.com/hubfs/Website/Home/6.png",
+    "https://mvp.franchisegrade.com/hubfs/Website/Home/7.png",
+    "https://mvp.franchisegrade.com/hubfs/Website/Home/8.png",
+    "https://mvp.franchisegrade.com/hubfs/Website/Home/9.png",
+    "https://mvp.franchisegrade.com/hubfs/Website/Home/10.png",
+    "https://mvp.franchisegrade.com/hubfs/Website/Home/11.png",
+    "https://mvp.franchisegrade.com/hubfs/Website/Home/12.png",
   ];
 
   const alts = [
@@ -114,7 +114,7 @@ export default function AnimatedFeatureModule() {
       <div className="image-wrapper">
         <div className="animated-images">
           <img
-            src="https://mvp.franchisegrade.com/hubfs/New%20style/Home%20page/1.png"
+            src="https://mvp.franchisegrade.com/hubfs/Website/Home/1.png"
             className="image-sizer"
             alt=""
           />
@@ -164,63 +164,76 @@ export default function AnimatedFeatureModule() {
 
       {/* Features Section */}
       <div className="features-inner-section w-full px-0 md:px-4 lg:px-8 py-10 md:py-12 mt-0">
-        <div className="container mx-auto max-w-6xl">
-          <div className="flex flex-col md:flex-row gap-8 md:gap-[32px] items-center justify-center">
-            <div className="flex flex-col gap-5 items-center px-8 md:px-[32px] py-[10px] text-center w-full md:w-[363px]">
-              <div className="flex items-center justify-center shrink-0 w-[62px] h-[62px]">
-                <div className="bg-[#a4c6e8] flex items-center justify-center p-[6.986px] rounded-[10px] w-[62px] h-[62px]">
-                  <img
-                    src="https://www.figma.com/api/mcp/asset/3f717d2c-7dc0-46b2-8e21-6db96f4c089e"
-                    alt=""
-                    className="w-auto h-auto max-w-[48px] max-h-[48px] object-contain"
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col gap-5 items-center text-white w-full">
-                <h3 className="font-bold text-2xl leading-8">Smart decision</h3>
-                <p className="font-normal text-base leading-6">
-                  Invest backed by data. We'll show you exactly which franchises thrive, and which to avoid.
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-col gap-5 items-center px-8 md:px-[32px] py-[10px] text-center w-full md:w-[363px]">
-              <div className="flex items-center justify-center shrink-0 w-[62px] h-[62px]">
-                <div className="bg-[#a4c6e8] flex items-center justify-center p-[6.986px] rounded-[10px] w-[62px] h-[62px]">
-                  <img
-                    src="https://www.figma.com/api/mcp/asset/8cc11dd5-4e01-4e7f-9fe8-fb3095711d6e"
-                    alt=""
-                    className="w-auto h-auto max-w-[48px] max-h-[48px] object-contain"
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col gap-5 items-center text-white w-full">
-                <h3 className="font-bold text-2xl leading-8">Expert guidance</h3>
-                <p className="font-normal text-base leading-6">
-                  Get 1-on-1 support from a trusted franchise advisor who treats your investment like their own.
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-col gap-5 items-center px-8 md:px-[32px] py-[10px] text-center w-full md:w-[363px]">
-              <div className="flex items-center justify-center shrink-0 w-[62px] h-[62px]">
-                <div className="bg-[#a4c6e8] flex items-center justify-center p-[6.986px] rounded-[10px] w-[62px] h-[62px]">
-                  <img
-                    src="https://www.figma.com/api/mcp/asset/081a7dfc-5dde-4a52-92ad-56dbfa76078b"
-                    alt=""
-                    className="w-auto h-auto max-w-[48px] max-h-[48px] object-contain"
-                    style={{ transform: "rotate(180deg) scaleY(-1)" }}
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col gap-5 items-center text-white w-full">
-                <h3 className="font-bold text-2xl leading-8">Complete panorama</h3>
-                <p className="font-normal text-base leading-6">
-                  Explore the full franchise market. Spot real opportunities and make truly unbiased decisions.
-                </p>
-              </div>
-            </div>
-          </div>
+      <div className="features-inner-section w-full px-0 md:px-4 lg:px-8 py-10 md:py-12 mt-0">
+  <div className="container mx-auto max-w-6xl">
+    <div className="flex flex-col md:flex-row gap-8 md:gap-[32px] items-start justify-center">
+      
+      {/* CARD 1 */}
+      <div className="flex flex-col gap-5 items-center px-8 md:px-[32px] py-[10px] text-center w-full md:w-[363px]">
+        <div className="flex items-center justify-center shrink-0 w-[62px] h-[62px]">
+          <div
+            className="bg-[#a4c6e8] flex items-center justify-center p-[6.986px] rounded-[10px] w-[62px] h-[62px] bg-center bg-cover bg-no-repeat"
+            style={{
+              backgroundImage:
+                "url('https://mvp.franchisegrade.com/hubfs/Website/Home/icon-smart.png')",
+            }}
+          />
+        </div>
+
+        <div className="flex flex-col gap-5 items-center text-white w-full">
+          <h3 className="font-bold text-2xl leading-8">Smart decision</h3>
+          <p className="font-normal text-base leading-6">
+            Invest backed by data. We'll show you exactly which franchises thrive, and which to avoid.
+          </p>
         </div>
       </div>
+
+      {/* CARD 2 */}
+      <div className="flex flex-col gap-5 items-center px-8 md:px-[32px] py-[10px] text-center w-full md:w-[363px]">
+        <div className="flex items-center justify-center shrink-0 w-[62px] h-[62px]">
+          <div
+            className="bg-[#a4c6e8] flex items-center justify-center p-[6.986px] rounded-[10px] w-[62px] h-[62px] bg-center bg-cover bg-no-repeat"
+            style={{
+              backgroundImage:
+                "url('https://mvp.franchisegrade.com/hubfs/Website/Home/icon-expert.png')",
+            }}
+          />
+        </div>
+
+        <div className="flex flex-col gap-5 items-center text-white w-full">
+          <h3 className="font-bold text-2xl leading-8">Expert guidance</h3>
+          <p className="font-normal text-base leading-6">
+            Get 1-on-1 support from a trusted franchise advisor who treats your investment like their own.
+          </p>
+        </div>
+      </div>
+
+      {/* CARD 3 */}
+      <div className="flex flex-col gap-5 items-center px-8 md:px-[32px] py-[10px] text-center w-full md:w-[363px]">
+        <div className="flex items-center justify-center shrink-0 w-[62px] h-[62px]">
+          <div
+            className="bg-[#a4c6e8] flex items-center justify-center p-[6.986px] rounded-[10px] w-[62px] h-[62px] bg-center bg-cover bg-no-repeat"
+            style={{
+              backgroundImage:
+                "url('https://mvp.franchisegrade.com/hubfs/Website/Home/icon-panorama.png')",
+            }}
+          />
+        </div>
+
+        <div className="flex flex-col gap-5 items-center text-white w-full">
+          <h3 className="font-bold text-2xl leading-8">Complete panorama</h3>
+          <p className="font-normal text-base leading-6">
+            Explore the full franchise market. Spot real opportunities and make truly unbiased decisions.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+ 
+</div>
+
     </div>
   );
 }

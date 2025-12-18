@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, User, ChevronDown, ArrowLeft, Mail } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -60,6 +60,17 @@ export function Navbar() {
   });
   const location = useLocation();
   const isLoggedIn = false; // This would come from auth context
+  const [isDesktop, setIsDesktop] = useState(false);
+  
+  // Check if desktop on mount and resize
+  useEffect(() => {
+    const checkDesktop = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+    checkDesktop();
+    window.addEventListener('resize', checkDesktop);
+    return () => window.removeEventListener('resize', checkDesktop);
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -146,7 +157,7 @@ export function Navbar() {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-8">
+            <div className={isDesktop ? "flex items-center gap-8" : "hidden"}>
               {navLinks.map((link) => (
                 <div
                   key={link.name}
@@ -216,7 +227,7 @@ export function Navbar() {
           </div>
 
           {/* Desktop Actions */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className={isDesktop ? "flex items-center gap-3" : "hidden"}>
             {isLoggedIn ? (
               <Link to="/dashboard">
                 <Button variant="soft" size="sm">

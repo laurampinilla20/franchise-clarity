@@ -13,13 +13,14 @@
   padding: 0;
   background-color: #163552;
   border-radius: 32px;
+  gap: 8px;
 }
 
 /* Content Styles */
 .content-wrapper {
   max-width: 950px;
   width: 100%;
-  padding: 40px 0 40px 0; /* Top padding 40px, bottom padding 40px, horizontal padding 0 */
+  padding: 40px 0 8px 0; /* Top padding 40px, bottom padding 8px, horizontal padding 0 */
   order: 1;
   align-items: center;
   text-align: center;
@@ -129,7 +130,10 @@
 /* --- IMAGE STYLES (THE FINAL SOLUTION) --- */
 .image-wrapper {
   width: 100%;
-  padding-top: 0; /* Space between text and image on desktop */
+  padding-top: 8px; /* Space between text and image on desktop */
+  padding-left: 32px;
+  padding-right: 32px;
+  padding-bottom: 8px;
   order: 3;
   align-items: center;
   text-align: center;
@@ -188,6 +192,8 @@
 
   .image-wrapper {
     padding-top: 0;
+    padding-left: 32px;
+    padding-right: 32px;
     margin-bottom: 0px;
   }
 

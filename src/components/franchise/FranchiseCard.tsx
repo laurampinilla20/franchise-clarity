@@ -82,7 +82,7 @@ export function FranchiseCard({
         </div>
 
         {/* Primary CTA Button */}
-        <Link to={`/brand/${id}`} className="w-full">
+        <Link to={`/best-franchises/brand/${id}`} className="w-full">
           <Button 
             variant="navy" 
             className="w-full rounded-[30px] py-2 px-5 text-base font-bold"

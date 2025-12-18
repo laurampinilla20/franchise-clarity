@@ -53,7 +53,7 @@ export function MatchCard({
           {/* Middle: Content */}
           <div className="flex-1 space-y-4">
             <div>
-              <Link to={`/brand/${id}`}>
+              <Link to={`/best-franchises/brand/${id}`}>
                 <h3 className="text-xl font-semibold text-foreground hover:text-primary transition-colors">
                   {name}
                 </h3>
