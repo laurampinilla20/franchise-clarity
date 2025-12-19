@@ -121,7 +121,7 @@ export function normalizeBrandData(data: BrandDataInput | null | undefined): Bra
     tagline: data.tagline || "N/A",
     description: data.description || "N/A",
     logo: data.logo ?? null,
-    grade: data.grade || "?",
+    grade: data.grade || "A",
     sector: data.sector || "N/A",
     category: data.category || "N/A",
     investment: {
@@ -188,7 +188,7 @@ const mockBrandData: BrandData = {
   tagline: "Eat Fresh",
   description: "Subway is the world's largest submarine sandwich franchise, with more than 37,000 locations in over 100 countries.",
   logo: null,
-  grade: "?" as const,
+    grade: "A" as const,
   sector: "Food & Beverage",
   category: "Quick Service",
   investment: {

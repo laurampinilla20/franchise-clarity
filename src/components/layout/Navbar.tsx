@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Menu, X, User, ChevronDown, ArrowLeft, Mail } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEngagementTracking } from "@/hooks/useEngagementTracking";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +18,13 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface NavLink {
   name: string;
@@ -59,7 +68,8 @@ export function Navbar() {
     email: "",
   });
   const location = useLocation();
-  const isLoggedIn = false; // This would come from auth context
+  const { isLoggedIn, login, logout } = useAuth();
+  const { trackSignIn } = useEngagementTracking();
   const [isDesktop, setIsDesktop] = useState(false);
   
   // Check if desktop on mount and resize
@@ -94,16 +104,31 @@ export function Navbar() {
     setShowVerification(true);
   };
 
-  const handleVerificationSubmit = (e: React.FormEvent) => {
+  const handleVerificationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // For testing: allow any 6-digit code to pass
     if (enteredCode.length === 6) {
-      console.log("Verification successful! Sign in data:", formData);
-      // Show welcome modal instead of closing
-      setShowVerification(false);
-      setShowWelcomeModal(true);
-      setEnteredCode("");
-      setVerificationCode("");
+      try {
+        // Login user through AuthContext (syncs to contact service)
+        await login({
+          email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+        });
+        
+        // Track sign-in engagement
+        await trackSignIn();
+        
+        console.log("Verification successful! Sign in data:", formData);
+        // Show welcome modal instead of closing
+        setShowVerification(false);
+        setShowWelcomeModal(true);
+        setEnteredCode("");
+        setVerificationCode("");
+      } catch (error) {
+        console.error("Login error:", error);
+        alert("Failed to sign in. Please try again.");
+      }
     } else {
       alert("Please enter a 6-digit code.");
       setEnteredCode("");
@@ -122,7 +147,7 @@ export function Navbar() {
     setSignInModalOpen(false);
     // Reset form
     setFormData({ firstName: "", lastName: "", email: "" });
-    // Handle successful sign in here (user is logged in but skipped quiz)
+    // User is already logged in from handleVerificationSubmit
   };
 
   const handleModalClose = (open: boolean) => {
@@ -229,27 +254,51 @@ export function Navbar() {
           {/* Desktop Actions */}
           <div className={isDesktop ? "flex items-center gap-3" : "hidden"}>
             {isLoggedIn ? (
-              <Link to="/dashboard">
-                <Button variant="soft" size="sm">
-                  <User className="w-4 h-4" />
-                  Dashboard
-                </Button>
-              </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-9 w-9 rounded-full p-0 bg-accent hover:border hover:border-[#A4C6E8]">
+                    <User className="w-5 h-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="cursor-pointer">
+                      My Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/saved" className="cursor-pointer">
+                      Saved
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    onClick={logout}
+                    className="cursor-pointer text-destructive focus:text-destructive"
+                  >
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <>
+                <Link to="/onboarding">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-base font-normal tracking-normal px-9 py-2 text-muted-foreground border-border"
+                  >
+                    Find the Best Match
+                  </Button>
+                </Link>
                 <Button 
-                  variant="outline" 
+                  variant="cta" 
                   size="sm" 
-                  className="text-base font-normal tracking-normal px-9 py-2 text-muted-foreground"
+                  className="text-base font-normal tracking-normal px-9 py-2"
                   onClick={() => setSignInModalOpen(true)}
                 >
                   Sign In
                 </Button>
-                <Link to="/onboarding">
-                  <Button variant="cta" size="sm" className="text-base px-9 py-2">
-                    Find the Best Match
-                  </Button>
-                </Link>
               </>
             )}
           </div>
@@ -312,11 +361,40 @@ export function Navbar() {
                 </div>
               ))}
               <div className="pt-4 px-4 flex flex-col gap-2">
-                <Link to="/onboarding" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="cta" className="w-full">
-                    Find the Best Match
-                  </Button>
-                </Link>
+                {isLoggedIn ? (
+                  <>
+                    <Link
+                      to="/profile"
+                      className="px-4 py-3 rounded-xl text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex items-center gap-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <User className="w-4 h-4" />
+                      My Profile
+                    </Link>
+                    <Link
+                      to="/saved"
+                      className="px-4 py-3 rounded-xl text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Saved
+                    </Link>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="px-4 py-3 rounded-xl text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-left w-full"
+                    >
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <Link to="/onboarding" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="cta" className="w-full">
+                      Find the Best Match
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
           </div>

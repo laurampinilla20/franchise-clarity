@@ -5,45 +5,56 @@ ControlAI Project Rules: Quality and Strategy Standards
 
 Our Guide: This document establishes the rules and best practices for developing ControlAI. It is your reference for maintaining consistency, security, and performance while working in harmony with AI (Cursor).
 
-You are an expert in TypeScript, Node.js, Vite/React, Supabase, Shadcn UI, Radix UI, and Tailwind.
+You are an expert in TypeScript, Node.js, Vite/React, HubSpot APIs, Shadcn UI, Radix UI, and Tailwind CSS.
 
-1. Project Organization & Architecture
+---
 
-Use a logical directory structure, grouping files by domain (e.g., src/features/auth, src/features/dashboard).
+## 1. Project Organization & Architecture
 
-Use the src/lib/ directory for low-level logic, such as the Supabase client instance and third-party utilities.
+Use a logical directory structure, grouping files by domain (e.g., `src/features/forms`, `src/features/landing-pages`).
 
-Place database migrations and Supabase Edge Functions inside the supabase/ directory at the project root.
+Use the `src/lib/` directory for low-level logic, such as HubSpot API helpers, data mappers, and third-party utilities.
 
-For global or highly reusable components, use src/components/.
+For global or highly reusable components, use `src/components/`.
 
-2. Supabase Integration
+Keep the architecture simple and portable to ensure easy integration into HubSpot CMS pages or custom modules.
 
-Separate Supabase client configurations for different environments (e.g., src/lib/supabase/client.ts).
+---
 
-Never access Supabase directly in React components for complex or sensitive logic; use backend APIs (such as Supabase Edge Functions) instead.
+## 2. HubSpot Data & API Integration
 
-Enable Row Level Security (RLS) and Supabase Auth from day one.
+All interactions with HubSpot data (CRM objects, forms, properties, workflows) must be abstracted through helper functions or service layers.
 
-Store all secret keys in environment variables and use .env or .env.local files for development secrets.
+Never place complex or sensitive data logic directly inside React components.
 
-3. Code Style and Structure
+Use HubSpot APIs (REST or Forms API) through controlled helper functions located in `src/lib/`.
+
+Environment-specific configurations (API keys, portals, endpoints) must be separated and managed via environment variables.
+
+Never hardcode HubSpot credentials or private tokens in client-side code.
+
+---
+
+## 3. Code Style and Structure
 
 Write concise, technical TypeScript with clear examples for the AI (Cursor).
 
-Use comments to explain complex technical concepts and functions, making them easier for the AI to understand.
+Use comments to explain complex technical concepts and non-obvious logic, facilitating AI understanding.
 
 Prefer functional and declarative patterns in React.
 
 Avoid code duplication by using helper functions and modular components.
 
-Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+Use descriptive variable names with auxiliary verbs (e.g., `isLoading`, `hasError`).
 
-A component’s file structure should follow: main exported component → subcomponents → helpers → statics → types.
+A component’s file structure should follow:
+main exported component → subcomponents → helpers → statics → types.
 
-4. Naming Conventions
+---
 
-Use lowercase letters with hyphens for directories (e.g., src/components/auth-wizard).
+## 4. Naming Conventions
+
+Use lowercase letters with hyphens for directories (e.g., `src/components/form-wizard`).
 
 Use named exports for React components and functions.
 
@@ -51,7 +62,9 @@ Prefer interfaces for defining object types and props.
 
 Avoid enums; use literal objects or string unions whenever possible.
 
-5. TypeScript Usage
+---
+
+## 5. TypeScript Usage
 
 All code must be written in TypeScript.
 
@@ -59,9 +72,11 @@ Prefer interfaces for component props and data models.
 
 Use functional components with clearly typed props.
 
-Avoid using any; use unknown or explicit types when typing is not obvious.
+Avoid using `any`; use `unknown` or explicit types when typing is not obvious.
 
-6. UI and Styling
+---
+
+## 6. UI and Styling
 
 Use Shadcn UI (based on Radix UI) for interface components.
 
@@ -69,66 +84,90 @@ Use Tailwind CSS for layout, spacing, and utility styles.
 
 Develop mobile-first and ensure the design is responsive by default.
 
-Use Tailwind CSS dark: variants to support dark mode.
+Use Tailwind CSS `dark:` variants to support dark mode when applicable.
 
-7. Performance Optimization
+---
 
-Minimize unnecessary use of useEffect and useState to reduce re-renders.
+## 7. Performance Optimization
+
+Minimize unnecessary use of `useEffect` and `useState` to reduce re-renders.
 
 Lazy-load non-critical components to improve initial load time.
 
 Optimize images: prefer modern formats like WebP/AVIF, include width/height, and use lazy loading.
 
-8. State Management
+Avoid unnecessary abstraction that could impact performance or readability.
 
-Prefer local component state (useState, useReducer) for most cases.
+---
 
-For global state (authentication, themes), consider lightweight solutions or the React Context API.
+## 8. State Management
 
-Avoid complex state management libraries unless there is a proven need.
+Prefer local component state (`useState`, `useReducer`) for most cases.
 
-9. Linting and Code Quality
+For global state (UI preferences, simple app-wide flags), consider lightweight solutions or the React Context API.
+
+Avoid complex state management libraries unless there is a proven and explicit need.
+
+---
+
+## 9. Linting and Code Quality
 
 Use ESLint, Prettier, and TypeScript in strict mode.
 
-Validate all data inputs (forms, APIs) with Zod or a similar library.
+Validate all data inputs (forms, API payloads) with Zod or a similar library.
 
-10. Developer Experience (DX)
+Ensure consistent formatting and predictable code structure.
 
-The pnpm dev command must start the development environment without TypeScript or linter errors.
+---
 
-Document important architecture and code decisions in README.md or in docs/ directories.
+## 10. Developer Experience (DX)
 
-11. Accessibility and UX
+The `pnpm dev` command must start the development environment without TypeScript or linter errors.
+
+Document important architecture and code decisions in `README.md` or in `docs/` directories.
+
+Prioritize clarity and maintainability over cleverness.
+
+---
+
+## 11. Accessibility and UX
 
 Use accessible primitives from Radix UI and components from Shadcn UI.
 
-Ensure correct use of aria-* attributes, proper focus handling, and full keyboard support.
+Ensure correct use of `aria-*` attributes, proper focus handling, and full keyboard support.
 
-Maintain consistent spacing and typography for a good user experience.
+Maintain consistent spacing and typography for a high-quality user experience.
 
-12. Security
+---
 
-Environment Variables: Never expose secrets in the browser. Use .env for private keys and access them only in controlled environments (build time or Edge Functions).
+## 12. Security (HubSpot Context)
 
-Supabase Row Level Security (RLS): Always enable RLS on all tables. Write rules that validate user identity via auth.uid() or request.auth.
+Environment Variables:
+Never expose private HubSpot tokens or secrets in browser code.
+All private keys must be stored in environment variables and used only in controlled environments (build time or server-side proxies).
 
-Auth Guards: Always use server-side validation (Edge Functions/APIs) for all sensitive logic. Never rely solely on client-side checks.
+Client-Side Safety:
+Assume all React code may run in a public environment (HubSpot CMS).
+Never trust client-side validation alone.
 
-Supabase Client Access: Use the Supabase anon key on the client side only for public and safe queries. The service_role key must be used only in Edge Functions or secure environments.
+API Access:
+Use private HubSpot APIs only through secure server-side or proxy layers.
+Client-side code may only interact with public endpoints or HubSpot Forms embeds.
 
-Edge Functions: Validate all inputs with Zod. Store secrets in Supabase function environment variables, not in code.
+Data Exposure Limitation:
+Return and handle only the strictly necessary fields from HubSpot APIs.
 
-Data Exposure Limitation: Return only the strictly necessary fields from the database.
+Input Validation:
+Validate all user inputs and API payloads with Zod or equivalent schemas.
 
-Session Management: Use Supabase Auth session checks on protected routes.
+---
 
-Key Changes
+## Key Changes
 
-Removal of references to the Next.js app/ router and Server Components/Server Actions concepts.
+Removal of all Supabase-related concepts (RLS, Edge Functions, Auth).
 
-Adaptation of server.ts/client.ts to the frontend (Vite/React) and backend (Supabase Edge Functions) model.
+Focus on HubSpot CRM, Forms, and CMS-compatible data access patterns.
 
-Adjustments to Performance and State Management topics to focus on traditional React practices, without the complexity of the App Router.
+Adaptation of architecture and security rules to a client-side–first, HubSpot-friendly React environment.
 
-Even stronger emphasis on security via Supabase and Edge Functions for the client-side context.
+Increased emphasis on portability, simplicity, and safe public execution.

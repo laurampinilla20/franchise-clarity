@@ -71,3 +71,5 @@ Cada sección tendrá un módulo adicional que se muestra cuando `isLoggedIn ===
 - Verificar que contenido logged-in se muestra correctamente
 
 
+
+
