@@ -95,51 +95,53 @@ export default function Index() {
 
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-[32px] items-center justify-center w-full">
             {/* Territory Card */}
-            <div className="relative w-full lg:w-[363px] h-[450px] rounded-[33px] overflow-hidden group">
-              <div className="absolute inset-0 bg-[#446786] rounded-[33px]">
-                {/* Layer 3 & 4: Image and base background */}
-                <img
-                  src="https://www.figma.com/api/mcp/asset/34aefb97-346e-4ec7-9ffc-b29f9e9632ee"
-                  alt="Territory"
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-                {/* Layer 1: Linear gradient - always visible */}
-                <div
-                  className="absolute inset-0 rounded-[33px]"
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(180deg, rgba(32, 61, 87, 0) 48.077%, rgba(32, 61, 87, 1) 100%)",
-                  }}
-                />
-                {/* Layer 2: #0E2438 overlay - 74% opacity by default, 0% on hover */}
-                <div
-                  className="absolute inset-0 rounded-[33px] bg-[#0E2438] opacity-[0.74] group-hover:opacity-0 transition-opacity"
-                />
-              </div>
-              <div className="relative h-full flex flex-col justify-between p-7">
-                <div className="flex justify-end">
-                  <div className="relative w-[25px] h-[25px] group cursor-pointer">
-                    <div className="absolute bg-[#FFFFFF] opacity-[0.33] group-hover:opacity-100 inset-0 rounded-[30px] transition-all" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <img
-                        src="https://www.figma.com/api/mcp/asset/2fc37f6e-2a82-4797-a992-58e2cc838e9e"
-                        alt=""
-                        className="arrow-icon block w-[14px] h-[10px] rotate-[284.751deg] scale-y-[-1]"
-                      />
+            <Link to="/best-franchises/in" className="block w-full lg:w-[363px]">
+              <div className="relative w-full h-[450px] rounded-[33px] overflow-hidden group">
+                <div className="absolute inset-0 bg-[#446786] rounded-[33px]">
+                  {/* Layer 3 & 4: Image and base background */}
+                  <img
+                    src="https://www.figma.com/api/mcp/asset/34aefb97-346e-4ec7-9ffc-b29f9e9632ee"
+                    alt="Territory"
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                  {/* Layer 1: Linear gradient - always visible */}
+                  <div
+                    className="absolute inset-0 rounded-[33px]"
+                    style={{
+                      backgroundImage:
+                        "linear-gradient(180deg, rgba(32, 61, 87, 0) 48.077%, rgba(32, 61, 87, 1) 100%)",
+                    }}
+                  />
+                  {/* Layer 2: #0E2438 overlay - 74% opacity by default, 0% on hover */}
+                  <div
+                    className="absolute inset-0 rounded-[33px] bg-[#0E2438] opacity-[0.74] group-hover:opacity-0 transition-opacity"
+                  />
+                </div>
+                <div className="relative h-full flex flex-col justify-between p-7">
+                  <div className="flex justify-end">
+                    <div className="relative w-[25px] h-[25px] group cursor-pointer">
+                      <div className="absolute bg-[#FFFFFF] opacity-[0.33] group-hover:opacity-100 inset-0 rounded-[30px] transition-all" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <img
+                          src="https://www.figma.com/api/mcp/asset/2fc37f6e-2a82-4797-a992-58e2cc838e9e"
+                          alt=""
+                          className="arrow-icon block w-[14px] h-[10px] rotate-[284.751deg] scale-y-[-1]"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex flex-col gap-[17px]">
-                  <div className="bg-white flex items-center justify-center px-2 py-0.5 rounded-[30px] w-fit">
-                    <p className="font-bold text-xs leading-6 text-foreground">Territory</p>
+                  <div className="flex flex-col gap-[17px]">
+                    <div className="bg-white flex items-center justify-center px-2 py-0.5 rounded-[30px] w-fit">
+                      <p className="font-bold text-xs leading-6 text-foreground">Territory</p>
+                    </div>
+                    <p className="font-normal text-[24px] leading-8 text-white">
+                      See the top franchise opportunities in your desired area,{" "}
+                      <span className="font-bold">backed by real market data.</span>
+                    </p>
                   </div>
-                  <p className="font-normal text-[24px] leading-8 text-white">
-                    See the top franchise opportunities in your desired area,{" "}
-                    <span className="font-bold">backed by real market data.</span>
-                  </p>
                 </div>
-          </div>
-        </div>
+              </div>
+            </Link>
 
             {/* Financials Card */}
             <div className="relative w-full lg:w-[363px] h-[450px] rounded-[33px] overflow-hidden group">
@@ -189,51 +191,53 @@ export default function Index() {
           </div>
 
             {/* Industries Card */}
-            <div className="relative w-full lg:w-[363px] h-[450px] rounded-[33px] overflow-hidden group">
-              <div className="absolute inset-0 bg-[#446786] rounded-[33px]">
-                {/* Layer 3 & 4: Image and base background */}
-                <img
-                  src="https://www.figma.com/api/mcp/asset/175278fc-ac43-4db0-b526-851784745bb1"
-                  alt="Industries"
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-                {/* Layer 1: Linear gradient - always visible */}
-                <div
-                  className="absolute inset-0 rounded-[33px]"
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(180deg, rgba(32, 61, 87, 0) 48.077%, rgba(32, 61, 87, 1) 100%)",
-                  }}
-                />
-                {/* Layer 2: #0E2438 overlay - 74% opacity by default, 0% on hover */}
-                <div
-                  className="absolute inset-0 rounded-[33px] bg-[#0E2438] opacity-[0.74] group-hover:opacity-0 transition-opacity"
-                />
-              </div>
-              <div className="relative h-full flex flex-col justify-between p-7">
-                <div className="flex justify-end">
-                  <div className="relative w-[25px] h-[25px] group cursor-pointer">
-                    <div className="absolute bg-[#FFFFFF] opacity-[0.33] group-hover:opacity-100 inset-0 rounded-[30px] transition-all" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <img
-                        src="https://www.figma.com/api/mcp/asset/2fc37f6e-2a82-4797-a992-58e2cc838e9e"
-                        alt=""
-                        className="arrow-icon block w-[14px] h-[10px] rotate-[284.751deg] scale-y-[-1]"
-                      />
+            <Link to="/best-franchises/for" className="block w-full lg:w-[363px]">
+              <div className="relative w-full h-[450px] rounded-[33px] overflow-hidden group">
+                <div className="absolute inset-0 bg-[#446786] rounded-[33px]">
+                  {/* Layer 3 & 4: Image and base background */}
+                  <img
+                    src="https://www.figma.com/api/mcp/asset/175278fc-ac43-4db0-b526-851784745bb1"
+                    alt="Industries"
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                  {/* Layer 1: Linear gradient - always visible */}
+                  <div
+                    className="absolute inset-0 rounded-[33px]"
+                    style={{
+                      backgroundImage:
+                        "linear-gradient(180deg, rgba(32, 61, 87, 0) 48.077%, rgba(32, 61, 87, 1) 100%)",
+                    }}
+                  />
+                  {/* Layer 2: #0E2438 overlay - 74% opacity by default, 0% on hover */}
+                  <div
+                    className="absolute inset-0 rounded-[33px] bg-[#0E2438] opacity-[0.74] group-hover:opacity-0 transition-opacity"
+                  />
+                </div>
+                <div className="relative h-full flex flex-col justify-between p-7">
+                  <div className="flex justify-end">
+                    <div className="relative w-[25px] h-[25px] group cursor-pointer">
+                      <div className="absolute bg-[#FFFFFF] opacity-[0.33] group-hover:opacity-100 inset-0 rounded-[30px] transition-all" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <img
+                          src="https://www.figma.com/api/mcp/asset/2fc37f6e-2a82-4797-a992-58e2cc838e9e"
+                          alt=""
+                          className="arrow-icon block w-[14px] h-[10px] rotate-[284.751deg] scale-y-[-1]"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex flex-col gap-[17px]">
-                  <div className="bg-white flex items-center justify-center px-2 py-0.5 rounded-[30px] w-fit">
-                    <p className="font-bold text-xs leading-6 text-foreground">Industries</p>
+                  <div className="flex flex-col gap-[17px]">
+                    <div className="bg-white flex items-center justify-center px-2 py-0.5 rounded-[30px] w-fit">
+                      <p className="font-bold text-xs leading-6 text-foreground">Industries</p>
+                    </div>
+                    <p className="font-normal text-[24px] leading-8 text-white">
+                      Align your lifestyle and long-term goals to{" "}
+                      <span className="font-bold">industries where you're most likely to thrive.</span>
+                    </p>
                   </div>
-                  <p className="font-normal text-[24px] leading-8 text-white">
-                    Align your lifestyle and long-term goals to{" "}
-                    <span className="font-bold">industries where you're most likely to thrive.</span>
-                  </p>
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
         </div>
       </section>
@@ -254,69 +258,89 @@ export default function Index() {
                     <div className="flex flex-col md:flex-row gap-[32px] items-start justify-start w-full">
                       {/* Left Column */}
                       <div className="flex flex-col gap-[14px] items-start w-full md:w-auto">
-                        <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap">
-                          <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
-                          <p className="font-semibold leading-6 text-navy text-sm text-left">
-                            Business & Professional
-                          </p>
-                        </div>
-                        <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap">
-                          <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
-                          <p className="font-semibold leading-6 text-navy text-sm text-left">
-                            Pet Care
-                          </p>
-                        </div>
-                        <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap">
-                          <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
-                          <p className="font-semibold leading-6 text-navy text-sm text-left">
-                            Healthcare & Medical
-                          </p>
-                        </div>
-                        <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap">
-                          <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
-                          <p className="font-semibold leading-6 text-navy text-sm text-left">
-                            Retail Food & Convenience
-                          </p>
-                        </div>
-                        <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap">
-                          <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
-                          <p className="font-semibold leading-6 text-navy text-sm text-left">
-                            Real Estate & Lodging
-                          </p>
-                        </div>
+                        <Link to="/best-franchises/category/business-and-professional-services" className="w-full md:w-auto">
+                          <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap hover:bg-[#cbd8e8] transition-colors cursor-pointer">
+                            <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
+                            <p className="font-semibold leading-6 text-navy text-sm text-left">
+                              Business & Professional
+                            </p>
+                          </div>
+                        </Link>
+                        <Link to="/best-franchises/category/pet-care" className="w-full md:w-auto">
+                          <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap hover:bg-[#cbd8e8] transition-colors cursor-pointer">
+                            <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
+                            <p className="font-semibold leading-6 text-navy text-sm text-left">
+                              Pet Care
+                            </p>
+                          </div>
+                        </Link>
+                        <Link to="/best-franchises/category/healthcare-and-medical-services" className="w-full md:w-auto">
+                          <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap hover:bg-[#cbd8e8] transition-colors cursor-pointer">
+                            <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
+                            <p className="font-semibold leading-6 text-navy text-sm text-left">
+                              Healthcare & Medical
+                            </p>
+                          </div>
+                        </Link>
+                        <Link to="/best-franchises/category/retail-food-and-convenience" className="w-full md:w-auto">
+                          <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap hover:bg-[#cbd8e8] transition-colors cursor-pointer">
+                            <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
+                            <p className="font-semibold leading-6 text-navy text-sm text-left">
+                              Retail Food & Convenience
+                            </p>
+                          </div>
+                        </Link>
+                        <Link to="/best-franchises/category/real-estate-and-lodging" className="w-full md:w-auto">
+                          <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap hover:bg-[#cbd8e8] transition-colors cursor-pointer">
+                            <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
+                            <p className="font-semibold leading-6 text-navy text-sm text-left">
+                              Real Estate & Lodging
+                            </p>
+                          </div>
+                        </Link>
                       </div>
                       {/* Right Column */}
                       <div className="flex flex-col gap-[14px] items-start w-full md:w-auto">
-                        <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap">
-                          <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
-                          <p className="font-semibold leading-6 text-navy text-sm text-left">
-                            Personal Care & Lifestyle
-                          </p>
-                        </div>
-                        <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap">
-                          <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
-                          <p className="font-semibold leading-6 text-navy text-sm text-left">
-                            Home Services
-                          </p>
-                        </div>
-                        <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap">
-                          <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
-                          <p className="font-semibold leading-6 text-navy text-sm text-left">
-                            Fast Food Restaurants
-                          </p>
-                        </div>
-                        <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap">
-                          <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
-                          <p className="font-semibold leading-6 text-navy text-sm text-left">
-                            Retail Products
-                          </p>
-                        </div>
-                        <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap">
-                          <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
-                          <p className="font-semibold leading-6 text-navy text-sm text-left">
-                            Full Service Restaurants
-                          </p>
-                        </div>
+                        <Link to="/best-franchises/category/personal-care-and-lifestyle-services" className="w-full md:w-auto">
+                          <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap hover:bg-[#cbd8e8] transition-colors cursor-pointer">
+                            <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
+                            <p className="font-semibold leading-6 text-navy text-sm text-left">
+                              Personal Care & Lifestyle
+                            </p>
+                          </div>
+                        </Link>
+                        <Link to="/best-franchises/category/home-and-property-services" className="w-full md:w-auto">
+                          <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap hover:bg-[#cbd8e8] transition-colors cursor-pointer">
+                            <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
+                            <p className="font-semibold leading-6 text-navy text-sm text-left">
+                              Home Services
+                            </p>
+                          </div>
+                        </Link>
+                        <Link to="/best-franchises/category/fast-food-and-fast-casual-restaurants" className="w-full md:w-auto">
+                          <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap hover:bg-[#cbd8e8] transition-colors cursor-pointer">
+                            <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
+                            <p className="font-semibold leading-6 text-navy text-sm text-left">
+                              Fast Food Restaurants
+                            </p>
+                          </div>
+                        </Link>
+                        <Link to="/best-franchises/category/retail-products-and-services" className="w-full md:w-auto">
+                          <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap hover:bg-[#cbd8e8] transition-colors cursor-pointer">
+                            <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
+                            <p className="font-semibold leading-6 text-navy text-sm text-left">
+                              Retail Products
+                            </p>
+                          </div>
+                        </Link>
+                        <Link to="/best-franchises/category/full-service-restaurants" className="w-full md:w-auto">
+                          <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap hover:bg-[#cbd8e8] transition-colors cursor-pointer">
+                            <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
+                            <p className="font-semibold leading-6 text-navy text-sm text-left">
+                              Full Service Restaurants
+                            </p>
+                          </div>
+                        </Link>
                       </div>
                     </div>
                     <Link to="/best-franchises/for">

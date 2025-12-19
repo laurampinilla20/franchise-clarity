@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Phone, Mail } from "lucide-react";
+import { ReactNode } from "react";
 
 const socialIcons = {
   linkedin: "https://www.figma.com/api/mcp/asset/d8619095-33fa-409b-89e3-9e33c386610e",
@@ -10,27 +11,37 @@ const socialIcons = {
 
 const logoImg = "https://www.figma.com/api/mcp/asset/99ad8574-4696-4356-9f06-9e6ea9989263";
 
-export function Footer() {
+interface FooterProps {
+  customCTA?: ReactNode;
+}
+
+export function Footer({ customCTA }: FooterProps = {}) {
   return (
     <footer className="bg-background">
       <div className="flex flex-col items-start w-full max-w-[1512px] mx-auto">
         {/* Top Section - CTA and Contact Info */}
         <div className="bg-secondary flex flex-col items-center pb-5 pt-[60px] md:pt-[120px] px-3 md:px-[90px] lg:px-[180px] rounded-[30px] w-full mt-8 mx-0 md:mx-8">
-          <div className="flex flex-col gap-[60px] md:gap-[120px] items-center w-full max-w-[1200px]">
+          <div className="flex flex-col gap-[60px] md:gap-[120px] items-center w-full max-w-[1136px]">
             {/* CTA Section */}
-            <div className="flex flex-col gap-4 items-center w-full">
-              <p className="font-normal leading-normal text-2xl md:text-4xl text-white text-center w-full max-w-[554px] whitespace-pre-wrap">
-                Leave it to the experts, a wrong choice could cost you thousands
-              </p>
-              <p className="font-normal leading-6 text-base text-white text-center w-full max-w-[554px] whitespace-pre-wrap">
-                Book a call and get your free, personalized roadmap. No pressure. No bias. Just clear guidance to protect your investment.
-              </p>
-              <Link to="/best-franchises">
-                <Button variant="cta" size="lg" className="rounded-[30px] px-9 py-3">
-                  Find the best franchise for you
-                </Button>
-              </Link>
-            </div>
+            {customCTA ? (
+              <div className="flex flex-col gap-4 items-center w-full">
+                {customCTA}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4 items-center w-full">
+                <p className="font-normal leading-normal text-2xl md:text-4xl text-white text-center w-full max-w-[554px] whitespace-pre-wrap">
+                  Leave it to the experts, a wrong choice could cost you thousands
+                </p>
+                <p className="font-normal leading-6 text-base text-white text-center w-full max-w-[554px] whitespace-pre-wrap">
+                  Book a call and get your free, personalized roadmap. No pressure. No bias. Just clear guidance to protect your investment.
+                </p>
+                <Link to="/best-franchises">
+                  <Button variant="cta" size="lg" className="rounded-[30px] px-9 py-3">
+                    Find the best franchise for you
+                  </Button>
+                </Link>
+              </div>
+            )}
 
             {/* Contact Info Section */}
             <div className="border-[#446786] border-t-2 flex flex-col md:flex-row items-start justify-between px-0 py-10 w-full">
