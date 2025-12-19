@@ -67,7 +67,7 @@ const iconMap: Record<string, any> = {
   BarChart: BarChart3,
 };
 
-export default function CategoryDetail() {
+export default function IndustryDetail() {
   const { categorySlug } = useParams();
   const [categoryData, setCategoryData] = useState<CategoryData | null>(null);
   const [franchises, setFranchises] = useState<any[]>([]);
@@ -239,7 +239,7 @@ export default function CategoryDetail() {
         <div className="bg-white w-full overflow-x-hidden">
           <div className="px-8 max-w-[1448px] mx-auto">
             {/* Introduction Section */}
-            <div className="mb-16">
+            <div className="mb-16 mt-10 max-w-[1136px] mx-auto">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center mb-12">
                 <div className="rounded-[20px] overflow-hidden">
                   {categoryData.heroImage ? (
@@ -297,11 +297,12 @@ export default function CategoryDetail() {
             {/* Industry Snapshot Section */}
             {categoryData.sectorMetrics ? (
               <div className="mb-16">
-                <div className="bg-[#F4F8FE] rounded-[30px] overflow-hidden shadow-sm py-10 px-8">
+                <div className="bg-[#F4F8FE] rounded-[30px] overflow-hidden shadow-sm py-10 px-8 max-w-[1448px] mx-auto">
                   <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-8 text-center">
                     Industry Snapshot
                   </h2>
-                  <table className="w-full border-collapse">
+                  <div className="max-w-[1136px] mx-auto">
+                    <table className="w-full border-collapse">
                     <tbody>
                       <tr>
                         {/* 1. Average Total Investment */}
@@ -396,6 +397,7 @@ export default function CategoryDetail() {
                       </tr>
                     </tbody>
                   </table>
+                  </div>
                 </div>
               </div>
             ) : null}
@@ -404,7 +406,8 @@ export default function CategoryDetail() {
             {categoryData.sectorMetrics ? (
               <div className="mb-16 space-y-16">
                 {/* Initial Investment and Royalty Rate - Side by Side */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <div className="max-w-[1136px] mx-auto">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start lg:items-center">
                   {/* Initial Investment Section */}
                   <div className="flex flex-col space-y-6 h-full">
                     {/* 1. Title */}
@@ -423,7 +426,7 @@ export default function CategoryDetail() {
                       <ChartContainer
                         config={{
                           average: { label: "Average", color: "#446786" },
-                          median: { label: "Median", color: "#54b936" },
+                          median: { label: "Median", color: "#203d57" },
                         }}
                         className="h-[300px] flex-shrink-0"
                       >
@@ -433,10 +436,12 @@ export default function CategoryDetail() {
                               {
                                 name: "Average",
                                 value: (categoryData.stats.totalInvestment.min + categoryData.stats.totalInvestment.max) / 2,
+                                fill: "#446786",
                               },
                               {
                                 name: "Median",
                                 value: (categoryData.stats.totalInvestment.min + categoryData.stats.totalInvestment.max) / 2 * 0.65,
+                                fill: "#203d57",
                               },
                             ]}
                           >
@@ -444,21 +449,28 @@ export default function CategoryDetail() {
                             <XAxis dataKey="name" stroke="#446786" />
                             <YAxis stroke="#446786" />
                             <ChartTooltip content={<ChartTooltipContent />} />
-                            <Bar dataKey="value" fill="#446786" radius={[8, 8, 0, 0]} />
+                            <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                              {[
+                                { name: "Average", value: (categoryData.stats.totalInvestment.min + categoryData.stats.totalInvestment.max) / 2 },
+                                { name: "Median", value: (categoryData.stats.totalInvestment.min + categoryData.stats.totalInvestment.max) / 2 * 0.65 },
+                              ].map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={index === 0 ? "#446786" : "#203d57"} />
+                              ))}
+                            </Bar>
                           </BarChart>
                         </ResponsiveContainer>
                       </ChartContainer>
                       <div className="flex justify-center gap-4 mt-4">
                         <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 rounded-full bg-[#A4C6E8]"></div>
+                          <div className="w-4 h-4 rounded-full bg-[#446786]"></div>
                           <span className="text-xs text-muted-foreground">
-                            {formatCurrency(categoryData.sectorMetrics.initialFranchiseFee.range.max)} Highest
+                            Average
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 rounded-full bg-[#54b936]"></div>
+                          <div className="w-4 h-4 rounded-full bg-[#203d57]"></div>
                           <span className="text-xs text-muted-foreground">
-                            {formatCurrency(categoryData.sectorMetrics.initialFranchiseFee.range.min)} Lowest
+                            Median
                           </span>
                         </div>
                       </div>
@@ -519,21 +531,28 @@ export default function CategoryDetail() {
                             <XAxis dataKey="name" stroke="#446786" />
                             <YAxis stroke="#446786" />
                             <ChartTooltip content={<ChartTooltipContent />} />
-                            <Bar dataKey="value" fill="#446786" radius={[8, 8, 0, 0]} />
+                            <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                              {[
+                                { name: "Average", value: categoryData.sectorMetrics.royaltyRate.average },
+                                { name: "Median", value: categoryData.sectorMetrics.royaltyRate.median },
+                              ].map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={index === 0 ? "#446786" : "#203d57"} />
+                              ))}
+                            </Bar>
                           </BarChart>
                         </ResponsiveContainer>
                       </ChartContainer>
                       <div className="flex justify-center gap-4 mt-4">
                         <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 rounded-full bg-[#A4C6E8]"></div>
+                          <div className="w-4 h-4 rounded-full bg-[#446786]"></div>
                           <span className="text-xs text-muted-foreground">
-                            {categoryData.sectorMetrics.royaltyRate.range.max}% Highest
+                            Average: {categoryData.sectorMetrics.royaltyRate.average}%
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 rounded-full bg-[#54b936]"></div>
+                          <div className="w-4 h-4 rounded-full bg-[#203d57]"></div>
                           <span className="text-xs text-muted-foreground">
-                            {categoryData.sectorMetrics.royaltyRate.range.min}% Lowest
+                            Median: {categoryData.sectorMetrics.royaltyRate.median}%
                           </span>
                         </div>
                       </div>
@@ -559,10 +578,12 @@ export default function CategoryDetail() {
                       </div>
                     </div>
                   </div>
+                  </div>
                 </div>
 
                 {/* Growth Rate Chart */}
-                <div className="space-y-8">
+                <div className="max-w-[1136px] mx-auto">
+                  <div className="space-y-8">
                   <div>
                     <h3 className="text-2xl font-bold text-foreground mb-4">Growth Rate</h3>
                     <p className="text-base text-muted-foreground mb-6">
@@ -593,17 +614,19 @@ export default function CategoryDetail() {
                       Figure: Growth rate over time
                     </p>
                   </div>
+                  </div>
                 </div>
 
                 {/* Territory Rights Chart */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                  <div className="bg-white border border-[#A4C6E8] rounded-[20px] p-6">
+                <div className="max-w-[1136px] mx-auto">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                  <div className="bg-white border border-[#A4C6E8] rounded-[20px] p-6 flex flex-col items-center">
                     <h4 className="text-lg font-bold text-foreground mb-4 text-center">Territory Rights</h4>
                     <ChartContainer
                       config={{
                         value: { label: "Percentage", color: "#446786" },
                       }}
-                      className="h-[300px]"
+                      className="h-[300px] w-full flex items-center justify-center"
                     >
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
@@ -661,15 +684,17 @@ export default function CategoryDetail() {
                       </p>
                     </div>
                   </div>
+                  </div>
                 </div>
 
             {/* Comparison Section */}
-            <div className="mb-16 bg-[#f4f8fe] border border-[#A4C6E8] rounded-[20px] p-8 sm:p-10 lg:p-12">
-              <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-8 text-center">
-                Why Choose {categoryData.name}?
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
+            <div className="mb-16 max-w-[1448px] mx-auto">
+              <div className="bg-[#f4f8fe] rounded-[20px] ">
+                <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-8 text-center">
+                  Why Choose {categoryData.name}?
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-0 justify-items-center ">
+                <div className="w-full">
                   <h3 className="text-xl font-bold text-foreground mb-6 text-left">
                     {categoryData.name}
                   </h3>
@@ -682,7 +707,7 @@ export default function CategoryDetail() {
                     ))}
                   </div>
                 </div>
-                <div>
+                <div className="w-full">
                   <h3 className="text-xl font-bold text-foreground mb-6 text-left">
                     Other Franchises
                   </h3>
@@ -719,6 +744,7 @@ export default function CategoryDetail() {
                 >
                   Talk to a Franchise Industry Advisor
                 </Button>
+              </div>
               </div>
             </div>
 

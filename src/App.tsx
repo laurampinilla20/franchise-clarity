@@ -11,7 +11,7 @@ import Browse from "./pages/Browse";
 import BrowseByLocation from "./pages/BrowseByLocation";
 import BrowseByIndustry from "./pages/BrowseByIndustry";
 import BrandDetail from "./pages/BrandDetail";
-import CategoryDetail from "./pages/CategoryDetail";
+import IndustryDetail from "./pages/IndustryDetail";
 import StateDetail from "./pages/StateDetail";
 import Compare from "./pages/Compare";
 import Onboarding from "./pages/Onboarding";
@@ -41,7 +41,7 @@ const App = () => (
           <Route path="/best-franchises/in" element={<BrowseByLocation />} />
           <Route path="/best-franchises/in/:stateName" element={<StateDetail />} />
           <Route path="/best-franchises/for" element={<BrowseByIndustry />} />
-          <Route path="/best-franchises/category/:categorySlug" element={<CategoryDetail />} />
+          <Route path="/best-franchises/category/:categorySlug" element={<IndustryDetail />} />
           <Route path="/best-franchises/brand/:slug" element={<BrandDetail />} />
           <Route path="/compare" element={<Compare />} />
           <Route path="/onboarding" element={<Onboarding />} />

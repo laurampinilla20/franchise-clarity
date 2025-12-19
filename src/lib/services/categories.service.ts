@@ -45,6 +45,54 @@ export interface CategoryData {
     description: string;
   }>;
   sectorMetrics?: SectorMetrics; // HubSpot-ready detailed metrics
+  buyerAttractionReasons?: string[]; // HubSpot-ready: Reasons buyers are attracted to this franchise group
+  // HubSpot-ready: Ideal Buyer Profile
+  idealBuyerProfile?: {
+    description?: string;
+    traits: string[]; // Bullet points for ideal buyer profile
+    closingText?: string;
+  };
+  // HubSpot-ready: Who Thrives traits
+  whoThrivesTraits?: Array<{
+    icon: string; // Icon name (Heart, Target, Users, RefreshCw)
+    title: string;
+    description: string;
+  }>;
+  // HubSpot-ready: Next Steps content
+  nextSteps?: {
+    title?: string;
+    subtitle?: string;
+    steps?: Array<{
+      number: number;
+      title: string;
+      content: string;
+      checklist?: string[];
+      ctaText?: string;
+      ctaLink?: string;
+    }>;
+    finalSection?: {
+      title: string;
+      description: string;
+      checklist: string[];
+      ctaText?: string;
+      ctaLink?: string;
+    };
+  };
+  // HubSpot-ready: FAQ questions and answers
+  faqs?: Array<{
+    question: string;
+    answer: string;
+    ctaText?: string;
+    ctaLink?: string;
+  }>;
+  // HubSpot-ready: Section descriptions
+  sectionDescriptions?: {
+    initialInvestment?: string;
+    royaltyRate?: string;
+    growthRate?: string;
+    territoryRights?: string;
+    franchiseeTurnoverRate?: string;
+  };
 }
 
 // Default category data (HubSpot-ready with fallbacks)
@@ -99,6 +147,12 @@ const defaultCategoryData: Record<string, CategoryData> = {
         title: "Support Network",
         description: "Comprehensive franchise support"
       }
+    ],
+    buyerAttractionReasons: [
+      "Recurring Revenue Models (e.g., subscriptions, memberships)",
+      "High Profit Margins or Low Overhead",
+      "Simple, Scalable Operations without complex staffing",
+      "Owner-Operated or Semi-Absentee Friendly"
     ],
     sectorMetrics: {
       initialFranchiseFee: { average: 35000, median: 32000, range: { min: 0, max: 200000 } },
@@ -187,6 +241,12 @@ const defaultCategoryData: Record<string, CategoryData> = {
         description: "Time for what matters"
       }
     ],
+    buyerAttractionReasons: [
+      "Recurring Revenue Models (e.g., subscriptions, memberships)",
+      "High Profit Margins or Low Overhead",
+      "Simple, Scalable Operations without complex staffing",
+      "Owner-Operated or Semi-Absentee Friendly"
+    ],
     sectorMetrics: {
       initialFranchiseFee: { average: 42000, median: 38000, range: { min: 0, max: 250000 } },
       royaltyRate: { average: 10, median: 8, range: { min: 0, max: 30 } },
@@ -273,6 +333,12 @@ const defaultCategoryData: Record<string, CategoryData> = {
         title: "Recession Proof",
         description: "Economic resilience"
       }
+    ],
+    buyerAttractionReasons: [
+      "Recurring Revenue Models (e.g., subscriptions, memberships)",
+      "High Profit Margins or Low Overhead",
+      "Simple, Scalable Operations without complex staffing",
+      "Owner-Operated or Semi-Absentee Friendly"
     ],
     sectorMetrics: {
       initialFranchiseFee: { average: 45000, median: 40000, range: { min: 0, max: 300000 } },
@@ -361,6 +427,12 @@ const defaultCategoryData: Record<string, CategoryData> = {
         description: "Comprehensive education"
       }
     ],
+    buyerAttractionReasons: [
+      "Recurring Revenue Models (e.g., subscriptions, memberships)",
+      "High Profit Margins or Low Overhead",
+      "Simple, Scalable Operations without complex staffing",
+      "Owner-Operated or Semi-Absentee Friendly"
+    ],
     sectorMetrics: {
       initialFranchiseFee: { average: 38000, median: 35000, range: { min: 0, max: 180000 } },
       royaltyRate: { average: 9, median: 8, range: { min: 0, max: 25 } },
@@ -436,6 +508,12 @@ export async function getCategoryBySlug(slug: string): Promise<CategoryData | nu
       "Brand Recognition",
       "Marketing Support"
     ],
+    buyerAttractionReasons: [
+      "Recurring Revenue Models (e.g., subscriptions, memberships)",
+      "High Profit Margins or Low Overhead",
+      "Simple, Scalable Operations without complex staffing",
+      "Owner-Operated or Semi-Absentee Friendly"
+    ],
     alternatives: [
       "Unproven System",
       "Limited Training",
@@ -506,6 +584,47 @@ export async function getCategoryBySlug(slug: string): Promise<CategoryData | nu
       },
       totalOutlets: { current: 38056, growth5Year: 32 },
       legalActions: { average: 3, median: 0 }
+    },
+    // HubSpot-ready: Ideal Buyer Profile (default values, can be overridden)
+    idealBuyerProfile: {
+      description: `Strong candidates for {name}, aligned franchises typically demonstrate:`,
+      traits: [
+        "Strategic thinking and the ability to understand how this business model operates within its market",
+        "Operational discipline, ensuring systems and processes are consistently followed",
+        "Adaptability, as some {name} groups evolve quickly due to consumer or technology trends"
+      ],
+      closingText: "Buyers who resonate with these traits often find the {name} category to be both manageable and rewarding."
+    },
+    // HubSpot-ready: Who Thrives traits (default values, can be overridden)
+    whoThrivesTraits: [
+      {
+        icon: "Heart",
+        title: "Customer Focus",
+        description: "If the model involves direct service or community engagement, owners who lead with empathy and responsiveness often outperform."
+      },
+      {
+        icon: "Target",
+        title: "Operational Discipline",
+        description: "Following playbooks matters, {name} brands succeed when SOPs and KPIs are taken seriously."
+      },
+      {
+        icon: "Users",
+        title: "Team Leadership",
+        description: "Many models depend on small but efficient teams, so the ability to lead, train, and retain people is key."
+      },
+      {
+        icon: "RefreshCw",
+        title: "Adaptability",
+        description: "Especially in evolving markets (tech, wellness, or mobile), the best owners stay responsive and coachable."
+      }
+    ],
+    // HubSpot-ready: Section descriptions (default values, can be overridden)
+    sectionDescriptions: {
+      initialInvestment: "The initial investment includes all costs associated with opening a new franchised location. These costs include things like leasehold improvements, training, grand opening advertising and additional funds.",
+      royaltyRate: "Should be a primary revenue stream for franchisor. Royalties are fees you pay to the franchisor on a regular basis.",
+      growthRate: "The average franchisee growth rate in the {name} industry is {average}%. This average masks significant variation, with some franchise systems growing and others shrinking. Compare and review growth rates from several franchises before making an investment decision.",
+      territoryRights: "Territory rights are specific to a franchise and should include definitions of customer types or geographic boundaries. In the {name} industry, {percentage}% of franchises offer exclusive territory rights.",
+      franchiseeTurnoverRate: "The Franchisee Turnover Rate (FTR) is the percentage of franchised outlets that turn over every year. The average FTR in the {name} industry is {average}%. Franchisee turnover is an important indicator of franchisee satisfaction and system health."
     }
   };
   
