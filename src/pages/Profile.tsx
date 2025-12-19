@@ -4,9 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Edit3, Save, User, Mail, Phone, MapPin, DollarSign, Briefcase } from "lucide-react";
+import { Edit3, Save, User, Mail, Phone, MapPin, DollarSign, Star } from "lucide-react";
 import { useState } from "react";
+import { PreferencesSection } from "@/components/PreferencesSection";
 
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
@@ -20,7 +20,6 @@ export default function Profile() {
     lifestyle: "Full-time",
     goals: ["Financial freedom", "Be my own boss"],
     industries: ["Food & Beverage", "Health & Fitness"],
-    bio: "Looking for a franchise opportunity that aligns with my passion for food and wellness.",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -49,13 +48,11 @@ export default function Profile() {
               </p>
             </div>
             {!isEditing ? (
-              <Button onClick={() => setIsEditing(true)} variant="outline" className="gap-2">
-                <Edit3 className="w-4 h-4" />
+              <Button onClick={() => setIsEditing(true)} variant="outline">
                 Edit Profile
               </Button>
             ) : (
-              <Button onClick={handleSave} variant="cta" className="gap-2">
-                <Save className="w-4 h-4" />
+              <Button onClick={handleSave} variant="cta">
                 Save Changes
               </Button>
             )}
@@ -73,7 +70,7 @@ export default function Profile() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
+                    <Label htmlFor="firstName" className="font-bold">First Name</Label>
                     {isEditing ? (
                       <Input
                         id="firstName"
@@ -86,7 +83,7 @@ export default function Profile() {
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
+                    <Label htmlFor="lastName" className="font-bold">Last Name</Label>
                     {isEditing ? (
                       <Input
                         id="lastName"
@@ -100,7 +97,7 @@ export default function Profile() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="flex items-center gap-2">
+                  <Label htmlFor="email" className="flex items-center gap-2 font-bold">
                     <Mail className="w-4 h-4" />
                     Email
                   </Label>
@@ -117,7 +114,7 @@ export default function Profile() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="flex items-center gap-2">
+                  <Label htmlFor="phone" className="flex items-center gap-2 font-bold">
                     <Phone className="w-4 h-4" />
                     Phone
                   </Label>
@@ -134,7 +131,7 @@ export default function Profile() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="location" className="flex items-center gap-2">
+                  <Label htmlFor="location" className="flex items-center gap-2 font-bold">
                     <MapPin className="w-4 h-4" />
                     Location
                   </Label>
@@ -149,20 +146,6 @@ export default function Profile() {
                     <p className="text-foreground font-medium">{formData.location}</p>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="bio">Bio</Label>
-                  {isEditing ? (
-                    <Textarea
-                      id="bio"
-                      name="bio"
-                      value={formData.bio}
-                      onChange={handleInputChange}
-                      rows={3}
-                    />
-                  ) : (
-                    <p className="text-foreground">{formData.bio}</p>
-                  )}
-                </div>
               </CardContent>
             </Card>
 
@@ -170,13 +153,13 @@ export default function Profile() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Briefcase className="w-5 h-5" />
+                  <Star className="w-5 h-5" />
                   Franchise Preferences
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
+                  <Label className="flex items-center gap-2 font-bold">
                     <DollarSign className="w-4 h-4" />
                     Budget
                   </Label>
@@ -191,7 +174,7 @@ export default function Profile() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label>Lifestyle</Label>
+                  <Label className="font-bold">Lifestyle</Label>
                   {isEditing ? (
                     <Input
                       name="lifestyle"
@@ -203,7 +186,7 @@ export default function Profile() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label>Goals</Label>
+                  <Label className="font-bold">Goals</Label>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {formData.goals.map((goal) => (
                       <Badge key={goal} variant="soft">
@@ -213,7 +196,7 @@ export default function Profile() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Preferred Industries</Label>
+                  <Label className="font-bold">Preferred Industries</Label>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {formData.industries.map((industry) => (
                       <Badge key={industry} variant="soft">
@@ -224,11 +207,15 @@ export default function Profile() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Likes and Dislikes Section */}
+            <PreferencesSection />
           </div>
         </div>
       </div>
     </PageLayout>
   );
 }
+
 
 

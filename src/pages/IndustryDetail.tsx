@@ -53,8 +53,7 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
+  type CarouselApi,
 } from "@/components/ui/carousel";
 import {
   Accordion,
@@ -90,6 +89,14 @@ const sections = [
   { id: "faqs", label: "FAQs" },
 ];
 
+// Helper function to create slug from category/industry name
+const createSlug = (name: string): string => {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
 export default function IndustryDetail() {
   const { categorySlug } = useParams();
   const [categoryData, setCategoryData] = useState<CategoryData | null>(null);
@@ -101,6 +108,21 @@ export default function IndustryDetail() {
   const sectionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const navRef = useRef<HTMLDivElement>(null);
   const [isNavSticky, setIsNavSticky] = useState(false);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+
+  // Track carousel slide changes
+  useEffect(() => {
+    if (!carouselApi) {
+      return;
+    }
+
+    setCurrent(carouselApi.selectedScrollSnap());
+
+    carouselApi.on("select", () => {
+      setCurrent(carouselApi.selectedScrollSnap());
+    });
+  }, [carouselApi]);
 
   // Fetch category data
   useEffect(() => {
@@ -603,6 +625,11 @@ export default function IndustryDetail() {
                   align: "start",
                   loop: false,
                 }}
+                setApi={(api) => {
+                  if (api) {
+                    setCarouselApi(api);
+                  }
+                }}
                 className="w-full"
               >
                 <CarouselContent className="-ml-2 md:-ml-4">
@@ -622,7 +649,7 @@ export default function IndustryDetail() {
                     };
                     
                     return (
-                      <CarouselItem key={franchise.id || index} className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
+                      <CarouselItem key={franchise.id || index} className="pl-2 md:pl-4 basis-2/3 sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
                         <FranchiseCard
                           id={franchise.id || `franchise-${index}`}
                           name={franchise.name}
@@ -631,6 +658,7 @@ export default function IndustryDetail() {
                           investmentMax={franchise.investmentMax || categoryData.stats.totalInvestment.max}
                           sector={franchise.sector || categoryData.name}
                           category={franchise.category || categoryData.name}
+                          categorySlug={categoryData.slug}
                           grade={franchise.grade || "B"}
                           isLoggedIn={false}
                         />
@@ -638,8 +666,19 @@ export default function IndustryDetail() {
                     );
                   })}
                 </CarouselContent>
-                <CarouselPrevious className="left-0 md:-left-12" />
-                <CarouselNext className="right-0 md:-right-12" />
+                {/* Dots Navigation */}
+                <div className="flex justify-center gap-2 mt-6">
+                  {Array.from({ length: 8 }).map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => carouselApi?.scrollTo(index)}
+                      className={`h-2 rounded-full transition-all ${
+                        current === index ? "w-8 bg-[#446786]" : "w-2 bg-[#A4C6E8]"
+                      }`}
+                      aria-label={`Go to slide ${index + 1}`}
+                    />
+                  ))}
+                </div>
               </Carousel>
             </div>
 

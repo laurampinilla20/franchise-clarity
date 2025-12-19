@@ -2,56 +2,67 @@ import { PageLayout } from "@/components/layout";
 import { MatchCard } from "@/components/franchise";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { Heart, Filter, ArrowUpDown, Trash2 } from "lucide-react";
-import { useState } from "react";
-
-const savedFranchises = [
-  {
-    id: "subway-1",
-    name: "Subway",
-    grade: "A" as const,
-    whyYes: [
-      "Aligns with your food & beverage interest",
-      "Investment fits your budget range",
-      "Strong training program for new owners",
-    ],
-    whyNot: ["High competition in quick-service", "Requires full-time commitment"],
-    fitChips: { territory: true, lifestyle: true, budget: true },
-  },
-  {
-    id: "jerseymikes-1",
-    name: "Jersey Mike's Subs",
-    grade: "B" as const,
-    whyYes: [
-      "Strong brand in food & beverage",
-      "Excellent franchisee support",
-      "Proven business model",
-    ],
-    whyNot: ["Investment at top of budget", "Saturated markets in some areas"],
-    fitChips: { territory: true, lifestyle: true, budget: true },
-  },
-  {
-    id: "orangetheory-1",
-    name: "Orangetheory Fitness",
-    grade: "B" as const,
-    whyYes: [
-      "Matches your health & fitness interest",
-      "Growing market demand",
-      "Semi-absentee ownership possible",
-    ],
-    whyNot: ["Investment exceeds budget", "Limited territories available"],
-    fitChips: { territory: false, lifestyle: true, budget: false },
-  },
-];
+import { Bookmark, Filter, ArrowUpDown, Trash2 } from "lucide-react";
+import { PreferencesSection } from "@/components/PreferencesSection";
+import { useSaved } from "@/hooks/useSaved";
+import { fetchBrandBySlug, type BrandData } from "@/api/brands";
+import { useEffect, useState } from "react";
 
 export default function Saved() {
-  const [savedItems, setSavedItems] = useState(savedFranchises);
+  const { savedItems, removeSaved } = useSaved();
+  const [enrichedSavedItems, setEnrichedSavedItems] = useState<any[]>([]);
 
-  const handleRemove = (id: string) => {
-    setSavedItems(savedItems.filter((item) => item.id !== id));
-  };
+  // Enrich saved items with full data (HubSpot-friendly: can fetch from database)
+  useEffect(() => {
+    const enrichSavedItems = async () => {
+      const enriched = await Promise.all(
+        savedItems.map(async (item) => {
+          try {
+            // Try to fetch full brand data from API
+            const slug = item.id.split('-').slice(0, -1).join('-') || item.id;
+            const brandData: BrandData = await fetchBrandBySlug(slug);
+            
+            // Check if API returned correct brand
+            if (brandData.id === item.id || brandData.name.toLowerCase() === item.name.toLowerCase()) {
+            return {
+              id: brandData.id || item.id,
+              name: brandData.name || item.name,
+              grade: (brandData.grade as "A" | "B" | "C" | "D") || item.grade || "A",
+              investmentMin: brandData.investment.min || item.investmentMin,
+              investmentMax: brandData.investment.max || item.investmentMax,
+              sector: brandData.sector || item.sector,
+              category: brandData.category || item.category,
+              fitChips: item.fitChips || { territory: true, lifestyle: true, budget: true },
+            };
+            }
+          } catch (error) {
+            console.log(`Using saved item data for ${item.name}`);
+          }
+          
+          // Fallback to saved item data
+          return {
+            id: item.id,
+            name: item.name,
+            grade: item.grade || "A",
+            investmentMin: item.investmentMin,
+            investmentMax: item.investmentMax,
+            sector: item.sector,
+            category: item.category,
+            fitChips: item.fitChips || { territory: true, lifestyle: true, budget: true },
+          };
+        })
+      );
+      
+      setEnrichedSavedItems(enriched);
+    };
+
+    if (savedItems.length > 0) {
+      enrichSavedItems();
+    } else {
+      setEnrichedSavedItems([]);
+    }
+  }, [savedItems]);
 
   return (
     <PageLayout>
@@ -61,29 +72,27 @@ export default function Saved() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
-                <Heart className="w-8 h-8 text-primary" />
+                <Bookmark className="w-8 h-8 text-primary" />
                 Saved Franchises
               </h1>
               <p className="text-muted-foreground mt-1">
-                {savedItems.length} {savedItems.length === 1 ? "franchise" : "franchises"} saved
+                {enrichedSavedItems.length} {enrichedSavedItems.length === 1 ? "franchise" : "franchises"} saved
               </p>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Filter className="w-4 h-4" />
+              <Button variant="outline" size="sm">
                 Filter
               </Button>
-              <Button variant="outline" size="sm" className="gap-2">
-                <ArrowUpDown className="w-4 h-4" />
+              <Button variant="outline" size="sm">
                 Sort
               </Button>
             </div>
           </div>
 
-          {savedItems.length === 0 ? (
+          {enrichedSavedItems.length === 0 ? (
             <Card>
               <CardContent className="p-12 text-center">
-                <Heart className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                <Bookmark className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
                 <h3 className="text-xl font-semibold text-foreground mb-2">
                   No saved franchises yet
                 </h3>
@@ -99,7 +108,7 @@ export default function Saved() {
             <>
               {/* Saved Franchises List */}
               <div className="space-y-4">
-                {savedItems.map((franchise, i) => (
+                {enrichedSavedItems.map((franchise, i) => (
                   <div
                     key={franchise.id}
                     className="relative animate-fade-up"
@@ -110,7 +119,9 @@ export default function Saved() {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                        onClick={() => handleRemove(franchise.id)}
+                        onClick={async () => {
+                          await removeSaved(franchise.id);
+                        }}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -121,7 +132,7 @@ export default function Saved() {
               </div>
 
               {/* Compare CTA */}
-              {savedItems.length > 1 && (
+              {enrichedSavedItems.length > 1 && (
                 <Card className="mt-8 border-dashed">
                   <CardContent className="p-6 text-center">
                     <h3 className="font-semibold text-foreground mb-2">
@@ -138,10 +149,14 @@ export default function Saved() {
               )}
             </>
           )}
+
+          {/* Likes and Dislikes Section */}
+          <PreferencesSection />
         </div>
       </div>
     </PageLayout>
   );
 }
+
 
 

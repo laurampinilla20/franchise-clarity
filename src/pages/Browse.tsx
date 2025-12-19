@@ -42,6 +42,8 @@ import {
   Star,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSearchParams } from "react-router-dom";
 
 const filters = {
   budget: ["Under $50K", "$50K–$100K", "$100K–$250K", "$250K–$500K", "$500K+"],
@@ -128,6 +130,8 @@ const franchises = [
 ];
 
 export default function Browse() {
+  const { isLoggedIn } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [location, setLocation] = useState("");
   const [industry, setIndustry] = useState("");
@@ -145,6 +149,77 @@ export default function Browse() {
   const [stateOpen, setStateOpen] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
   const searchSectionRef = useRef<HTMLDivElement>(null);
+
+  // Apply filters from URL parameters on mount
+  useEffect(() => {
+    const budget = searchParams.get('budget');
+    const tag = searchParams.get('tag');
+    const lifestyle = searchParams.get('lifestyle');
+    
+    // Apply budget filter
+    if (budget === 'under-50k') {
+      setBudgetRange([0, 50000]);
+      setActiveFilters((prev) => {
+        const newFilters = prev.includes('Under $50K') ? prev : [...prev, 'Under $50K'];
+        return newFilters;
+      });
+    } else if (budget === 'under-100k') {
+      setBudgetRange([0, 100000]);
+      setActiveFilters((prev) => {
+        const newFilters = prev.includes('Under $100K') ? prev : [...prev, 'Under $100K'];
+        return newFilters;
+      });
+    }
+    
+    // Apply tag filters
+    if (tag) {
+      const tagMap: Record<string, string> = {
+        'high-roi': 'High ROI',
+        'no-royalty': 'No Royalty',
+        'home-based': 'Home-Based',
+        'flexible-schedule': 'Flexible Schedule',
+        'solo-operator': 'Solo Operator',
+        'high-margin': 'High Margin',
+        'fastest-growing': 'Fastest Growing',
+        'high-validation': 'High Validation',
+        'recession-resistant': 'Recession Resistant',
+        'top-rated': 'Top Rated',
+        'for-beginners': 'For Beginners',
+        'for-retirees': 'For Retirees',
+        'for-career-changers': 'For Career Changers',
+        'turnkey': 'Turnkey',
+        'brick-and-mortar': 'Brick-and-Mortar',
+        'mobile': 'Mobile',
+        'online': 'Online',
+        'office-free': 'Office-Free',
+      };
+      if (tagMap[tag]) {
+        setActiveFilters((prev) => {
+          if (!prev.includes(tagMap[tag])) {
+            return [...prev, tagMap[tag]];
+          }
+          return prev;
+        });
+      }
+    }
+    
+    // Apply lifestyle filter
+    if (lifestyle === 'semi-absentee') {
+      setSelectedType('Semi-Absentee');
+    } else if (lifestyle === 'passive') {
+      setSelectedType('Passive');
+    }
+    
+    // Scroll to results after applying filters
+    if (budget || tag || lifestyle) {
+      setTimeout(() => {
+        const element = document.getElementById("franchise-grid");
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 100);
+    }
+  }, [searchParams]);
 
   const toggleFilter = (filter: string) => {
     setActiveFilters((prev) =>
@@ -633,7 +708,7 @@ export default function Browse() {
             <FranchiseCard
               key={franchise.id}
               {...franchise}
-              isLoggedIn={false}
+              isLoggedIn={isLoggedIn}
             />
           ))}
         </div>

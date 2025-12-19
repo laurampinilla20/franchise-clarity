@@ -99,8 +99,7 @@ export default function OwnershipPath() {
               <p className="text-muted-foreground mb-6">
                 Talk to an advisor to activate your personalized journey. They'll guide you through each step.
               </p>
-              <Button variant="cta" size="lg" className="gap-2">
-                <MessageCircle className="w-4 h-4" />
+              <Button variant="cta" size="lg">
                 Talk to an Advisor
               </Button>
             </CardContent>
@@ -222,8 +221,7 @@ export default function OwnershipPath() {
             <Link to="/dashboard">
               <Button variant="outline">View My Matches</Button>
             </Link>
-            <Button variant="cta" className="gap-2">
-              <MessageCircle className="w-4 h-4" />
+            <Button variant="cta">
               Schedule Advisor Call
             </Button>
           </div>

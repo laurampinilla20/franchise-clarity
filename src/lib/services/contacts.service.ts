@@ -30,8 +30,15 @@ class MockContactService implements ContactService {
     const existing = contacts.get(contactData.email);
     const now = new Date().toISOString();
 
+    // For testing: Use consistent test user ID for default test account
+    // HubSpot-friendly: In production, this will use HubSpot contact ID
+    const DEFAULT_TEST_USER_ID = 'test-user-001';
+    const isTestEmail = contactData.email.toLowerCase().includes('test') || 
+                        contactData.email.toLowerCase().includes('example') ||
+                        !contactData.email.includes('@'); // Fallback for any email during testing
+    
     const contact: Contact = {
-      id: existing?.id || `contact_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: existing?.id || (isTestEmail ? DEFAULT_TEST_USER_ID : `contact_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`),
       email: contactData.email,
       firstName: contactData.firstName || existing?.firstName,
       lastName: contactData.lastName || existing?.lastName,
@@ -79,5 +86,6 @@ class MockContactService implements ContactService {
 }
 
 export default MockContactService;
+
 
 

@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, ChevronDown, ArrowLeft, Mail } from "lucide-react";
+import { Menu, X, User, ChevronDown, ArrowLeft, Mail, Bookmark, GitCompare } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -59,7 +59,6 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [showVerification, setShowVerification] = useState(false);
-  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
   const [enteredCode, setEnteredCode] = useState("");
   const [formData, setFormData] = useState({
@@ -135,8 +134,10 @@ export function Navbar() {
           setFormData({ firstName: "", lastName: "", email: "" });
           // Don't clear pending section here - let BrandDetail handle it after scrolling
         } else {
-          // No pending section - show welcome modal
-          setShowWelcomeModal(true);
+          // No pending section - just close modal
+          closeModal();
+          // Reset form
+          setFormData({ firstName: "", lastName: "", email: "" });
         }
       } catch (error) {
         console.error("Login error:", error);
@@ -148,29 +149,12 @@ export function Navbar() {
     }
   };
 
-  const handleStartQuiz = () => {
-    setShowWelcomeModal(false);
-    closeModal();
-    // Reset form
-    setFormData({ firstName: "", lastName: "", email: "" });
-    // Navigate to onboarding/quiz page
-    window.location.href = "/onboarding";
-  };
-
-  const handleSkipQuiz = () => {
-    setShowWelcomeModal(false);
-    closeModal();
-    // Reset form
-    setFormData({ firstName: "", lastName: "", email: "" });
-    // User is already logged in from handleVerificationSubmit
-  };
 
   const handleModalClose = (open: boolean) => {
     if (!open) {
       closeModal();
       // Reset everything when modal closes
       setShowVerification(false);
-      setShowWelcomeModal(false);
       setFormData({ firstName: "", lastName: "", email: "" });
       setEnteredCode("");
       setVerificationCode("");
@@ -269,32 +253,53 @@ export function Navbar() {
           {/* Desktop Actions */}
           <div className={isDesktop ? "flex items-center gap-3" : "hidden"}>
             {isLoggedIn ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-9 w-9 rounded-full p-0 bg-accent hover:border hover:border-[#A4C6E8]">
-                    <User className="w-5 h-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem asChild>
-                    <Link to="/profile" className="cursor-pointer">
-                      My Profile
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/saved" className="cursor-pointer">
-                      Saved
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    onClick={logout}
-                    className="cursor-pointer text-destructive focus:text-destructive"
+              <>
+                <Link to="/onboarding">
+                  <Button 
+                    variant="cta" 
+                    size="sm" 
+                    className="text-base font-normal tracking-normal px-9 py-2"
                   >
-                    Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    Find the Best Match
+                  </Button>
+                </Link>
+                <Link to="/saved">
+                  <Button variant="ghost" size="sm" className="h-9 w-9 rounded-full p-0 bg-accent hover:border hover:border-[#A4C6E8]">
+                    <Bookmark className="w-5 h-5" />
+                  </Button>
+                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-9 w-9 rounded-full p-0 bg-accent hover:border hover:border-[#A4C6E8]">
+                      <User className="w-5 h-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="cursor-pointer">
+                        My Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/saved" className="cursor-pointer">
+                        Saved
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/compare" className="cursor-pointer">
+                        Compare
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={logout}
+                      className="cursor-pointer text-destructive focus:text-destructive"
+                    >
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
             ) : (
               <>
                 <Link to="/onboarding">
@@ -379,6 +384,14 @@ export function Navbar() {
                 {isLoggedIn ? (
                   <>
                     <Link
+                      to="/dashboard"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Button variant="outline" className="w-full">
+                        Find the Best Match
+                      </Button>
+                    </Link>
+                    <Link
                       to="/profile"
                       className="px-4 py-3 rounded-xl text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex items-center gap-2"
                       onClick={() => setMobileMenuOpen(false)}
@@ -392,6 +405,13 @@ export function Navbar() {
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Saved
+                    </Link>
+                    <Link
+                      to="/compare"
+                      className="px-4 py-3 rounded-xl text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Compare
                     </Link>
                     <button
                       onClick={() => {
@@ -625,50 +645,6 @@ export function Navbar() {
               </form>
             </>
           )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Welcome Modal */}
-      <Dialog open={showWelcomeModal} onOpenChange={setShowWelcomeModal}>
-        <DialogContent className="sm:max-w-[480px] p-0 rounded-[20px]">
-          <DialogHeader className="px-8 pt-8 pb-6 border-b border-border">
-            <DialogTitle className="text-2xl font-bold text-foreground text-left">
-              Welcome to FranchiseGrade
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="px-8 py-6">
-            <div className="space-y-6">
-              <p className="text-base text-muted-foreground leading-relaxed">
-                We're here to help you find the right franchise, one that truly fits you.
-              </p>
-              
-              <p className="text-base text-muted-foreground leading-relaxed">
-                Take our quick match quiz to get personalized recommendations based on your goals, budget, and lifestyle.
-              </p>
-              
-              <p className="text-base text-muted-foreground leading-relaxed">
-                It takes less than 3 minutes, or you can skip and do it later.
-              </p>
-
-              <div className="flex flex-col gap-3 pt-4">
-                <Button
-                  onClick={handleStartQuiz}
-                  className="w-full h-12 text-base font-semibold bg-[#203d57] hover:bg-[#203d57]/90 text-white rounded-[33px]"
-                >
-                  Start Match Quiz
-                </Button>
-                
-                <Button
-                  onClick={handleSkipQuiz}
-                  variant="outline"
-                  className="w-full h-12 text-base font-normal border-border hover:bg-muted rounded-[33px]"
-                >
-                  Skip for now
-                </Button>
-              </div>
-            </div>
-          </div>
         </DialogContent>
       </Dialog>
     </header>

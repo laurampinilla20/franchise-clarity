@@ -1,4 +1,5 @@
 import { PageLayout } from "@/components/layout";
+import { useNavigate } from "react-router-dom";
 import { FranchiseCard } from "@/components/franchise";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -369,6 +370,7 @@ const franchises = [
 ];
 
 export default function BrowseByIndustry() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [selectedSector, setSelectedSector] = useState<string>("");
@@ -421,6 +423,94 @@ export default function BrowseByIndustry() {
     setSelectedTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
+  };
+
+  /**
+   * Handle filter chip click - Apply filter and navigate to results
+   * HubSpot-friendly: Can track filter selections for analytics
+   */
+  const handleFilterChipClick = (tag: string, category: 'investment' | 'lifestyle' | 'performance' | 'experience' | 'operation') => {
+    // Map tag to appropriate filter
+    let filterParams: Record<string, string> = {};
+    
+    // Investment filters
+    if (category === 'investment') {
+      if (tag === 'Low-Cost' || tag === 'Under $50K') {
+        filterParams.budget = 'under-50k';
+      } else if (tag === 'Under $100K') {
+        filterParams.budget = 'under-100k';
+      } else if (tag === 'High ROI') {
+        filterParams.tag = 'high-roi';
+      } else if (tag === 'No Royalty') {
+        filterParams.tag = 'no-royalty';
+      }
+    }
+    
+    // Lifestyle filters
+    if (category === 'lifestyle') {
+      if (tag === 'Semi-Absentee') {
+        filterParams.lifestyle = 'semi-absentee';
+      } else if (tag === 'Passive Income') {
+        filterParams.lifestyle = 'passive';
+      } else if (tag === 'Home-Based') {
+        filterParams.tag = 'home-based';
+      } else if (tag === 'Flexible Schedule') {
+        filterParams.tag = 'flexible-schedule';
+      } else if (tag === 'Solo Operator') {
+        filterParams.tag = 'solo-operator';
+      }
+    }
+    
+    // Performance filters
+    if (category === 'performance') {
+      if (tag === 'High Margin') {
+        filterParams.tag = 'high-margin';
+      } else if (tag === 'Fastest Growing') {
+        filterParams.tag = 'fastest-growing';
+      } else if (tag === 'High Validation') {
+        filterParams.tag = 'high-validation';
+      } else if (tag === 'Recession Resistant') {
+        filterParams.tag = 'recession-resistant';
+      } else if (tag === 'Top Rated') {
+        filterParams.tag = 'top-rated';
+      }
+    }
+    
+    // Experience filters
+    if (category === 'experience') {
+      if (tag === 'For Beginners') {
+        filterParams.tag = 'for-beginners';
+      } else if (tag === 'For Retirees') {
+        filterParams.tag = 'for-retirees';
+      } else if (tag === 'For Career Changers') {
+        filterParams.tag = 'for-career-changers';
+      } else if (tag === 'Turnkey') {
+        filterParams.tag = 'turnkey';
+      }
+    }
+    
+    // Operation filters
+    if (category === 'operation') {
+      if (tag === 'Brick-and-Mortar') {
+        filterParams.tag = 'brick-and-mortar';
+      } else if (tag === 'Mobile') {
+        filterParams.tag = 'mobile';
+      } else if (tag === 'Online') {
+        filterParams.tag = 'online';
+      } else if (tag === 'Office-Free') {
+        filterParams.tag = 'office-free';
+      }
+    }
+    
+    // Build URL with filter parameters and scroll to results
+    const queryString = new URLSearchParams(filterParams).toString();
+    const url = `/best-franchises${queryString ? `?${queryString}` : ''}#franchise-grid`;
+    
+    // Navigate to browse page with filter applied
+    navigate(url);
+    
+    // TODO: Track filter selection in HubSpot
+    // trackFilterSelection(tag, category);
   };
 
   const clearFilters = () => {
@@ -917,7 +1007,7 @@ export default function BrowseByIndustry() {
                       <div className="flex flex-col gap-4 flex-1">
                         {/* Clickable Icon and Title */}
                         <Link
-                          to={`/best-franchises/category/${sectorSlug}`}
+                          to={`/best-franchises/for/${sectorSlug}`}
                           className="flex items-start gap-3 group cursor-pointer"
                         >
                           {/* Icon */}
@@ -978,7 +1068,7 @@ export default function BrowseByIndustry() {
                                       return (
                                         <Link
                                           key={catIndex}
-                                          to={`/best-franchises/category/${categorySlug}`}
+                                          to={`/best-franchises/for/${categorySlug}`}
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             setSelectedSector(sector.name);
@@ -1013,7 +1103,7 @@ export default function BrowseByIndustry() {
               <p className="text-sm text-muted-foreground mb-8">Discover the most popular franchise opportunities</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Investment Tags */}
-                <Link to="/best-franchises/category/investment" className="block">
+                <Link to="/best-franchises/for/investment" className="block">
                   <div className="bg-gradient-to-br from-white to-[#f4f8fe] border border-[#A4C6E8] rounded-[20px] p-6 shadow-sm hover:shadow-md transition-all duration-200">
                     <div className="flex items-center gap-3 mb-5">
                       <div className="w-12 h-12 rounded-[12px] bg-[#446786] flex items-center justify-center shadow-sm">
@@ -1026,11 +1116,11 @@ export default function BrowseByIndustry() {
                         <Badge
                           key={index}
                           variant={selectedTags.includes(tag) ? "chipActive" : "chip"}
-                          className="cursor-pointer transition-all duration-200"
+                          className="cursor-pointer transition-all duration-200 hover:bg-primary/20"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            toggleTag(tag);
+                            handleFilterChipClick(tag, 'investment');
                           }}
                         >
                           {tag}
@@ -1041,7 +1131,7 @@ export default function BrowseByIndustry() {
                 </Link>
 
                 {/* Lifestyle Tags */}
-                <Link to="/best-franchises/category/lifestyle" className="block">
+                <Link to="/best-franchises/for/lifestyle" className="block">
                   <div className="bg-gradient-to-br from-white to-[#f4f8fe] border border-[#A4C6E8] rounded-[20px] p-6 shadow-sm hover:shadow-md transition-all duration-200">
                     <div className="flex items-center gap-3 mb-5">
                       <div className="w-12 h-12 rounded-[12px] bg-[#446786] flex items-center justify-center shadow-sm">
@@ -1054,11 +1144,11 @@ export default function BrowseByIndustry() {
                         <Badge
                           key={index}
                           variant={selectedTags.includes(tag) ? "chipActive" : "chip"}
-                          className="cursor-pointer transition-all duration-200"
+                          className="cursor-pointer transition-all duration-200 hover:bg-primary/20"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            toggleTag(tag);
+                            handleFilterChipClick(tag, 'lifestyle');
                           }}
                         >
                           {tag}
@@ -1069,7 +1159,7 @@ export default function BrowseByIndustry() {
                 </Link>
 
                 {/* Performance Tags */}
-                <Link to="/best-franchises/category/performance" className="block">
+                <Link to="/best-franchises/for/performance" className="block">
                   <div className="bg-gradient-to-br from-white to-[#f4f8fe] border border-[#A4C6E8] rounded-[20px] p-6 shadow-sm hover:shadow-md transition-all duration-200">
                     <div className="flex items-center gap-3 mb-5">
                       <div className="w-12 h-12 rounded-[12px] bg-[#446786] flex items-center justify-center shadow-sm">
@@ -1082,11 +1172,11 @@ export default function BrowseByIndustry() {
                         <Badge
                           key={index}
                           variant={selectedTags.includes(tag) ? "chipActive" : "chip"}
-                          className="cursor-pointer transition-all duration-200"
+                          className="cursor-pointer transition-all duration-200 hover:bg-primary/20"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            toggleTag(tag);
+                            handleFilterChipClick(tag, 'performance');
                           }}
                         >
                           {tag}
@@ -1097,7 +1187,7 @@ export default function BrowseByIndustry() {
                 </Link>
 
                 {/* Operation & Experience Type Tags - Top 5 Hottest for SEO */}
-                <Link to="/best-franchises/category/business-setup" className="block">
+                <Link to="/best-franchises/for/business-setup" className="block">
                   <div className="bg-gradient-to-br from-white to-[#f4f8fe] border border-[#A4C6E8] rounded-[20px] p-6 shadow-sm hover:shadow-md transition-all duration-200">
                     <div className="flex items-center gap-3 mb-5">
                       <div className="w-12 h-12 rounded-[12px] bg-[#446786] flex items-center justify-center shadow-sm">
@@ -1111,6 +1201,11 @@ export default function BrowseByIndustry() {
                         const experienceTags = directoryData?.tags?.experience || industryDirectory.tags.experience || [];
                         const operationTags = directoryData?.tags?.operation || industryDirectory.tags.operation || [];
                         const allTags = [...experienceTags, ...operationTags];
+                        
+                        // Helper to determine category for each tag
+                        const getTagCategory = (tag: string): 'experience' | 'operation' => {
+                          return experienceTags.includes(tag) ? 'experience' : 'operation';
+                        };
                         // Top 5 hottest tags for SEO: For Beginners, Turnkey, Brick-and-Mortar, Mobile, Online
                         const hottestTags = [
                           "For Beginners",
@@ -1120,20 +1215,23 @@ export default function BrowseByIndustry() {
                           "Online"
                         ].filter(tag => allTags.includes(tag));
                         
-                        return hottestTags.map((tag: string, index: number) => (
-                          <Badge
-                            key={index}
-                            variant={selectedTags.includes(tag) ? "chipActive" : "chip"}
-                            className="cursor-pointer transition-all duration-200"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              toggleTag(tag);
-                            }}
-                          >
-                            {tag}
-                          </Badge>
-                        ));
+                        return hottestTags.map((tag: string, index: number) => {
+                          const category = getTagCategory(tag);
+                          return (
+                            <Badge
+                              key={index}
+                              variant={selectedTags.includes(tag) ? "chipActive" : "chip"}
+                              className="cursor-pointer transition-all duration-200 hover:bg-primary/20"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleFilterChipClick(tag, category);
+                              }}
+                            >
+                              {tag}
+                            </Badge>
+                          );
+                        });
                       })()}
                     </div>
                   </div>

@@ -7,7 +7,9 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEngagementTracking } from "@/hooks/useEngagementTracking";
 import { useSignInModal } from "@/contexts/SignInModalContext";
+import { useCompare } from "@/hooks/useCompare";
 import { getBrandService } from "@/lib/services";
+import { useNavigate } from "react-router-dom";
 import type { BrandGrade } from "@/lib/services/types";
 import {
   DollarSign,
@@ -60,6 +62,8 @@ export default function BrandDetail() {
   const { isLoggedIn } = useAuth();
   const { trackPageView, trackUnlock } = useEngagementTracking();
   const { openModal, pendingSectionId, clearPendingSection } = useSignInModal();
+  const { addToCompare, isInCompare, compareItems, canAddMore } = useCompare();
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState("snapshot");
   const sectionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const navRef = useRef<HTMLDivElement>(null);
@@ -83,6 +87,49 @@ export default function BrandDetail() {
   
   // Franchisee Turnover Rate - HubSpot-ready, can be fetched from brand data
   const turnoverScore = (currentBrandData as any)?.profitability?.turnoverScore ?? 90; // Default to 90, can be replaced with API data
+
+  // Get current franchise ID for compare functionality
+  const currentFranchiseId = currentBrandData?.id || (slug ? `${slug}-1` : '');
+  const isCurrentFranchiseInCompare = currentFranchiseId ? isInCompare(currentFranchiseId) : false;
+
+  // Handle compare button click
+  const handleCompareClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    if (!isLoggedIn) {
+      openModal();
+      return;
+    }
+
+    if (!currentBrandData || !currentFranchiseId) {
+      return;
+    }
+
+    // If already in compare, just navigate
+    if (isCurrentFranchiseInCompare) {
+      navigate("/compare");
+      return;
+    }
+
+    // Try to add to compare (will show error if max items reached)
+    const franchiseData = {
+      id: currentFranchiseId,
+      name: currentBrandData.name,
+      logo: currentBrandData.logo || null,
+      grade: currentBrandData.grade as "A" | "B" | "C" | "D" | undefined,
+      investmentMin: currentBrandData.investment.min,
+      investmentMax: currentBrandData.investment.max,
+    };
+
+    const added = await addToCompare(franchiseData);
+    if (added) {
+      // Small delay to ensure state updates, then navigate
+      setTimeout(() => {
+        navigate("/compare");
+      }, 150);
+    }
+    // If not added (max items reached), error toast is shown by addToCompare
+  };
 
   // Fetch brand data when slug changes - slug is the single source of truth
   // This effect handles both resetting state and loading new data when slug changes
@@ -656,10 +703,16 @@ export default function BrandDetail() {
                     )}
                     <Button
                       variant="outline"
-                      className="border border-[#446786] rounded-[30px] px-6 py-3 text-base font-bold text-[#446786] hover:bg-[#446786] hover:text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-                      asChild
+                      onClick={handleCompareClick}
+                      className={`border border-[#446786] rounded-[30px] px-6 py-3 text-base font-bold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${
+                        isCurrentFranchiseInCompare
+                          ? "bg-[#446786] text-white"
+                          : "text-[#446786] hover:bg-[#446786] hover:text-white"
+                      }`}
                     >
-                      <Link to="/compare">Compare to similar franchises</Link>
+                      {isCurrentFranchiseInCompare
+                        ? "View in Compare"
+                        : "Compare to similar franchises"}
                     </Button>
                   </div>
                 </div>
@@ -1724,10 +1777,16 @@ export default function BrandDetail() {
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="border border-[#446786] rounded-[30px] px-9 py-2 text-base font-bold text-[#446786] flex-1"
-                      asChild
+                      onClick={handleCompareClick}
+                      className={`border border-[#446786] rounded-[30px] px-9 py-2 text-base font-bold flex-1 transition-all duration-200 ${
+                        isCurrentFranchiseInCompare
+                          ? "bg-[#446786] text-white"
+                          : "text-[#446786] hover:bg-[#446786] hover:text-white"
+                      }`}
                     >
-                      <Link to="/compare">Compare to similar franchises</Link>
+                      {isCurrentFranchiseInCompare
+                        ? "View in Compare"
+                        : "Compare to similar franchises"}
                     </Button>
                   </div>
                 </div>

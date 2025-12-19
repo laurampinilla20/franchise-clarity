@@ -124,8 +124,7 @@ export default function Dashboard() {
                 <p className="text-sm text-secondary-foreground/70 mb-4">
                   Talk to a franchise advisor to discuss your matches.
                 </p>
-                <Button variant="cta" className="w-full gap-2">
-                  <MessageCircle className="w-4 h-4" />
+                <Button variant="cta" className="w-full">
                   Talk to Advisor
                 </Button>
               </CardContent>
@@ -143,12 +142,10 @@ export default function Dashboard() {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Filter className="w-4 h-4" />
+                <Button variant="outline" size="sm">
                   Filter
                 </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <ArrowUpDown className="w-4 h-4" />
+                <Button variant="outline" size="sm">
                   Sort
                 </Button>
               </div>

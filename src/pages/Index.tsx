@@ -258,7 +258,7 @@ export default function Index() {
                     <div className="flex flex-col md:flex-row gap-[32px] items-start justify-start w-full">
                       {/* Left Column */}
                       <div className="flex flex-col gap-[14px] items-start w-full md:w-auto">
-                        <Link to="/best-franchises/category/business-and-professional-services" className="w-full md:w-auto">
+                        <Link to="/best-franchises/for/business-and-professional-services" className="w-full md:w-auto">
                           <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap hover:bg-[#cbd8e8] transition-colors cursor-pointer">
                             <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
                             <p className="font-semibold leading-6 text-navy text-sm text-left">
@@ -266,7 +266,7 @@ export default function Index() {
                             </p>
                           </div>
                         </Link>
-                        <Link to="/best-franchises/category/pet-care" className="w-full md:w-auto">
+                        <Link to="/best-franchises/for/pet-care" className="w-full md:w-auto">
                           <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap hover:bg-[#cbd8e8] transition-colors cursor-pointer">
                             <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
                             <p className="font-semibold leading-6 text-navy text-sm text-left">
@@ -274,7 +274,7 @@ export default function Index() {
                             </p>
                           </div>
                         </Link>
-                        <Link to="/best-franchises/category/healthcare-and-medical-services" className="w-full md:w-auto">
+                        <Link to="/best-franchises/for/healthcare-and-medical-services" className="w-full md:w-auto">
                           <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap hover:bg-[#cbd8e8] transition-colors cursor-pointer">
                             <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
                             <p className="font-semibold leading-6 text-navy text-sm text-left">
@@ -282,7 +282,7 @@ export default function Index() {
                             </p>
                           </div>
                         </Link>
-                        <Link to="/best-franchises/category/retail-food-and-convenience" className="w-full md:w-auto">
+                        <Link to="/best-franchises/for/retail-food-and-convenience" className="w-full md:w-auto">
                           <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap hover:bg-[#cbd8e8] transition-colors cursor-pointer">
                             <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
                             <p className="font-semibold leading-6 text-navy text-sm text-left">
@@ -290,7 +290,7 @@ export default function Index() {
                             </p>
                           </div>
                         </Link>
-                        <Link to="/best-franchises/category/real-estate-and-lodging" className="w-full md:w-auto">
+                        <Link to="/best-franchises/for/real-estate-and-lodging" className="w-full md:w-auto">
                           <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap hover:bg-[#cbd8e8] transition-colors cursor-pointer">
                             <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
                             <p className="font-semibold leading-6 text-navy text-sm text-left">
@@ -301,7 +301,7 @@ export default function Index() {
                       </div>
                       {/* Right Column */}
                       <div className="flex flex-col gap-[14px] items-start w-full md:w-auto">
-                        <Link to="/best-franchises/category/personal-care-and-lifestyle-services" className="w-full md:w-auto">
+                        <Link to="/best-franchises/for/personal-care-and-lifestyle-services" className="w-full md:w-auto">
                           <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap hover:bg-[#cbd8e8] transition-colors cursor-pointer">
                             <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
                             <p className="font-semibold leading-6 text-navy text-sm text-left">
@@ -309,7 +309,7 @@ export default function Index() {
                             </p>
                           </div>
                         </Link>
-                        <Link to="/best-franchises/category/home-and-property-services" className="w-full md:w-auto">
+                        <Link to="/best-franchises/for/home-and-property-services" className="w-full md:w-auto">
                           <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap hover:bg-[#cbd8e8] transition-colors cursor-pointer">
                             <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
                             <p className="font-semibold leading-6 text-navy text-sm text-left">
@@ -317,7 +317,7 @@ export default function Index() {
                             </p>
                           </div>
                         </Link>
-                        <Link to="/best-franchises/category/fast-food-and-fast-casual-restaurants" className="w-full md:w-auto">
+                        <Link to="/best-franchises/for/fast-food-and-fast-casual-restaurants" className="w-full md:w-auto">
                           <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap hover:bg-[#cbd8e8] transition-colors cursor-pointer">
                             <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
                             <p className="font-semibold leading-6 text-navy text-sm text-left">
@@ -325,7 +325,7 @@ export default function Index() {
                             </p>
                           </div>
                         </Link>
-                        <Link to="/best-franchises/category/retail-products-and-services" className="w-full md:w-auto">
+                        <Link to="/best-franchises/for/retail-products-and-services" className="w-full md:w-auto">
                           <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap hover:bg-[#cbd8e8] transition-colors cursor-pointer">
                             <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
                             <p className="font-semibold leading-6 text-navy text-sm text-left">
@@ -333,7 +333,7 @@ export default function Index() {
                             </p>
                           </div>
                         </Link>
-                        <Link to="/best-franchises/category/full-service-restaurants" className="w-full md:w-auto">
+                        <Link to="/best-franchises/for/full-service-restaurants" className="w-full md:w-auto">
                           <div className="bg-[#dee8f2] flex gap-2 items-center pl-4 pr-6 py-2 rounded-[30px] whitespace-nowrap hover:bg-[#cbd8e8] transition-colors cursor-pointer">
                             <img src="/check-filled.svg" alt="" className="w-[14px] h-[14px]" />
                             <p className="font-semibold leading-6 text-navy text-sm text-left">

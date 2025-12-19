@@ -2,22 +2,29 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GradeBadge } from "./GradeBadge";
-import { Heart, GitCompare, MessageCircle, Check, X, MapPin, Clock, DollarSign } from "lucide-react";
-import { Link } from "react-router-dom";
+import { GitCompare, MessageCircle, Check, X, MapPin, Clock, DollarSign } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useCompare } from "@/hooks/useCompare";
+import { generateMatchReasons } from "@/utils/matchReasons";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { useMemo } from "react";
 
 interface MatchCardProps {
   id: string;
   name: string;
   logo?: string;
   grade: "A" | "B" | "C" | "D";
-  whyYes: string[];
-  whyNot: string[];
+  whyYes?: string[]; // Optional - will be generated if not provided
+  whyNot?: string[]; // Optional - will be generated if not provided
+  investmentMin?: number; // For personalized reasons
+  investmentMax?: number; // For personalized reasons
+  sector?: string; // For personalized reasons
+  category?: string; // For personalized reasons
   fitChips: {
     territory: boolean;
     lifestyle: boolean;
     budget: boolean;
   };
-  onSave?: () => void;
   onCompare?: () => void;
 }
 
@@ -26,12 +33,103 @@ export function MatchCard({
   name,
   logo,
   grade,
-  whyYes,
-  whyNot,
+  whyYes: providedWhyYes,
+  whyNot: providedWhyNot,
+  investmentMin,
+  investmentMax,
+  sector,
+  category,
   fitChips,
-  onSave,
   onCompare,
 }: MatchCardProps) {
+  const navigate = useNavigate();
+  const { addToCompare, isInCompare } = useCompare();
+  const { profile } = useUserProfile();
+
+  // Generate personalized reasons based on user profile vs brand
+  // Only generate personalized reasons if user is logged in and has profile data
+  const { whyYes, whyNot } = useMemo(() => {
+    // If personalized reasons are provided, use them
+    if (providedWhyYes && providedWhyYes.length > 0 && providedWhyNot && providedWhyNot.length > 0) {
+      return {
+        whyYes: providedWhyYes,
+        whyNot: providedWhyNot,
+      };
+    }
+
+    // Generate personalized reasons only if user is logged in and has profile
+    // For public users, use generic reasons
+    const hasProfile = profile && (profile.budget || profile.location || profile.industries);
+    if (hasProfile) {
+      return generateMatchReasons(
+        profile,
+        {
+          investmentMin,
+          investmentMax,
+          sector,
+          category,
+          territory: fitChips.territory ? "Available" : "Limited",
+          lifestyle: fitChips.lifestyle ? profile.lifestyle : undefined,
+          name,
+        },
+        fitChips
+      );
+    }
+
+    // Default generic reasons for public users
+    return {
+      whyYes: [
+        "Proven business model",
+        "Strong brand recognition",
+        "Comprehensive training and support",
+      ],
+      whyNot: [
+        "Consider market competition",
+      ],
+    };
+  }, [profile, fitChips, name, investmentMin, investmentMax, sector, category, providedWhyYes, providedWhyNot]);
+
+  const handleCompare = async () => {
+    // Check if already in compare list
+    const alreadyInCompare = isInCompare(id);
+    
+    if (alreadyInCompare) {
+      // If already in compare, just navigate to compare page
+      navigate("/compare");
+      if (onCompare) {
+        onCompare();
+      }
+      return;
+    }
+
+    // If not in compare, add it first
+    const franchiseData = {
+      id,
+      name,
+      logo: logo || null,
+      grade,
+      whyYes,
+      whyNot,
+    };
+    
+    // Add to compare (fetches full brand data from API)
+    const added = await addToCompare(franchiseData);
+    
+    // Navigate to compare page if successfully added
+    // addToCompare returns true if added OR if already in list
+    if (added) {
+      // Small delay to ensure localStorage is written before navigation
+      setTimeout(() => {
+        navigate("/compare");
+      }, 50);
+    }
+    
+    // Call original onCompare if provided
+    if (onCompare) {
+      onCompare();
+    }
+  };
+
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-6">
@@ -47,7 +145,12 @@ export function MatchCard({
                 </span>
               )}
             </div>
-            <GradeBadge grade={grade} size="lg" />
+            <div className="flex flex-col items-center gap-1.5">
+              <GradeBadge grade={grade} size="lg" />
+              <span className="text-xs font-medium text-muted-foreground text-center">
+                Grade
+              </span>
+            </div>
           </div>
 
           {/* Middle: Content */}
@@ -84,12 +187,23 @@ export function MatchCard({
                   Why Yes
                 </h4>
                 <ul className="space-y-1">
-                  {whyYes.slice(0, 3).map((item, i) => (
-                    <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                      <span className="w-1 h-1 rounded-full bg-primary mt-2 flex-shrink-0" />
-                      {item}
-                    </li>
-                  ))}
+                  {(() => {
+                    // Always show 2-3 items (prefer 3, but at least 2)
+                    const displayItems = whyYes.length >= 3 
+                      ? whyYes.slice(0, 3) 
+                      : whyYes.length >= 2 
+                        ? whyYes.slice(0, 2)
+                        : whyYes.length === 1
+                          ? [...whyYes, "Strong business fundamentals"] // Add default if only 1
+                          : ["Proven business model", "Strong brand recognition"]; // Default if empty
+                    
+                    return displayItems.map((item, i) => (
+                      <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                        <span className="w-1 h-1 rounded-full bg-primary mt-2 flex-shrink-0" />
+                        {item}
+                      </li>
+                    ));
+                  })()}
                 </ul>
               </div>
               <div className="space-y-2">
@@ -98,12 +212,21 @@ export function MatchCard({
                   Why Not
                 </h4>
                 <ul className="space-y-1">
-                  {whyNot.slice(0, 3).map((item, i) => (
-                    <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                      <span className="w-1 h-1 rounded-full bg-rose-500 mt-2 flex-shrink-0" />
-                      {item}
-                    </li>
-                  ))}
+                  {(() => {
+                    // Always show 1-2 items (prefer 2, but at least 1)
+                    const displayItems = whyNot.length >= 2 
+                      ? whyNot.slice(0, 2) 
+                      : whyNot.length === 1
+                        ? whyNot
+                        : ["Consider market competition"]; // Default if empty
+                    
+                    return displayItems.map((item, i) => (
+                      <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                        <span className="w-1 h-1 rounded-full bg-rose-500 mt-2 flex-shrink-0" />
+                        {item}
+                      </li>
+                    ));
+                  })()}
                 </ul>
               </div>
             </div>
@@ -111,15 +234,16 @@ export function MatchCard({
 
           {/* Right: Actions */}
           <div className="flex md:flex-col gap-2 justify-end">
-            <Button variant="icon" size="icon" onClick={onSave}>
-              <Heart className="w-4 h-4" />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleCompare}
+              className={isInCompare(id) ? "bg-muted" : ""}
+            >
+              {isInCompare(id) ? "In Compare" : "Compare"}
             </Button>
-            <Button variant="icon" size="icon" onClick={onCompare}>
-              <GitCompare className="w-4 h-4" />
-            </Button>
-            <Button variant="navy" size="sm" className="gap-1.5">
-              <MessageCircle className="w-4 h-4" />
-              Advisor
+            <Button variant="navy" size="sm">
+              Talk to an Advisor
             </Button>
           </div>
         </div>

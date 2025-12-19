@@ -807,14 +807,11 @@ export default function Onboarding() {
               variant="ghost"
               onClick={handleBack}
               disabled={currentStep === 1}
-              className="gap-2"
             >
-              <ArrowLeft className="w-4 h-4" />
               Back
             </Button>
-            <Button variant="cta" onClick={handleNext} className="gap-2">
+            <Button variant="cta" onClick={handleNext}>
               {currentStep === steps.length ? "See My Matches" : "Continue"}
-              <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
         </div>

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SignInModalProvider } from "@/contexts/SignInModalContext";
+import { PendingActionsHandler } from "@/components/PendingActionsHandler";
 import Index from "./pages/Index";
 import Browse from "./pages/Browse";
 import BrowseByLocation from "./pages/BrowseByLocation";
@@ -31,6 +32,7 @@ const App = () => (
     <TooltipProvider>
       <AuthProvider>
         <SignInModalProvider>
+          <PendingActionsHandler />
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -41,7 +43,7 @@ const App = () => (
           <Route path="/best-franchises/in" element={<BrowseByLocation />} />
           <Route path="/best-franchises/in/:stateName" element={<StateDetail />} />
           <Route path="/best-franchises/for" element={<BrowseByIndustry />} />
-          <Route path="/best-franchises/category/:categorySlug" element={<IndustryDetail />} />
+          <Route path="/best-franchises/for/:categorySlug" element={<IndustryDetail />} />
           <Route path="/best-franchises/brand/:slug" element={<BrandDetail />} />
           <Route path="/compare" element={<Compare />} />
           <Route path="/onboarding" element={<Onboarding />} />

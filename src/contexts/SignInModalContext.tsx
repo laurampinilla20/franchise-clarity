@@ -6,6 +6,8 @@ interface SignInModalContextType {
   closeModal: () => void;
   pendingSectionId: string | null;
   clearPendingSection: () => void;
+  pendingAction?: string; // For pending actions like 'like', 'dislike', 'save', 'compare'
+  setPendingAction: (action?: string) => void;
 }
 
 const SignInModalContext = createContext<SignInModalContextType | undefined>(undefined);
@@ -13,6 +15,7 @@ const SignInModalContext = createContext<SignInModalContextType | undefined>(und
 export function SignInModalProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [pendingSectionId, setPendingSectionId] = useState<string | null>(null);
+  const [pendingAction, setPendingAction] = useState<string | undefined>(undefined);
 
   const openModal = (sectionId?: string) => {
     if (sectionId) {
@@ -40,6 +43,8 @@ export function SignInModalProvider({ children }: { children: ReactNode }) {
         closeModal,
         pendingSectionId,
         clearPendingSection,
+        pendingAction,
+        setPendingAction,
       }}
     >
       {children}
@@ -54,4 +59,5 @@ export function useSignInModal() {
   }
   return context;
 }
+
 

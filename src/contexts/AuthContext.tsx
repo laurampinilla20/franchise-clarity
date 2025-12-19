@@ -19,6 +19,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'franchise_clarity_auth';
+const DEFAULT_TEST_USER_ID = 'test-user-001'; // Default test user for development
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -51,8 +52,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       // Create user object
+      // HubSpot-friendly: User ID can map to HubSpot contact ID
+      // For testing: Use default test user ID if contact ID is not available
       const user: User = {
-        id: contact.id,
+        id: contact.id || DEFAULT_TEST_USER_ID,
         email: contact.email,
         firstName: contact.firstName,
         lastName: contact.lastName,
@@ -61,6 +64,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Store in state and localStorage
       setUser(user);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+      
+      // TODO: Sync user data from HubSpot on login
+      // HubSpot-friendly: Can fetch user's saved data from HubSpot
+      // const hubspotData = await fetch(`/api/hubspot/user-data/${user.id}`);
+      // if (hubspotData) {
+      //   importUserDataFromHubSpot(user.id, hubspotData);
+      // }
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -90,5 +100,6 @@ export function useAuth() {
   }
   return context;
 }
+
 
 
