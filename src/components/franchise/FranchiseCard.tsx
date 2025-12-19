@@ -213,15 +213,19 @@ export function FranchiseCard({
                 return;
               }
               
-              // Logged-in user - execute action
+              // Logged-in user - execute action immediately
+              // HubSpot-friendly: All actions are saved to user account database
               try {
                 if (isLiked) {
                   await removeLike(id);
                 } else {
+                  // Add like - will be saved immediately to user account
+                  // Functional state updates ensure all rapid clicks are processed
                   await addLike({ id, name, logo: logo || null });
                 }
               } catch (error) {
                 console.error("Failed to update like preference:", error);
+                // Error is logged but doesn't break the UI
               }
             }}
             className={`h-[38px] w-[40px] rounded-[30px] border border-[#8ba4bd] flex items-center justify-center hover:bg-[#8ba4bd]/10 transition-colors ${
@@ -279,11 +283,14 @@ export function FranchiseCard({
                 return;
               }
               
-              // Logged-in user - execute action
+              // Logged-in user - execute action immediately
+              // HubSpot-friendly: All actions are saved to user account database
               try {
                 if (isSaved) {
                   await removeSaved(id);
                 } else {
+                  // Add saved - will be saved immediately to user account
+                  // Functional state updates ensure all rapid clicks are processed
                   await addSaved({
                     id,
                     name,
@@ -297,6 +304,7 @@ export function FranchiseCard({
                 }
               } catch (error) {
                 console.error("Failed to update saved status:", error);
+                // Error is logged but doesn't break the UI
               }
             }}
             className={`h-[38px] w-[40px] rounded-[30px] border border-[#8ba4bd] flex items-center justify-center hover:bg-[#8ba4bd]/10 transition-colors ${

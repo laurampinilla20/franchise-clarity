@@ -53,14 +53,57 @@ export function useSaved() {
       // Load user-specific saved items
       const userSaved = getUserData<SavedFranchise[]>(user.id, 'saved', []);
       setSavedItems(userSaved);
+      console.log(`[useSaved] Loaded ${userSaved.length} saved items for user ${user.id}`);
     } else {
       // Clear saved items for public users
       setSavedItems([]);
     }
   }, [isLoggedIn, user]);
 
-  // Note: We don't sync on every state change here to avoid race conditions
-  // Instead, we save directly to localStorage when state changes in addSaved/removeSaved
+  // Listen for storage changes to sync across tabs and components
+  // This ensures that rapid clicks across different components are all captured
+  useEffect(() => {
+    if (!isLoggedIn || !user) return;
+    
+    const userSavedKey = `franchise_clarity_${user.id}_saved`;
+    
+    const handleStorageChange = (e: StorageEvent) => {
+      // Handle cross-tab synchronization
+      if (e.key === userSavedKey && e.newValue) {
+        try {
+          const newSaved = JSON.parse(e.newValue);
+          setSavedItems(newSaved);
+          console.log(`[useSaved] Synced saved items from storage: ${newSaved.length} items`);
+        } catch (error) {
+          console.error('Failed to parse saved items from storage event:', error);
+        }
+      }
+    };
+
+    // Also check localStorage directly for same-tab updates (storage events only fire for other tabs)
+    const checkForUpdates = () => {
+      const currentSaved = getUserData<SavedFranchise[]>(user.id, 'saved', []);
+      
+      setSavedItems((prev) => {
+        // Only update if there's a meaningful difference
+        if (currentSaved.length !== prev.length || 
+            currentSaved.some((item, index) => item.id !== prev[index]?.id)) {
+          return currentSaved;
+        }
+        return prev;
+      });
+    };
+
+    // Check immediately and then periodically
+    checkForUpdates();
+    const intervalId = setInterval(checkForUpdates, 100); // Check every 100ms for rapid updates
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(intervalId);
+    };
+  }, [isLoggedIn, user]);
 
   /**
    * Track save action to HubSpot
@@ -101,12 +144,14 @@ export function useSaved() {
    * HubSpot-ready: Can be replaced with API call
    * Updates state immediately for instant UI feedback
    * Handles rapid clicks correctly using functional state updates
+   * Ensures all clicks are saved to user account database (HubSpot-friendly)
    * Only works for logged-in users
    */
   const addSaved = useCallback(
     async (franchise: SavedFranchise) => {
       // Only allow for logged-in users
-      if (!isLoggedIn) {
+      if (!isLoggedIn || !user) {
+        console.warn('addSaved called but user is not logged in or user data not available');
         return;
       }
 
@@ -116,37 +161,58 @@ export function useSaved() {
       };
 
       // Use functional state updates to avoid race conditions with rapid clicks
+      // This ensures that even if user clicks 3 saves rapidly, all 3 are saved
+      // CRITICAL: Always read from localStorage to get the absolute latest state
+      // This prevents losing clicks when multiple components update simultaneously
       setSavedItems((prev) => {
-        // Check if already saved using current state (prev)
-        if (prev.some((item) => item.id === franchise.id)) {
-          return prev; // Already saved, no change
+        // Always read fresh from localStorage to get latest state from any component
+        const currentSavedFromStorage = getUserData<SavedFranchise[]>(user.id, 'saved', []);
+        
+        // Use the longer array (either prev or storage) to ensure we have all items
+        // This handles rapid clicks across multiple components
+        const latestSaved = currentSavedFromStorage.length >= prev.length 
+          ? currentSavedFromStorage 
+          : prev;
+        
+        // Check if already saved using latest state - prevents duplicates
+        if (latestSaved.some((item) => item.id === franchise.id)) {
+          console.log(`Franchise ${franchise.name} already in saved, skipping`);
+          return latestSaved; // Already saved, return latest state
         }
-        // Add to saved using current state
-        const newSaved = [...prev, franchiseWithTimestamp];
-        // Save to localStorage immediately (synchronous) - CRITICAL
-        if (user) {
-          setUserData(user.id, 'saved', newSaved);
-        }
+        
+        // Add to saved using latest state - ensures all rapid clicks are processed
+        const newSaved = [...latestSaved, franchiseWithTimestamp];
+        
+        // Save to localStorage immediately (synchronous) - CRITICAL for data persistence
+        // HubSpot-friendly: This data structure is ready for HubSpot contact properties
+        setUserData(user.id, 'saved', newSaved);
+        
+        console.log(`✓ Saved franchise ${franchise.name} to user account (${user.id}). Total saved: ${newSaved.length}`);
+        
         return newSaved;
       });
 
       // Track to HubSpot asynchronously (doesn't block UI)
+      // HubSpot-friendly: This tracks the action for analytics and CRM integration
       trackSaveAction("save", franchise).catch((error) => {
         console.error("Failed to track save action:", error);
       });
 
-      // TODO: Replace with API call (non-blocking)
-      // HubSpot-friendly: Can send to HubSpot API
-      // fetch('/api/saved', {
+      // TODO: Replace with HubSpot API call (non-blocking)
+      // HubSpot-friendly: Can send to HubSpot API to store in contact properties
+      // Example HubSpot API call:
+      // fetch('/api/hubspot/contacts/update', {
       //   method: 'POST',
       //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ 
-      //     franchiseId: franchise.id, 
-      //     franchiseName: franchise.name,
-      //     userId: user?.id,
-      //     timestamp: franchiseWithTimestamp.timestamp
+      //   body: JSON.stringify({
+      //     contactId: user.id, // HubSpot contact ID
+      //     properties: {
+      //       saved_franchises: JSON.stringify(newSaved), // Store as JSON string in HubSpot
+      //       last_save_timestamp: franchiseWithTimestamp.timestamp,
+      //       total_saved: newSaved.length
+      //     }
       //   })
-      // }).catch(error => console.error('API error:', error));
+      // }).catch(error => console.error('HubSpot API error:', error));
     },
     [trackSaveAction, isLoggedIn, user]
   );
@@ -156,42 +222,67 @@ export function useSaved() {
    * HubSpot-ready: Can be replaced with API call
    * Updates state immediately for instant UI feedback
    * Handles rapid clicks correctly using functional state updates
+   * Ensures all clicks are saved to user account database (HubSpot-friendly)
    * Only works for logged-in users
    */
   const removeSaved = useCallback(
     async (id: string) => {
       // Only allow for logged-in users
-      if (!isLoggedIn) {
+      if (!isLoggedIn || !user) {
+        console.warn('removeSaved called but user is not logged in or user data not available');
         return;
       }
 
       // Use functional state update to get current franchise before removing
+      // CRITICAL: Always read from localStorage to get the absolute latest state
       let franchiseToTrack: SavedFranchise | undefined;
 
       setSavedItems((prev) => {
-        franchiseToTrack = prev.find((item) => item.id === id);
-        const newSaved = prev.filter((item) => item.id !== id);
-        // Save to localStorage immediately (synchronous) - CRITICAL
-        if (user) {
-          setUserData(user.id, 'saved', newSaved);
+        // Always read fresh from localStorage to get latest state from any component
+        const currentSavedFromStorage = getUserData<SavedFranchise[]>(user.id, 'saved', []);
+        
+        // Use the longer array (either prev or storage) to ensure we have all items
+        const latestSaved = currentSavedFromStorage.length >= prev.length 
+          ? currentSavedFromStorage 
+          : prev;
+        
+        franchiseToTrack = latestSaved.find((item) => item.id === id);
+        const newSaved = latestSaved.filter((item) => item.id !== id);
+        
+        // Save to localStorage immediately (synchronous) - CRITICAL for data persistence
+        // HubSpot-friendly: This data structure is ready for HubSpot contact properties
+        setUserData(user.id, 'saved', newSaved);
+        
+        if (franchiseToTrack) {
+          console.log(`✓ Removed saved franchise ${franchiseToTrack.name} from user account (${user.id}). Total saved: ${newSaved.length}`);
         }
+        
         return newSaved;
       });
 
       // Track to HubSpot asynchronously (doesn't block UI)
+      // HubSpot-friendly: This tracks the action for analytics and CRM integration
       if (franchiseToTrack) {
         trackSaveAction("unsave", franchiseToTrack).catch((error) => {
           console.error("Failed to track unsave action:", error);
         });
       }
 
-      // TODO: Replace with API call (non-blocking)
-      // HubSpot-friendly: Can send to HubSpot API
-      // fetch(`/api/saved/${id}`, {
-      //   method: 'DELETE',
+      // TODO: Replace with HubSpot API call (non-blocking)
+      // HubSpot-friendly: Can send to HubSpot API to update contact properties
+      // Example HubSpot API call:
+      // fetch('/api/hubspot/contacts/update', {
+      //   method: 'POST',
       //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ userId: user?.id, franchiseId: id })
-      // }).catch(error => console.error('API error:', error));
+      //   body: JSON.stringify({
+      //     contactId: user.id, // HubSpot contact ID
+      //     properties: {
+      //       saved_franchises: JSON.stringify(newSaved), // Store as JSON string in HubSpot
+      //       last_unsave_timestamp: new Date().toISOString(),
+      //       total_saved: newSaved.length
+      //     }
+      //   })
+      // }).catch(error => console.error('HubSpot API error:', error));
     },
     [trackSaveAction, isLoggedIn, user]
   );
@@ -206,21 +297,6 @@ export function useSaved() {
     [savedItems]
   );
 
-  // Listen for storage changes to sync across tabs - user-specific
-  useEffect(() => {
-    if (!isLoggedIn || !user) return;
-    
-    const userSavedKey = `franchise_clarity_${user.id}_saved`;
-    
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === userSavedKey) {
-        setSavedItems(getUserData<SavedFranchise[]>(user.id, 'saved', []));
-      }
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, [isLoggedIn, user]);
 
   return {
     savedItems,

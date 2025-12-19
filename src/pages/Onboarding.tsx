@@ -4,6 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Link, useNavigate } from "react-router-dom";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Target,
   Building2,
@@ -179,6 +181,8 @@ const educationOptions = [
 
 export default function Onboarding() {
   const navigate = useNavigate();
+  const { setProfile } = useUserProfile();
+  const { isLoggedIn, user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [currentRoleOpen, setCurrentRoleOpen] = useState(false);
   const [industryExperienceOpen, setIndustryExperienceOpen] = useState(false);
@@ -223,10 +227,43 @@ export default function Onboarding() {
     }));
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
     } else {
+      // Save profile data when completing onboarding
+      if (isLoggedIn && user) {
+        // Map form data to profile structure
+        const goals = formData.goals.map((goalId) => {
+          const goal = goalOptions.find((g) => g.id === goalId);
+          return goal ? goal.label : goalId;
+        });
+        
+        const industries = formData.industries || [];
+        
+        // Map budget ID to display format
+        const budgetOption = budgetOptions.find((b) => b.id === formData.budget);
+        const budget = budgetOption ? budgetOption.label : formData.budget;
+        
+        // Map lifestyle/time commitment
+        const lifestyleOption = timeOptions.find((t) => t.id === formData.timeCommitment);
+        const lifestyle = lifestyleOption ? lifestyleOption.label : formData.timeCommitment;
+        
+        // Save profile - this will save to localStorage immediately
+        const profileData = {
+          goals,
+          industries,
+          budget,
+          lifestyle,
+        };
+        
+        setProfile(profileData);
+        
+        // Small delay to ensure localStorage is written before navigation
+        // This ensures the Dashboard can read the profile immediately
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
       navigate("/dashboard");
     }
   };

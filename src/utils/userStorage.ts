@@ -42,28 +42,56 @@ export function getUserData<T>(userId: string, dataType: string, defaultValue: T
 /**
  * Set data for a specific user
  * HubSpot-friendly: Can be replaced with HubSpot API calls
+ * 
+ * This function ensures all user actions are immediately saved to their account.
+ * For HubSpot integration, this can be replaced with direct API calls to update contact properties.
  */
 export function setUserData<T>(userId: string, dataType: string, data: T): void {
   if (typeof window === 'undefined') return;
   
   const key = getUserStorageKey(userId, dataType);
-  localStorage.setItem(key, JSON.stringify(data));
   
-  // TODO: Sync to HubSpot API
+  // Save to localStorage immediately (synchronous) - CRITICAL for data persistence
+  // This ensures that even rapid clicks are all saved correctly
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+    
+    // Log for debugging (can be removed in production)
+    if (dataType === 'likes' || dataType === 'dislikes') {
+      const items = Array.isArray(data) ? data : [];
+      console.log(`[UserStorage] Saved ${items.length} ${dataType} for user ${userId}`);
+    }
+  } catch (error) {
+    console.error(`[UserStorage] Failed to save ${dataType} for user ${userId}:`, error);
+  }
+  
+  // TODO: Sync to HubSpot API (non-blocking, async)
   // HubSpot-friendly: Can sync to HubSpot contact properties
-  // await fetch('/api/hubspot/sync-user-data', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify({
-  //     userId,
-  //     dataType,
-  //     data,
-  //     // HubSpot-friendly fields:
-  //     // - userId maps to HubSpot contact ID
-  //     // - dataType maps to HubSpot custom property name
-  //     // - data is the value to store
-  //   })
-  // });
+  // This can run asynchronously without blocking the UI
+  // Example implementation:
+  // (async () => {
+  //   try {
+  //     await fetch('/api/hubspot/contacts/update', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({
+  //         contactId: userId, // HubSpot contact ID
+  //         properties: {
+  //           // Map dataType to HubSpot property names
+  //           [dataType === 'likes' ? 'liked_franchises' : 
+  //            dataType === 'dislikes' ? 'disliked_franchises' :
+  //            dataType === 'saved' ? 'saved_franchises' :
+  //            dataType === 'compare' ? 'compare_franchises' :
+  //            dataType]: JSON.stringify(data), // Store as JSON string in HubSpot
+  //           [`last_${dataType}_update`]: new Date().toISOString(),
+  //         }
+  //       })
+  //     });
+  //   } catch (error) {
+  //     console.error(`[HubSpot] Failed to sync ${dataType} for user ${userId}:`, error);
+  //     // Don't throw - HubSpot sync failures shouldn't break the app
+  //   }
+  // })();
 }
 
 /**

@@ -197,33 +197,19 @@ export function useCompare() {
       return false;
     }
 
-    // Use functional state update to check duplicates and max items with current state
-    let shouldAdd = false;
-    let isDuplicate = false;
+    // CRITICAL: Always read from localStorage first to get the absolute latest state
+    // This prevents false "max items" errors when state hasn't synced yet
+    const currentCompareFromStorage = getUserData<CompareFranchise[]>(user.id, 'compare', []);
     
-    setCompareItems((prev) => {
-      // Check for duplicates using current state
-      isDuplicate = prev.some((item) => item.id === franchise.id);
-      if (isDuplicate) {
-        return prev; // Already in list
-      }
-
-      // Check max items
-      if (prev.length >= MAX_COMPARE_ITEMS) {
-        return prev; // Max items reached
-      }
-
-      shouldAdd = true;
-      return prev; // Will be updated below after fetching data
-    });
-
-    // If duplicate, return true (already in list, can navigate)
+    // Check for duplicates using latest storage data
+    const isDuplicate = currentCompareFromStorage.some((item) => item.id === franchise.id);
     if (isDuplicate) {
+      // Already in list, can navigate
       return true;
     }
 
-    // If max items reached, show error message and return false
-    if (!shouldAdd) {
+    // Check max items using latest storage data
+    if (currentCompareFromStorage.length >= MAX_COMPARE_ITEMS) {
       toast({
         title: "Maximum Compare Items Reached",
         description: `You can only compare up to ${MAX_COMPARE_ITEMS} franchises at a time. Please remove a franchise from your comparison list to add this one.`,
@@ -263,33 +249,32 @@ export function useCompare() {
         const defaultData = getDefaultBrandData(franchise);
         
         // Add to compare list using functional update to prevent duplicates
+        // Always read from storage first to get latest state
         let added = false;
-        let maxReached = false;
         setCompareItems((prev) => {
-          // Double-check for duplicates
-          if (prev.some((item) => item.id === defaultData.id)) {
+          // Read fresh from storage to ensure we have latest state
+          const latestFromStorage = getUserData<CompareFranchise[]>(user.id, 'compare', []);
+          
+          // Use the longer array (either prev or storage) to ensure we have all items
+          const latestItems = latestFromStorage.length >= prev.length ? latestFromStorage : prev;
+          
+          // Double-check for duplicates using latest state
+          if (latestItems.some((item) => item.id === defaultData.id)) {
             added = true; // Already added
-            return prev;
+            return latestItems;
           }
-          if (prev.length >= MAX_COMPARE_ITEMS) {
-            maxReached = true; // Max items reached
-            return prev;
+          
+          // Double-check max items using latest state
+          if (latestItems.length >= MAX_COMPARE_ITEMS) {
+            return latestItems; // Max items reached (shouldn't happen due to check above, but safety)
           }
-          const newItems = [...prev, defaultData];
+          
+          const newItems = [...latestItems, defaultData];
           // Update user-specific storage immediately (synchronous) - CRITICAL
           setUserData(user.id, 'compare', newItems);
           added = true;
           return newItems;
         });
-        
-        // Show error if max items reached
-        if (maxReached) {
-          toast({
-            title: "Maximum Compare Items Reached",
-            description: `You can only compare up to ${MAX_COMPARE_ITEMS} franchises at a time. Please remove a franchise from your comparison list to add this one.`,
-            variant: "destructive",
-          });
-        }
         
         // Ensure localStorage is written before returning
         // Force a small delay to ensure state and storage are in sync
@@ -322,34 +307,32 @@ export function useCompare() {
       };
 
       // Add to compare list using functional update to prevent duplicates
+      // Always read from storage first to get latest state
       let added = false;
-      let maxReached = false;
       setCompareItems((prev) => {
-        // Double-check for duplicates (race condition protection)
-        if (prev.some((item) => item.id === fullFranchiseData.id)) {
+        // Read fresh from storage to ensure we have latest state
+        const latestFromStorage = getUserData<CompareFranchise[]>(user.id, 'compare', []);
+        
+        // Use the longer array (either prev or storage) to ensure we have all items
+        const latestItems = latestFromStorage.length >= prev.length ? latestFromStorage : prev;
+        
+        // Double-check for duplicates using latest state
+        if (latestItems.some((item) => item.id === fullFranchiseData.id)) {
           added = true; // Already added
-          return prev; // Already added, don't duplicate
+          return latestItems;
         }
-        // Check max items again
-        if (prev.length >= MAX_COMPARE_ITEMS) {
-          maxReached = true; // Max reached
-          return prev;
+        
+        // Double-check max items using latest state
+        if (latestItems.length >= MAX_COMPARE_ITEMS) {
+          return latestItems; // Max items reached (shouldn't happen due to check above, but safety)
         }
-        const newItems = [...prev, fullFranchiseData];
+        
+        const newItems = [...latestItems, fullFranchiseData];
         // Update user-specific storage immediately (synchronous) - CRITICAL
         setUserData(user.id, 'compare', newItems);
         added = true;
         return newItems;
       });
-
-      // Show error if max items reached
-      if (maxReached) {
-        toast({
-          title: "Maximum Compare Items Reached",
-          description: `You can only compare up to ${MAX_COMPARE_ITEMS} franchises at a time. Please remove a franchise from your comparison list to add this one.`,
-          variant: "destructive",
-        });
-      }
 
       // Ensure localStorage is written before returning
       await new Promise(resolve => setTimeout(resolve, 50));
@@ -361,34 +344,32 @@ export function useCompare() {
       const defaultData = getDefaultBrandData(franchise);
       
       // Add to compare list using functional update to prevent duplicates
+      // Always read from storage first to get latest state
       let added = false;
-      let maxReached = false;
       setCompareItems((prev) => {
-        // Double-check for duplicates (race condition protection)
-        if (prev.some((item) => item.id === defaultData.id)) {
+        // Read fresh from storage to ensure we have latest state
+        const latestFromStorage = getUserData<CompareFranchise[]>(user.id, 'compare', []);
+        
+        // Use the longer array (either prev or storage) to ensure we have all items
+        const latestItems = latestFromStorage.length >= prev.length ? latestFromStorage : prev;
+        
+        // Double-check for duplicates using latest state
+        if (latestItems.some((item) => item.id === defaultData.id)) {
           added = true; // Already added
-          return prev; // Already added, don't duplicate
+          return latestItems;
         }
-        // Check max items again
-        if (prev.length >= MAX_COMPARE_ITEMS) {
-          maxReached = true; // Max reached
-          return prev;
+        
+        // Double-check max items using latest state
+        if (latestItems.length >= MAX_COMPARE_ITEMS) {
+          return latestItems; // Max items reached (shouldn't happen due to check above, but safety)
         }
-        const newItems = [...prev, defaultData];
+        
+        const newItems = [...latestItems, defaultData];
         // Update user-specific storage immediately (synchronous) - CRITICAL
         setUserData(user.id, 'compare', newItems);
         added = true;
         return newItems;
       });
-
-      // Show error if max items reached
-      if (maxReached) {
-        toast({
-          title: "Maximum Compare Items Reached",
-          description: `You can only compare up to ${MAX_COMPARE_ITEMS} franchises at a time. Please remove a franchise from your comparison list to add this one.`,
-          variant: "destructive",
-        });
-      }
 
       // Ensure localStorage is written before returning
       await new Promise(resolve => setTimeout(resolve, 50));

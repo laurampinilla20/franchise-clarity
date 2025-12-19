@@ -4,7 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { Edit3, MessageCircle, Filter, ArrowUpDown } from "lucide-react";
+import { Edit3, MessageCircle, Filter, ArrowUpDown, Target } from "lucide-react";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
+import { getUserData } from "@/utils/userStorage";
+import type { UserProfile } from "@/hooks/useUserProfile";
 
 const userProfile = {
   name: "Alex",
@@ -66,6 +71,89 @@ const matches = [
 ];
 
 export default function Dashboard() {
+  const { profile, setProfile } = useUserProfile();
+  const { isLoggedIn, user } = useAuth();
+  const [isCheckingProfile, setIsCheckingProfile] = useState(true);
+  
+  // Force reload profile from localStorage on mount and when navigating to this page
+  // This ensures we get the latest profile data after completing onboarding
+  useEffect(() => {
+    if (isLoggedIn && user) {
+      // Read directly from localStorage to get the latest data
+      const latestProfile = getUserData<UserProfile>(user.id, 'profile', {});
+      
+      // Update the profile state if we have new data
+      if (latestProfile && (
+        (latestProfile.goals && latestProfile.goals.length > 0) ||
+        latestProfile.budget ||
+        (latestProfile.industries && latestProfile.industries.length > 0)
+      )) {
+        setProfile(latestProfile);
+      }
+      
+      setIsCheckingProfile(false);
+    } else {
+      setIsCheckingProfile(false);
+    }
+  }, [isLoggedIn, user, setProfile]);
+  
+  // Check if user has completed onboarding (has profile data)
+  // Profile is considered complete if it has goals, budget, or industries
+  // Also check directly from localStorage for immediate updates
+  const profileFromStorage = isLoggedIn && user 
+    ? getUserData<UserProfile>(user.id, 'profile', {})
+    : {};
+  
+  const hasCompletedOnboarding = isLoggedIn && !isCheckingProfile && (
+    (profile.goals && profile.goals.length > 0) ||
+    profile.budget ||
+    (profile.industries && profile.industries.length > 0) ||
+    (profileFromStorage.goals && profileFromStorage.goals.length > 0) ||
+    profileFromStorage.budget ||
+    (profileFromStorage.industries && profileFromStorage.industries.length > 0)
+  );
+
+  // If user hasn't completed onboarding, show empty state
+  if (!hasCompletedOnboarding) {
+    return (
+      <PageLayout>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-2xl mx-auto">
+            <Card className="border-2 border-dashed">
+              <CardContent className="p-12 text-center">
+                <div className="flex justify-center mb-6">
+                  <div className="rounded-full bg-[#F4F8FE] p-6">
+                    <Target className="w-12 h-12 text-[#446786]" />
+                  </div>
+                </div>
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
+                  Get Your Personalized Matches
+                </h1>
+                <p className="text-base text-muted-foreground mb-8 max-w-md mx-auto">
+                  Take our quick 3-minute quiz to discover franchises that match your goals, budget, and lifestyle. We'll analyze your preferences and show you personalized recommendations.
+                </p>
+                <Link to="/onboarding">
+                  <Button variant="cta" size="lg" className="text-base font-semibold px-8 py-6 rounded-[30px]">
+                    Start the Quiz
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  // User has completed onboarding - show matches
+  const displayProfile = {
+    name: "Alex",
+    goals: profile.goals || userProfile.goals,
+    budget: profile.budget || userProfile.budget,
+    lifestyle: profile.lifestyle || userProfile.lifestyle,
+    industries: profile.industries || userProfile.industries,
+  };
+
   return (
     <PageLayout>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -85,34 +173,42 @@ export default function Dashboard() {
                 </div>
 
                 <div className="space-y-4 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">Goals</p>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {userProfile.goals.map((goal) => (
-                        <Badge key={goal} variant="soft" className="text-xs">
-                          {goal}
-                        </Badge>
-                      ))}
+                  {displayProfile.goals && displayProfile.goals.length > 0 && (
+                    <div>
+                      <p className="text-muted-foreground">Goals</p>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {displayProfile.goals.map((goal) => (
+                          <Badge key={goal} variant="soft" className="text-xs">
+                            {goal}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Budget</p>
-                    <p className="font-medium text-foreground">{userProfile.budget}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Lifestyle</p>
-                    <p className="font-medium text-foreground">{userProfile.lifestyle}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Industries</p>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {userProfile.industries.map((ind) => (
-                        <Badge key={ind} variant="soft" className="text-xs">
-                          {ind}
-                        </Badge>
-                      ))}
+                  )}
+                  {displayProfile.budget && (
+                    <div>
+                      <p className="text-muted-foreground">Budget</p>
+                      <p className="font-medium text-foreground">{displayProfile.budget}</p>
                     </div>
-                  </div>
+                  )}
+                  {displayProfile.lifestyle && (
+                    <div>
+                      <p className="text-muted-foreground">Lifestyle</p>
+                      <p className="font-medium text-foreground">{displayProfile.lifestyle}</p>
+                    </div>
+                  )}
+                  {displayProfile.industries && displayProfile.industries.length > 0 && (
+                    <div>
+                      <p className="text-muted-foreground">Industries</p>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {displayProfile.industries.map((ind) => (
+                          <Badge key={ind} variant="soft" className="text-xs">
+                            {ind}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -136,7 +232,7 @@ export default function Dashboard() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div>
-                <h1 className="text-2xl font-bold text-foreground">Your Matches</h1>
+                <h1 className="text-2xl font-bold text-foreground">Matches</h1>
                 <p className="text-muted-foreground">
                   Based on your profile, we found <span className="font-medium">{matches.length}</span> strong matches
                 </p>

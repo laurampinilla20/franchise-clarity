@@ -181,87 +181,231 @@ export function normalizeBrandData(data: BrandDataInput | null | undefined): Bra
   };
 }
 
-// Mock data - This simulates data that would come from the database
-const mockBrandData: BrandData = {
-  id: "subway-1",
-  name: "Subway",
-  tagline: "Eat Fresh",
-  description: "Subway is the world's largest submarine sandwich franchise, with more than 37,000 locations in over 100 countries.",
-  logo: null,
-    grade: "A" as const,
-  sector: "Food & Beverage",
-  category: "Quick Service",
-  investment: {
-    min: 4926000,
-    max: 7136000,
-    franchiseFee: 115000,
-    workingCapital: 321000,
-    royalty: "5%",
-    marketing: "3%",
-    initialTerm: "20 Years",
-    renewalTerm: "0 Years",
-  },
-  profitability: {
-    item19Disclosed: "Yes",
-    benchmarkVsCategory: "A - Strong",
-    ownerWorkloadImpact: "18 - 24 months",
-  },
-  locations: 50,
-  founded: 1986,
-  franchisedSince: 2004,
-  item19Disclosed: "Yes",
-  snapshot: "This franchise is a full service, premium casual restaurant and lounge that offers a wide variety of food products and services.",
-  topAdvantages: "Moxies stands out because it's a recognizable brand in a growing category, supported by years of steady system performance. Buyers appreciate the structured onboarding, predictable startup path, and long-term stability indicators. Its model works well for owners who want a reliable business with strong support from day one.",
-  whyBuyersLike: [
-    "Simple and proven operating model",
-    "Strong category demand in Bar and Grill",
-    "Predictable owner role and support",
-  ],
-  comparisonStrengths: [
-    "Performs above category benchmarks in {top strengths}",
-    "Stronger growth and more consistent performance in {top strengths}",
-    "Lower risk indicators than similar brands in {top strengths}",
-  ],
-  industryBenchmarking: "Grill & Bar Industry Benchmarking",
-  competitorsRoyaltyRate: 6,
-  competitorsInitialTerm: 15,
-  territories: {
-    locationsInUSA: 0,
-    statesWithLocations: 0,
-    largestRegion: "West",
-    regionLocationsCount: 0,
-    fddYear: 2024,
-  },
-  similarBrands: [
+/**
+ * Generate default brand data for testing based on slug
+ * HubSpot-friendly: This structure matches HubSpot contact properties
+ * Only used for testing - will be replaced with real database/API calls
+ * 
+ * @param slug - Brand slug identifier
+ * @returns BrandDataInput with default values specific to the slug
+ */
+function generateDefaultBrandData(slug: string): BrandDataInput {
+  // Generate consistent "random" values based on slug for testing
+  // This ensures the same slug always gets the same default data
+  const hash = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  
+  // Brand name from slug (capitalize first letter of each word)
+  const brandName = slug
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+  
+  // Generate consistent data based on hash
+  const grades: ("A" | "B" | "C" | "D" | "F" | "?")[] = ["A", "B", "C", "D"];
+  const grade = grades[hash % 4] as "A" | "B" | "C" | "D";
+  
+  // Sectors and categories
+  const sectors = ["Food & Beverage", "Health & Fitness", "Home Services", "Retail", "Education", "Automotive"];
+  const categories = ["Quick Service", "Full Service", "Retail", "Service", "Education", "Automotive"];
+  const sector = sectors[hash % sectors.length];
+  const category = categories[hash % categories.length];
+  
+  // Investment ranges based on hash
+  const investmentRanges = [
+    { min: 50000, max: 150000 },
+    { min: 150000, max: 350000 },
+    { min: 350000, max: 700000 },
+    { min: 700000, max: 1500000 },
+    { min: 1500000, max: 3000000 },
+  ];
+  const investmentRange = investmentRanges[hash % investmentRanges.length];
+  
+  // Franchise fee (typically 5-15% of min investment)
+  const franchiseFee = Math.round(investmentRange.min * (0.05 + (hash % 10) * 0.01));
+  
+  // Working capital (typically 20-40% of min investment)
+  const workingCapital = Math.round(investmentRange.min * (0.2 + (hash % 20) * 0.01));
+  
+  // Marketing fee percentages
+  const marketingFees = ["2%", "3%", "4%", "5%"];
+  const marketingFee = marketingFees[hash % marketingFees.length];
+  
+  // Initial terms
+  const initialTerms = ["10 Years", "15 Years", "20 Years", "25 Years"];
+  const initialTerm = initialTerms[hash % initialTerms.length];
+  
+  // Royalty percentages
+  const royalties = ["4%", "5%", "6%", "7%", "8%"];
+  const royalty = royalties[hash % royalties.length];
+  
+  // Locations (generate realistic number)
+  const locations = 100 + (hash % 900) * 10;
+  
+  // Founded year (between 1950 and 2010)
+  const founded = 1950 + (hash % 60);
+  const franchisedSince = founded + 5 + (hash % 20);
+  
+  // Item 19 disclosure
+  const item19Options = ["Yes", "No", "Partial"];
+  const item19Disclosed = item19Options[hash % item19Options.length];
+  
+  // Benchmark options
+  const benchmarks = ["A - Strong", "B - Good", "C - Average", "D - Below Average"];
+  const benchmark = benchmarks[hash % benchmarks.length];
+  
+  // Owner workload impact
+  const workloadImpacts = ["12 - 18 months", "18 - 24 months", "24 - 36 months", "36+ months"];
+  const ownerWorkloadImpact = workloadImpacts[hash % workloadImpacts.length];
+  
+  // Why Buyers Like reasons
+  const whyBuyersLikeOptions = [
+    ["Simple and proven operating model", "Strong category demand", "Predictable owner role and support"],
+    ["Established market presence", "Ongoing support", "Marketing assistance"],
+    ["Scalable operations", "Brand equity", "Proven profitability"],
+    ["Territory protection", "Training programs", "Marketing support"],
+  ];
+  const whyBuyersLike = whyBuyersLikeOptions[hash % whyBuyersLikeOptions.length];
+  
+  // Comparison Strengths
+  const comparisonStrengthsOptions = [
+    ["Performs above category benchmarks", "Stronger growth and consistent performance", "Lower risk indicators"],
+    ["Higher revenue potential", "Better franchisee satisfaction", "Stronger brand recognition"],
+    ["More locations available", "Better training programs", "Lower initial investment"],
+  ];
+  const comparisonStrengths = comparisonStrengthsOptions[hash % comparisonStrengthsOptions.length];
+  
+  // Territories
+  const regions = ["West", "East", "South", "North", "Midwest"];
+  const largestRegion = regions[hash % regions.length];
+  const locationsInUSA = locations;
+  const statesWithLocations = 10 + (hash % 40);
+  const regionLocationsCount = Math.floor(locationsInUSA * (0.2 + (hash % 30) * 0.01));
+  
+  // Competitors data
+  const competitorsRoyaltyRate = 4 + (hash % 4);
+  const competitorsInitialTerm = 10 + (hash % 10);
+  
+  // Comparison data
+  const openUnitsLastYear = {
+    average: `${5 + (hash % 10)} Units`,
+    brand: `${10 + (hash % 20)} Units`,
+    percentage: `+${20 + (hash % 30)}%`,
+  };
+  
+  const marketingFeesComparison = {
+    average: `${5 + (hash % 3)}.${hash % 10}%`,
+    brand: marketingFee,
+    percentage: `-${10 + (hash % 20)}%`,
+  };
+  
+  // Similar brands
+  const similarBrandNames = [
+    "All American Pet Resort",
+    "Celebree School",
+    "Fitness First",
+    "Home Care Plus",
+    "Auto Service Pro",
+  ];
+  const similarBrands = [
     {
-      name: "All American Pet Resort",
-      description: "All American Pet Resorts offer pet boarding, daycare, and grooming...",
+      name: similarBrandNames[hash % similarBrandNames.length],
+      description: "A leading franchise in the industry with proven success...",
       logoColor: "#dee8f2",
     },
     {
-      name: "Celebree School",
-      description: "Infant care, pre-school, before and after-school programs for school...",
-      logoColor: "#dee8f2",
-    },
-    {
-      name: "All American Pet Resort",
-      description: "All American Pet Resorts offer pet boarding, daycare, and grooming...",
+      name: similarBrandNames[(hash + 1) % similarBrandNames.length],
+      description: "Established brand with strong market presence...",
       logoColor: "#4F7AA5",
     },
-    {
-      name: "Celebree School",
-      description: "Infant care, pre-school, before and after-school programs for school...",
-      logoColor: "#dee8f2",
+  ];
+  
+  // Taglines
+  const taglines = [
+    "Eat Fresh",
+    "Your Success, Our Mission",
+    "Building Better Futures",
+    "Quality You Can Trust",
+    "Excellence in Every Detail",
+  ];
+  const tagline = taglines[hash % taglines.length];
+  
+  // Descriptions
+  const descriptions = [
+    `${brandName} is a leading franchise in the ${sector} sector, with a proven track record of success.`,
+    `${brandName} offers franchise opportunities in the ${category} category with comprehensive support.`,
+    `Join ${brandName}, a trusted name in ${sector} with ${locations}+ locations nationwide.`,
+  ];
+  const description = descriptions[hash % descriptions.length];
+  
+  // Snapshots
+  const snapshots = [
+    `This franchise is a ${category.toLowerCase()} business that offers a wide variety of products and services in the ${sector} sector.`,
+    `A ${category.toLowerCase()} franchise opportunity with strong brand recognition and comprehensive training programs.`,
+    `Established ${sector} franchise with proven business model and ongoing support for franchisees.`,
+  ];
+  const snapshot = snapshots[hash % snapshots.length];
+  
+  // Top Advantages
+  const topAdvantages = `${brandName} stands out because it's a recognizable brand in a growing category, supported by years of steady system performance. Buyers appreciate the structured onboarding, predictable startup path, and long-term stability indicators. Its model works well for owners who want a reliable business with strong support from day one.`;
+  
+  // Industry Benchmarking
+  const industryBenchmarking = `${sector} Industry Benchmarking`;
+  
+  return {
+    id: `${slug}-1`,
+    name: brandName,
+    tagline,
+    description,
+    logo: null,
+    grade,
+    sector,
+    category,
+    investment: {
+      min: investmentRange.min,
+      max: investmentRange.max,
+      franchiseFee,
+      workingCapital,
+      royalty,
+      marketing: marketingFee,
+      initialTerm,
+      renewalTerm: "0 Years",
     },
-  ],
-  comparison: {
-    openUnitsLastYear: { average: "5 Units", brand: "17 Units", percentage: "+45%" },
-    marketingFees: { average: "6.5%", brand: "3%", percentage: "-25%" },
-  },
-};
+    profitability: {
+      item19Disclosed,
+      benchmarkVsCategory: benchmark,
+      ownerWorkloadImpact,
+    },
+    locations,
+    founded,
+    franchisedSince,
+    item19Disclosed,
+    snapshot,
+    topAdvantages,
+    whyBuyersLike,
+    comparisonStrengths,
+    industryBenchmarking,
+    competitorsRoyaltyRate,
+    competitorsInitialTerm,
+    territories: {
+      locationsInUSA,
+      statesWithLocations,
+      largestRegion,
+      regionLocationsCount,
+      fddYear: new Date().getFullYear(),
+    },
+    similarBrands,
+    comparison: {
+      openUnitsLastYear,
+      marketingFees: marketingFeesComparison,
+    },
+  };
+}
 
 /**
  * Fetches brand data by slug from the API
+ * 
+ * HubSpot-friendly: This function is designed to work with HubSpot CRM data.
+ * The structure matches HubSpot contact properties and can be easily mapped.
  * 
  * @param slug - The brand slug identifier
  * @returns Promise resolving to BrandData
@@ -277,13 +421,44 @@ const mockBrandData: BrandData = {
  * }
  * ```
  * 
- * TODO: Replace mock implementation with real API call:
+ * HubSpot Integration Example:
  * ```typescript
- * const response = await fetch(`${API_BASE_URL}/api/brands/${slug}`);
+ * // Replace this function with HubSpot API call:
+ * const API_BASE_URL = process.env.VITE_API_BASE_URL || '';
+ * const response = await fetch(`${API_BASE_URL}/api/hubspot/brands/${slug}`, {
+ *   method: 'GET',
+ *   headers: {
+ *     'Content-Type': 'application/json',
+ *     'Authorization': `Bearer ${hubspotToken}`,
+ *   },
+ * });
+ * 
  * if (!response.ok) {
- *   throw new Error(`Failed to fetch brand: ${response.statusText}`);
+ *   const errorData = await response.json().catch(() => ({}));
+ *   throw new Error(errorData.message || `Failed to fetch brand: ${response.statusText}`);
  * }
- * return response.json();
+ * 
+ * const hubspotData = await response.json();
+ * // Map HubSpot properties to BrandDataInput
+ * const rawData: BrandDataInput = {
+ *   id: hubspotData.properties.brand_id,
+ *   name: hubspotData.properties.brand_name,
+ *   tagline: hubspotData.properties.tagline,
+ *   description: hubspotData.properties.description,
+ *   grade: hubspotData.properties.grade,
+ *   sector: hubspotData.properties.sector,
+ *   category: hubspotData.properties.category,
+ *   investment: {
+ *     min: hubspotData.properties.investment_min,
+ *     max: hubspotData.properties.investment_max,
+ *     franchiseFee: hubspotData.properties.franchise_fee,
+ *     // ... map other investment properties
+ *   },
+ *   // ... map other properties
+ * };
+ * 
+ * // Normalize the data to ensure all fields have defaults
+ * return normalizeBrandData(rawData);
  * ```
  */
 export async function fetchBrandBySlug(slug: string): Promise<BrandData> {
@@ -292,30 +467,17 @@ export async function fetchBrandBySlug(slug: string): Promise<BrandData> {
     throw new Error('Brand slug is required and must be a non-empty string');
   }
 
-  // TODO: Replace this mock implementation with real API call
-  // Example implementation:
-  // const API_BASE_URL = process.env.VITE_API_BASE_URL || '';
-  // const response = await fetch(`${API_BASE_URL}/api/brands/${slug}`, {
-  //   method: 'GET',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //     // Add authentication headers if needed
-  //     // 'Authorization': `Bearer ${token}`,
-  //   },
-  // });
-  // 
-  // if (!response.ok) {
-  //   const errorData = await response.json().catch(() => ({}));
-  //   throw new Error(errorData.message || `Failed to fetch brand: ${response.statusText}`);
-  // }
-  // 
-  // const rawData: BrandDataInput = await response.json();
-  // // Normalize the data to ensure all fields have defaults
-  // return normalizeBrandData(rawData);
-
-  // Mock implementation - Simulate API delay
+  // TODO: Replace this mock implementation with real API/HubSpot call
+  // For now, use default data generator for testing
+  // This ensures each brand gets unique, consistent data based on its slug
+  
+  // Simulate API delay
   await new Promise((resolve) => setTimeout(resolve, 100));
 
-  // Return normalized mock data (in production, this would fetch from database via API)
-  return normalizeBrandData(mockBrandData);
+  // Generate default data for testing (only used when database is not connected)
+  // HubSpot-friendly: This structure matches what HubSpot would return
+  const defaultData = generateDefaultBrandData(slug);
+  
+  // Normalize the data to ensure all fields have defaults
+  return normalizeBrandData(defaultData);
 }

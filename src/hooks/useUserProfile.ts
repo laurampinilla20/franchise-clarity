@@ -39,11 +39,13 @@ export function useUserProfile() {
   const [profile, setProfile] = useState<UserProfile>({});
 
   // Load from user-specific storage on mount - only for logged-in users
+  // Use empty object as default, not DEFAULT_PROFILE, so we can detect if onboarding is complete
   useEffect(() => {
     if (isLoggedIn && user) {
-      // Load user-specific profile
-      const userProfile = getUserData<UserProfile>(user.id, 'profile', DEFAULT_PROFILE);
+      // Load user-specific profile - use empty object to detect if onboarding is complete
+      const userProfile = getUserData<UserProfile>(user.id, 'profile', {});
       setProfile(userProfile);
+      console.log(`[useUserProfile] Loaded profile for user ${user.id}:`, userProfile);
     } else {
       // Clear profile for public users
       setProfile({});
@@ -51,9 +53,11 @@ export function useUserProfile() {
   }, [isLoggedIn, user]);
 
   // Sync to user-specific storage whenever profile changes - only for logged-in users
+  // This ensures profile is saved immediately when updated
   useEffect(() => {
-    if (isLoggedIn && user) {
+    if (isLoggedIn && user && profile && Object.keys(profile).length > 0) {
       setUserData(user.id, 'profile', profile);
+      console.log(`[useUserProfile] Saved profile for user ${user.id}:`, profile);
     }
   }, [profile, isLoggedIn, user]);
 
@@ -65,7 +69,9 @@ export function useUserProfile() {
     
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === userProfileKey) {
-        setProfile(getUserData<UserProfile>(user.id, 'profile', DEFAULT_PROFILE));
+        const updatedProfile = getUserData<UserProfile>(user.id, 'profile', {});
+        setProfile(updatedProfile);
+        console.log(`[useUserProfile] Synced profile from storage for user ${user.id}:`, updatedProfile);
       }
     };
 

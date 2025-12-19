@@ -22,13 +22,18 @@ export function usePendingActions() {
   const { addToCompare } = useCompare();
 
   useEffect(() => {
-    if (!isLoggedIn) return;
+    if (!isLoggedIn || !user) return;
 
     // Execute pending actions after sign-in
     const executePendingActions = async () => {
+      // Wait a bit longer to ensure all hooks are ready and user data is loaded
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
       const pendingActions = getPendingActions();
       
       if (pendingActions.length === 0) return;
+
+      console.log(`Executing ${pendingActions.length} pending actions for user ${user.id}`);
 
       // Export actions for HubSpot before clearing
       const hubspotData = exportPendingActionsForHubSpot();
@@ -40,22 +45,31 @@ export function usePendingActions() {
         try {
           switch (action.type) {
             case 'like':
-              await addLike({
-                id: action.franchiseId,
-                name: action.franchiseName,
-                logo: action.franchiseData?.logo || null,
-              });
+              console.log(`Executing pending like for ${action.franchiseName} (ID: ${action.franchiseId})`);
+              try {
+                await addLike({
+                  id: action.franchiseId,
+                  name: action.franchiseName,
+                  logo: action.franchiseData?.logo || null,
+                });
+                console.log(`✓ Successfully saved like for ${action.franchiseName} to user account`);
+              } catch (error) {
+                console.error(`✗ Failed to save like for ${action.franchiseName}:`, error);
+              }
               break;
             
             case 'dislike':
+              console.log(`Executing pending dislike for ${action.franchiseName}`);
               await addDislike({
                 id: action.franchiseId,
                 name: action.franchiseName,
                 logo: action.franchiseData?.logo || null,
               });
+              console.log(`Successfully saved dislike for ${action.franchiseName}`);
               break;
             
             case 'save':
+              console.log(`Executing pending save for ${action.franchiseName}`);
               await addSaved({
                 id: action.franchiseId,
                 name: action.franchiseName,
@@ -66,9 +80,11 @@ export function usePendingActions() {
                 sector: action.franchiseData?.sector,
                 category: action.franchiseData?.category,
               });
+              console.log(`Successfully saved ${action.franchiseName}`);
               break;
             
             case 'compare':
+              console.log(`Executing pending compare for ${action.franchiseName}`);
               const added = await addToCompare({
                 id: action.franchiseId,
                 name: action.franchiseName,
@@ -80,6 +96,7 @@ export function usePendingActions() {
               
               if (added) {
                 shouldNavigateToCompare = true;
+                console.log(`Successfully added ${action.franchiseName} to compare`);
               }
               break;
           }
@@ -97,6 +114,7 @@ export function usePendingActions() {
 
       // Clear pending actions after execution
       clearPendingActions();
+      console.log('All pending actions executed and cleared');
 
       // TODO: Sync pending actions to HubSpot
       // HubSpot-friendly: Can send all executed actions to HubSpot API
@@ -117,10 +135,13 @@ export function usePendingActions() {
       // });
     };
 
-    // Small delay to ensure hooks are ready
-    setTimeout(() => {
+    // Execute pending actions after sign-in
+    // Use a longer delay to ensure all hooks and user data are ready
+    const timeoutId = setTimeout(() => {
       executePendingActions();
-    }, 500);
+    }, 800);
+
+    return () => clearTimeout(timeoutId);
   }, [isLoggedIn, user, addLike, addDislike, addSaved, addToCompare]);
 }
 

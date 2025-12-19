@@ -3,7 +3,7 @@ import { MatchCard } from "@/components/franchise";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { Bookmark, Filter, ArrowUpDown, Trash2 } from "lucide-react";
+import { Bookmark, Filter, ArrowUpDown } from "lucide-react";
 import { PreferencesSection } from "@/components/PreferencesSection";
 import { useSaved } from "@/hooks/useSaved";
 import { fetchBrandBySlug, type BrandData } from "@/api/brands";
@@ -114,18 +114,6 @@ export default function Saved() {
                     className="relative animate-fade-up"
                     style={{ animationDelay: `${i * 100}ms` }}
                   >
-                    <div className="absolute top-4 right-4 z-10">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                        onClick={async () => {
-                          await removeSaved(franchise.id);
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
                     <MatchCard {...franchise} />
                   </div>
                 ))}

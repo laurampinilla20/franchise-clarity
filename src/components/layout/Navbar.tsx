@@ -281,6 +281,11 @@ export function Navbar() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
+                      <Link to="/dashboard" className="cursor-pointer">
+                        Matches
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
                       <Link to="/saved" className="cursor-pointer">
                         Saved
                       </Link>
@@ -398,6 +403,13 @@ export function Navbar() {
                     >
                       <User className="w-4 h-4" />
                       My Profile
+                    </Link>
+                    <Link
+                      to="/dashboard"
+                      className="px-4 py-3 rounded-xl text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Matches
                     </Link>
                     <Link
                       to="/saved"

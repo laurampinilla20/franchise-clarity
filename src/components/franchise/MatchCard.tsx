@@ -2,11 +2,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GradeBadge } from "./GradeBadge";
-import { GitCompare, MessageCircle, Check, X, MapPin, Clock, DollarSign } from "lucide-react";
+import { GitCompare, MessageCircle, Check, X, MapPin, Clock, DollarSign, ThumbsUp, ThumbsDown, Bookmark } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCompare } from "@/hooks/useCompare";
 import { generateMatchReasons } from "@/utils/matchReasons";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { usePreferences } from "@/hooks/usePreferences";
+import { useSaved } from "@/hooks/useSaved";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSignInModal } from "@/contexts/SignInModalContext";
+import { addPendingAction } from "@/utils/pendingActions";
 import { useMemo } from "react";
 
 interface MatchCardProps {
@@ -45,6 +50,40 @@ export function MatchCard({
   const navigate = useNavigate();
   const { addToCompare, isInCompare } = useCompare();
   const { profile } = useUserProfile();
+  const { likedItems, dislikedItems, addLike, removeLike, addDislike, removeDislike } = usePreferences();
+  const { savedItems, addSaved, removeSaved, isSaved: checkIsSaved } = useSaved();
+  const { isLoggedIn } = useAuth();
+  const { openModal } = useSignInModal();
+  
+  // Check if this franchise is liked, disliked, or saved
+  const isLiked = likedItems.some((item) => item.id === id);
+  const isDisliked = dislikedItems.some((item) => item.id === id);
+  const isSaved = checkIsSaved(id);
+  
+  /**
+   * Handle action for public users - store pending action and open sign-in modal
+   * HubSpot-friendly: Pending actions are stored and can be synced to HubSpot after sign-in
+   */
+  const handlePublicUserAction = (actionType: 'like' | 'dislike' | 'save', franchiseData?: any) => {
+    // Store pending action
+    addPendingAction({
+      type: actionType,
+      franchiseId: id,
+      franchiseName: name,
+      franchiseData: {
+        logo: logo || null,
+        grade,
+        investmentMin,
+        investmentMax,
+        sector,
+        category,
+        ...franchiseData,
+      },
+    });
+    
+    // Open sign-in modal
+    openModal();
+  };
 
   // Generate personalized reasons based on user profile vs brand
   // Only generate personalized reasons if user is logged in and has profile data
@@ -131,8 +170,113 @@ export function MatchCard({
   };
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden relative">
       <CardContent className="p-6">
+        {/* Action Icons - Top Right Corner */}
+        <div className="absolute top-4 right-4 flex gap-2 z-10">
+          {/* Thumbs Up */}
+          <button
+            type="button"
+            onClick={async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (!isLoggedIn) {
+                handlePublicUserAction('like');
+                return;
+              }
+              
+              try {
+                if (isLiked) {
+                  await removeLike(id);
+                } else {
+                  await addLike({ id, name, logo: logo || null });
+                }
+              } catch (error) {
+                console.error("Failed to update like preference:", error);
+              }
+            }}
+            className={`h-[38px] w-[40px] rounded-[30px] border border-[#8ba4bd] flex items-center justify-center hover:bg-[#8ba4bd]/10 transition-colors bg-white ${
+              isLoggedIn && isLiked ? "bg-[#8ba4bd]/20" : ""
+            }`}
+            aria-label={isLoggedIn && isLiked ? "Remove from likes" : "Add to likes"}
+          >
+            <ThumbsUp 
+              className={`w-4 h-4 text-[#8ba4bd] ${isLoggedIn && isLiked ? "fill-current" : ""}`} 
+            />
+          </button>
+
+          {/* Thumbs Down */}
+          <button
+            type="button"
+            onClick={async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (!isLoggedIn) {
+                handlePublicUserAction('dislike');
+                return;
+              }
+              
+              try {
+                if (isDisliked) {
+                  await removeDislike(id);
+                } else {
+                  await addDislike({ id, name, logo: logo || null });
+                }
+              } catch (error) {
+                console.error("Failed to update dislike preference:", error);
+              }
+            }}
+            className={`h-[38px] w-[40px] rounded-[30px] border border-[#8ba4bd] flex items-center justify-center hover:bg-[#8ba4bd]/10 transition-colors bg-white ${
+              isLoggedIn && isDisliked ? "bg-[#8ba4bd]/20" : ""
+            }`}
+            aria-label={isLoggedIn && isDisliked ? "Remove from dislikes" : "Add to dislikes"}
+          >
+            <ThumbsDown 
+              className={`w-4 h-4 text-[#8ba4bd] ${isLoggedIn && isDisliked ? "fill-current" : ""}`} 
+            />
+          </button>
+
+          {/* Bookmark */}
+          <button
+            type="button"
+            onClick={async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (!isLoggedIn) {
+                handlePublicUserAction('save');
+                return;
+              }
+              
+              try {
+                if (isSaved) {
+                  await removeSaved(id);
+                } else {
+                  await addSaved({
+                    id,
+                    name,
+                    logo: logo || null,
+                    grade,
+                    investmentMin,
+                    investmentMax,
+                    sector,
+                    category,
+                  });
+                }
+              } catch (error) {
+                console.error("Failed to update saved status:", error);
+              }
+            }}
+            className={`h-[38px] w-[40px] rounded-[30px] border border-[#8ba4bd] flex items-center justify-center hover:bg-[#8ba4bd]/10 transition-colors bg-white ${
+              isLoggedIn && isSaved ? "bg-[#8ba4bd]/20" : ""
+            }`}
+            aria-label={isLoggedIn && isSaved ? "Remove from saved" : "Save franchise"}
+          >
+            <Bookmark 
+              className={`w-4 h-4 text-[#8ba4bd] ${isLoggedIn && isSaved ? "fill-current" : ""}`} 
+            />
+          </button>
+        </div>
+
         <div className="flex flex-col md:flex-row gap-6">
           {/* Left: Logo and Grade */}
           <div className="flex md:flex-col items-center gap-4 md:gap-3">
@@ -242,9 +386,11 @@ export function MatchCard({
             >
               {isInCompare(id) ? "In Compare" : "Compare"}
             </Button>
-            <Button variant="navy" size="sm">
-              Talk to an Advisor
-            </Button>
+            <Link to="/about/advisors">
+              <Button variant="navy" size="sm">
+                Talk to an Advisor
+              </Button>
+            </Link>
           </div>
         </div>
       </CardContent>
