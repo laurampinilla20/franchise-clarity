@@ -6,6 +6,7 @@ import { useParams, Link } from "react-router-dom";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEngagementTracking } from "@/hooks/useEngagementTracking";
+import { useSignInModal } from "@/contexts/SignInModalContext";
 import { getBrandService } from "@/lib/services";
 import type { BrandGrade } from "@/lib/services/types";
 import {
@@ -58,6 +59,7 @@ export default function BrandDetail() {
   const { slug } = useParams();
   const { isLoggedIn } = useAuth();
   const { trackPageView, trackUnlock } = useEngagementTracking();
+  const { openModal, pendingSectionId, clearPendingSection } = useSignInModal();
   const [activeSection, setActiveSection] = useState("snapshot");
   const sectionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const navRef = useRef<HTMLDivElement>(null);
@@ -142,6 +144,26 @@ export default function BrandDetail() {
   useEffect(() => {
     isNavStickyRef.current = isNavSticky;
   }, [isNavSticky]);
+
+  // Scroll to pending section after sign-in
+  useEffect(() => {
+    if (isLoggedIn && pendingSectionId) {
+      // Wait a bit for the page to update after login
+      setTimeout(() => {
+        const element = sectionRefs.current[pendingSectionId];
+        if (element) {
+          const offset = 64 + (isNavSticky ? 88 : 0); // navbar + nav height
+          const elementPosition = element.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - offset;
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth",
+          });
+        }
+        clearPendingSection();
+      }, 300);
+    }
+  }, [isLoggedIn, pendingSectionId, clearPendingSection, isNavSticky]);
 
   // Store initial nav position on mount
   useEffect(() => {
@@ -316,6 +338,16 @@ export default function BrandDetail() {
     }
   };
 
+  // Smart unlock function that tracks section and opens sign-in modal
+  const handleUnlockClick = (e: React.MouseEvent, sectionId?: string) => {
+    e.preventDefault();
+    if (sectionId) {
+      openModal(sectionId);
+    } else {
+      openModal();
+    }
+  };
+
   const formatCurrency = (value: number) => {
     if (value >= 1000000) {
       return `$${(value / 1000000).toFixed(1)}M`;
@@ -362,22 +394,22 @@ export default function BrandDetail() {
     
     return [
       { 
-        name: "Royalty Rate", 
+        name: "Royalty\nRate", 
         brand: brandRoyalty,
         competitors: competitorsRoyalty
       },
       { 
-        name: "National Advertising Rate", 
+        name: "National\nAdvertising", 
         brand: (currentBrandData as any)?.investment?.nationalAdvertisingRate || 2,
         competitors: 2
       },
       { 
-        name: "Local Advertising Rate", 
+        name: "Local\nAdvertising", 
         brand: (currentBrandData as any)?.investment?.localAdvertisingRate || 1,
         competitors: 2.5
       },
       { 
-        name: "Cooperative Advertising Rate", 
+        name: "Cooperative\nAdvertising", 
         brand: (currentBrandData as any)?.investment?.cooperativeAdvertisingRate || 0,
         competitors: 2.5
       },
@@ -390,9 +422,9 @@ export default function BrandDetail() {
     
     return [
       { 
-        name: "Royalty Rate", 
+        name: "Royalty\nRate", 
         brand: parseFloat((currentBrandData.investment.royalty || "0%").replace('%', '')),
-        competitors: currentBrandData.competitorsRoyaltyRate || 6
+        competitors: (currentBrandData as any)?.competitorsRoyaltyRate || 6
       },
     ];
   }, [currentBrandData]);
@@ -408,17 +440,17 @@ export default function BrandDetail() {
     
     return [
       { 
-        name: "Initial Term", 
+        name: "Initial\nTerm", 
         brand: brandInitialTerm,
         competitors: competitorsInitialTerm
       },
       { 
-        name: "Renewal Term", 
+        name: "Renewal\nTerm", 
         brand: brandRenewalTerm,
         competitors: competitorsRenewalTerm
       },
       { 
-        name: "# Renewals", 
+        name: "Number\nof Renewals", 
         brand: (currentBrandData as any)?.investment?.numberOfRenewals || 0,
         competitors: 1
       },
@@ -431,9 +463,9 @@ export default function BrandDetail() {
     
     return [
       { 
-        name: "Initial Term (Years)", 
+        name: "Initial\nTerm", 
         brand: parseInt((currentBrandData.investment.initialTerm || "0 Years").replace(' Years', '')),
-        competitors: currentBrandData.competitorsInitialTerm || 15
+        competitors: (currentBrandData as any)?.competitorsInitialTerm || 15
       },
     ];
   }, [currentBrandData]);
@@ -501,10 +533,10 @@ export default function BrandDetail() {
             <button
               key={section.id}
               onClick={() => scrollToSection(section.id)}
-              className={`px-[14px] py-[6px] rounded-[30px] text-sm transition-all whitespace-nowrap flex-shrink-0 ${
+              className={`px-4 py-2 rounded-[30px] text-sm transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
                 activeSection === section.id
-                  ? "bg-[#203d57] text-white font-bold"
-                  : "bg-transparent border border-[#4f7aa5]/50 text-[#4f7aa5] font-normal"
+                  ? "bg-[#203d57] text-white font-bold shadow-md"
+                  : "bg-transparent border border-[#4f7aa5]/50 text-[#4f7aa5] font-normal hover:bg-[#4f7aa5]/10 hover:border-[#4f7aa5]"
               }`}
             >
               {section.label}
@@ -521,7 +553,7 @@ export default function BrandDetail() {
           <div className="[display:contents] lg:flex lg:flex-col gap-5 w-full lg:flex-[1_1_50%] lg:min-w-0 xl:flex-[0_0_65%] xl:min-w-0">
             {/* Franchise Review Card */}
             <div className="bg-[#f4f8fe] flex flex-col rounded-[20px] order-1">
-              <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col">
+              <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col shadow-sm hover:shadow-md transition-shadow duration-200">
                 {/* Image */}
                 <div className="h-[180px] sm:h-[200px] lg:h-[220px] rounded-t-[20px] relative overflow-hidden">
                   {/* HubSpot-ready: Dynamic header image with default fallback */}
@@ -547,7 +579,7 @@ export default function BrandDetail() {
                 </div>
 
                 {/* Content */}
-                <div className="p-4 sm:p-6 lg:p-8 pt-0 flex flex-col gap-5 relative">
+                <div className="p-6 sm:p-8 lg:p-10 pt-0 flex flex-col gap-6 relative">
                   {/* Grade Badge */}
                   <div className="absolute right-4 sm:right-6 lg:right-8 -top-[50px] sm:-top-[56px] lg:-top-[62px] flex flex-col items-center z-[100]">
                     {isLoggedIn ? (
@@ -562,20 +594,17 @@ export default function BrandDetail() {
                       </div>
                     ) : (
                       // Non-logged-in: Button with "?" that links to sign in
-                      <Button
-                        asChild
-                        variant="ghost"
+                      <button
+                        onClick={(e) => handleUnlockClick(e)}
                         className="bg-white border border-[#A4C6E8] rounded-full size-[100px] sm:size-[112px] lg:size-[124px] flex items-center justify-center p-0 hover:scale-110 transition-transform duration-200 cursor-pointer"
                       >
-                        <Link to={`/best-franchises/brand/${slug}/unlock`}>
-                          <div className="flex flex-col items-center text-center">
-                            <div className="text-[58px] sm:text-[64px] lg:text-[71.884px] font-extrabold leading-none text-[#446786]">
-                              ?
-                            </div>
-                            <p className="text-xs sm:text-sm lg:text-[14.377px] font-medium text-foreground">GRADE</p>
+                        <div className="flex flex-col items-center text-center">
+                          <div className="text-[58px] sm:text-[64px] lg:text-[71.884px] font-extrabold leading-none text-[#446786]">
+                            ?
                           </div>
-                        </Link>
-                      </Button>
+                          <p className="text-xs sm:text-sm lg:text-[14.377px] font-medium text-foreground">GRADE</p>
+                        </div>
+                      </button>
                     )}
                   </div>
                   <div className="flex gap-5">
@@ -589,7 +618,7 @@ export default function BrandDetail() {
                   </div>
 
                   {/* Key Metrics */}
-                  <div className="flex flex-wrap sm:flex-nowrap gap-4 sm:gap-8 lg:gap-16 items-center">
+                  <div className="flex flex-wrap sm:flex-nowrap gap-6 sm:gap-8 lg:gap-12 items-center">
                     <div className="flex gap-2 items-center">
                       <div className="bg-[#a6a6a6] h-[68px] w-[2px] rounded-full" />
                       <div className="flex flex-col gap-1 px-1 py-5">
@@ -616,15 +645,18 @@ export default function BrandDetail() {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 items-stretch sm:items-start">
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-4 items-stretch sm:items-start">
                     {!isLoggedIn && (
-                      <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-5 py-2 text-base font-bold text-white" asChild>
-                        <Link to={`/best-franchises/brand/${slug}/unlock`}>Unlock for the Full Report</Link>
+                      <Button 
+                        className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-6 py-3 text-base font-bold text-white shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                        onClick={(e) => handleUnlockClick(e, "snapshot")}
+                      >
+                        Unlock for the Full Report
                       </Button>
                     )}
                     <Button
                       variant="outline"
-                      className="border border-[#446786] rounded-[30px] px-5 py-2 text-base font-bold text-[#446786]"
+                      className="border border-[#446786] rounded-[30px] px-6 py-3 text-base font-bold text-[#446786] hover:bg-[#446786] hover:text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                       asChild
                     >
                       <Link to="/compare">Compare to similar franchises</Link>
@@ -637,7 +669,7 @@ export default function BrandDetail() {
             {/* Snapshot Section */}
             <div
               ref={(el) => (sectionRefs.current.snapshot = el)}
-              className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-5 p-4 sm:p-6 lg:p-8 order-2"
+              className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-6 p-6 sm:p-8 lg:p-10 order-2 shadow-sm hover:shadow-md transition-all duration-200"
             >
               <div className="flex items-center gap-3">
                 <FileText className="w-6 h-6 text-[#203d57]" />
@@ -675,9 +707,12 @@ export default function BrandDetail() {
                   <>
                     {" "}
                     --{" "}
-                    <Link to={`/best-franchises/brand/${slug}/unlock`} className="font-bold text-[#54b936] underline">
+                    <button
+                      onClick={(e) => handleUnlockClick(e, "snapshot")}
+                      className="font-bold text-[#54b936] underline hover:text-[#54b936]/80"
+                    >
                       Unlock this franchise
-                    </Link>{" "}
+                    </button>{" "}
                     to better understand the costs such as training and territory fees.{" "}
                     <span className="font-bold">Sign Up to Unlock Full Cost Breakdown:</span>
                   </>
@@ -686,8 +721,11 @@ export default function BrandDetail() {
               </p>
 
               {!isLoggedIn && (
-                <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-5 py-2 text-base font-bold text-white w-fit" asChild>
-                  <Link to={`/best-franchises/brand/${slug}/unlock`}>Unlock for the Full Report</Link>
+                <Button 
+                  className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-6 py-3 text-base font-bold text-white w-fit shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  onClick={(e) => handleUnlockClick(e, "snapshot")}
+                >
+                  Unlock for the Full Report
                 </Button>
               )}
 
@@ -701,9 +739,12 @@ export default function BrandDetail() {
                   {!isLoggedIn && (
                     <>
                       {" "}
-                      <Link to={`/best-franchises/brand/${slug}/unlock`} className="font-bold text-[#54b936] underline">
+                      <button
+                        onClick={(e) => handleUnlockClick(e, "territories")}
+                        className="font-bold text-[#54b936] underline hover:text-[#54b936]/80"
+                      >
                         Unlock to learn more
-                      </Link>{" "}
+                      </button>{" "}
                       and connect with our experts.
                     </>
                   )}
@@ -715,7 +756,7 @@ export default function BrandDetail() {
             {/* Investment Overview Section */}
             <div
               ref={(el) => (sectionRefs.current.investment = el)}
-              className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-4 p-4 sm:p-6 lg:p-8 lg:order-3 order-5"
+              className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-6 p-6 sm:p-8 lg:p-10 lg:order-3 order-5 shadow-sm hover:shadow-md transition-all duration-200"
             >
               <div className="flex items-center gap-3">
                 <DollarSign className="w-6 h-6 text-[#203d57]" />
@@ -729,9 +770,12 @@ export default function BrandDetail() {
                     <>
                       {" "}
                       --{" "}
-                      <Link to={`/best-franchises/brand/${slug}/unlock`} className="font-bold text-[#54b936] underline">
+                      <button
+                        onClick={(e) => handleUnlockClick(e, "investment")}
+                        className="font-bold text-[#54b936] underline hover:text-[#54b936]/80"
+                      >
                         Unlock this franchise
-                      </Link>{" "}
+                      </button>{" "}
                       to better understand the costs such as training and territory fees.
                     </>
                   )}
@@ -744,7 +788,7 @@ export default function BrandDetail() {
                 {/* Left side: Data Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-4 flex-1 w-full lg:w-auto">
                 {/* Total Investment */}
-                <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col items-start justify-center p-3 w-full">
+                <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col items-start justify-center p-4 w-full shadow-sm hover:shadow-md transition-all duration-200">
                   <div className="flex flex-col gap-2 items-start justify-center w-full">
                     <div className="flex items-center gap-2 w-full">
                       <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: "#a4c6e8" }} />
@@ -759,7 +803,7 @@ export default function BrandDetail() {
                 </div>
 
                 {/* Franchise Fee */}
-                <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col items-start justify-center p-3 w-full">
+                <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col items-start justify-center p-4 w-full shadow-sm hover:shadow-md transition-all duration-200">
                   <div className="flex flex-col gap-2 items-start justify-center w-full">
                     <div className="flex items-center gap-2 w-full">
                       <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: "#446786" }} />
@@ -770,7 +814,7 @@ export default function BrandDetail() {
                 </div>
 
                 {/* Working Capital */}
-                <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col items-start justify-center p-3 w-full">
+                <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col items-start justify-center p-4 w-full shadow-sm hover:shadow-md transition-all duration-200">
                   <div className="flex flex-col gap-2 items-start justify-center w-full">
                     <div className="flex items-center gap-2 w-full">
                       <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: "#54b936" }} />
@@ -797,18 +841,21 @@ export default function BrandDetail() {
                         data={investmentPieData}
                         cx="50%"
                         cy="50%"
-                        innerRadius={80}
-                        outerRadius={120}
-                        paddingAngle={2}
+                        innerRadius={70}
+                        outerRadius={110}
+                        paddingAngle={3}
                         dataKey="value"
                         stroke="#ffffff"
-                        strokeWidth={2}
+                        strokeWidth={3}
                       >
                         {investmentPieData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <ChartTooltip 
+                        content={<ChartTooltipContent />}
+                        cursor={{ fill: 'rgba(255, 255, 255, 0.1)' }}
+                      />
                     </RechartsPieChart>
                   </ChartContainer>
                 </div>
@@ -817,7 +864,7 @@ export default function BrandDetail() {
               {/* Additional Investment Details */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Ongoing Fees */}
-                <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col items-start justify-center px-4 sm:px-6 lg:px-[29px] py-6 sm:py-8 w-full">
+                <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col items-start justify-center px-6 sm:px-8 lg:px-10 py-6 sm:py-8 w-full shadow-sm hover:shadow-md transition-all duration-200">
                   <div className="flex flex-col gap-2 items-start justify-center w-full">
                     <p className="text-sm sm:text-base font-bold text-foreground w-full">Ongoing Fees</p>
                     <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 items-start w-full">
@@ -834,7 +881,7 @@ export default function BrandDetail() {
                 </div>
 
                 {/* Franchise Agreement */}
-                <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col items-start justify-center px-4 sm:px-6 lg:px-[29px] py-6 sm:py-8 w-full">
+                <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col items-start justify-center px-6 sm:px-8 lg:px-10 py-6 sm:py-8 w-full shadow-sm hover:shadow-md transition-all duration-200">
                   <div className="flex flex-col gap-2 items-start justify-center w-full">
                     <p className="text-sm sm:text-base font-bold text-foreground w-full">Franchise Agreement</p>
                     <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 items-start w-full">
@@ -857,86 +904,86 @@ export default function BrandDetail() {
                   <h3 className=" sm:text-xl font-bold text-foreground mb-4">
                     Complete Investment Summary
                   </h3>
-                  <div className="bg-[#f4f8fe] border border-[#A4C6E8] rounded-[20px] overflow-hidden">
+                  <div className="bg-[#f4f8fe] border border-[#A4C6E8] rounded-[20px] overflow-hidden shadow-sm">
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
                         <tr className="bg-white border-b border-[#A4C6E8]">
-                          <th className="px-4 sm:px-6 py-4 text-left text-sm sm:text-base font-bold text-foreground">
+                          <th className="px-6 sm:px-8 py-4 text-left text-sm sm:text-base font-bold text-foreground">
                             Investment Category
                           </th>
-                          <th className="px-4 sm:px-6 py-4 text-left text-sm sm:text-base font-bold text-foreground">
+                          <th className="px-6 sm:px-8 py-4 text-left text-sm sm:text-base font-bold text-foreground">
                             Details
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#dee8f2]">
+                      <tbody className="divide-y divide-[#A4C6E8]">
                         {/* Total Investment */}
-                        <tr className="bg-white hover:bg-[#f4f8fe] transition-colors">
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base font-semibold text-foreground">
+                        <tr className="bg-white hover:bg-[#f4f8fe] transition-colors duration-150">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base font-semibold text-foreground">
                             Total Investment Range
                           </td>
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base text-foreground">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base text-foreground">
                             {formatCurrency(currentBrandData.investment.min)} - {formatCurrency(currentBrandData.investment.max)}
                           </td>
                         </tr>
                         
                         {/* Franchise Fee */}
-                        <tr className="bg-white hover:bg-[#f4f8fe] transition-colors">
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base font-semibold text-foreground">
+                        <tr className="bg-white hover:bg-[#f4f8fe] transition-colors duration-150">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base font-semibold text-foreground">
                             Franchise Fee
                           </td>
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base text-foreground">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base text-foreground">
                             {formatCurrency(currentBrandData.investment.franchiseFee)}
                           </td>
                         </tr>
                         
                         {/* Working Capital */}
-                        <tr className="bg-white hover:bg-[#f4f8fe] transition-colors">
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base font-semibold text-foreground">
+                        <tr className="bg-white hover:bg-[#f4f8fe] transition-colors duration-150">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base font-semibold text-foreground">
                             Working Capital
                           </td>
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base text-foreground">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base text-foreground">
                             {formatCurrency(currentBrandData.investment.workingCapital)}
                           </td>
                         </tr>
                         
                         {/* Royalty Fees */}
-                        <tr className="bg-white hover:bg-[#f4f8fe] transition-colors">
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base font-semibold text-foreground">
+                        <tr className="bg-white hover:bg-[#f4f8fe] transition-colors duration-150">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base font-semibold text-foreground">
                             Royalty Fees (Ongoing)
                           </td>
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base text-foreground">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base text-foreground">
                             {currentBrandData.investment.royalty || "N/A"}
                           </td>
                         </tr>
                         
                         {/* Marketing Fees */}
-                        <tr className="bg-white hover:bg-[#f4f8fe] transition-colors">
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base font-semibold text-foreground">
+                        <tr className="bg-white hover:bg-[#f4f8fe] transition-colors duration-150">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base font-semibold text-foreground">
                             Marketing/Advertising Fees
                           </td>
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base text-foreground">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base text-foreground">
                             {currentBrandData.investment.marketing || "N/A"}
                           </td>
                         </tr>
                         
                         {/* Initial Term */}
-                        <tr className="bg-white hover:bg-[#f4f8fe] transition-colors">
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base font-semibold text-foreground">
+                        <tr className="bg-white hover:bg-[#f4f8fe] transition-colors duration-150">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base font-semibold text-foreground">
                             Initial Franchise Term
                           </td>
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base text-foreground">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base text-foreground">
                             {currentBrandData.investment.initialTerm || "N/A"}
                           </td>
                         </tr>
                         
                         {/* Renewal Term */}
-                        <tr className="bg-white hover:bg-[#f4f8fe] transition-colors">
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base font-semibold text-foreground">
+                        <tr className="bg-white hover:bg-[#f4f8fe] transition-colors duration-150">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base font-semibold text-foreground">
                             Renewal Term
                           </td>
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base text-foreground">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base text-foreground">
                             {currentBrandData.investment.renewalTerm || "N/A"}
                           </td>
                         </tr>
@@ -946,47 +993,47 @@ export default function BrandDetail() {
                           <td className="px-4 sm:px-6 py-4 text-sm sm:text-base font-semibold text-foreground">
                             Training & Support Costs
                           </td>
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base text-foreground">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base text-foreground">
                             Included in franchise fee or varies by location
                           </td>
                         </tr>
                         
                         {/* Real Estate/Lease Requirements - New */}
-                        <tr className="bg-white hover:bg-[#f4f8fe] transition-colors">
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base font-semibold text-foreground">
+                        <tr className="bg-white hover:bg-[#f4f8fe] transition-colors duration-150">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base font-semibold text-foreground">
                             Real Estate & Lease Requirements
                           </td>
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base text-foreground">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base text-foreground">
                             Varies by location and market conditions
                           </td>
                         </tr>
                         
                         {/* Equipment & Inventory - New */}
-                        <tr className="bg-white hover:bg-[#f4f8fe] transition-colors">
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base font-semibold text-foreground">
+                        <tr className="bg-white hover:bg-[#f4f8fe] transition-colors duration-150">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base font-semibold text-foreground">
                             Equipment & Initial Inventory
                           </td>
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base text-foreground">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base text-foreground">
                             Included in total investment range
                           </td>
                         </tr>
                         
                         {/* Liquid Capital Requirements - New */}
-                        <tr className="bg-white hover:bg-[#f4f8fe] transition-colors">
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base font-semibold text-foreground">
+                        <tr className="bg-white hover:bg-[#f4f8fe] transition-colors duration-150">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base font-semibold text-foreground">
                             Liquid Capital Required
                           </td>
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base text-foreground">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base text-foreground">
                             Typically 20-30% of total investment
                           </td>
                         </tr>
                         
                         {/* Net Worth Requirements - New */}
-                        <tr className="bg-white hover:bg-[#f4f8fe] transition-colors">
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base font-semibold text-foreground">
+                        <tr className="bg-white hover:bg-[#f4f8fe] transition-colors duration-150">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base font-semibold text-foreground">
                             Minimum Net Worth Required
                           </td>
-                          <td className="px-4 sm:px-6 py-4 text-sm sm:text-base text-foreground">
+                          <td className="px-6 sm:px-8 py-4 text-sm sm:text-base text-foreground">
                             Varies by franchise system
                           </td>
                         </tr>
@@ -996,7 +1043,7 @@ export default function BrandDetail() {
                 </div>
                 
                     {/* Expert Note */}
-                    <div className="mt-4 p-4 bg-[#f4f8fe] border-l border-[#A4C6E8] rounded-r-[20px]">
+                    <div className="mt-6 p-6 bg-[#f4f8fe] border-l-4 border-[#54b936] rounded-r-[20px] shadow-sm">
                       <p className="text-sm sm:text-base text-foreground">
                         <span className="font-bold">Expert Note:</span> This summary provides key investment metrics that franchise experts review. 
                         Additional costs may include legal fees, accounting services, insurance, and local permits. 
@@ -1012,8 +1059,11 @@ export default function BrandDetail() {
                     <p className="text-sm text-muted-foreground mb-4">
                       Sign in to view the comprehensive investment breakdown including training costs, real estate requirements, equipment needs, and capital requirements.
                     </p>
-                    <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-5 py-2 text-base font-bold text-white" asChild>
-                      <Link to={`/best-franchises/brand/${slug}/unlock`}>Unlock for the Full Report</Link>
+                    <Button 
+                      className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-6 py-3 text-base font-bold text-white shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                      onClick={(e) => handleUnlockClick(e, "profitability")}
+                    >
+                      Unlock for the Full Report
                     </Button>
                   </div>
                 )}
@@ -1021,14 +1071,14 @@ export default function BrandDetail() {
 
             {/* Net Franchisee Growth Section - Only for logged in users */}
             {isLoggedIn && (
-              <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-6 p-4 sm:p-6 lg:p-8 lg:order-4 order-6">
+              <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-6 p-6 sm:p-8 lg:p-10 lg:order-4 order-6 shadow-sm hover:shadow-md transition-all duration-200">
                 <div className="flex items-center gap-3">
                   <BarChart3 className="w-6 h-6 text-[#203d57]" />
                   <h2 className="text-xl sm:text-2xl font-bold text-foreground">Net Franchisee Growth</h2>
                 </div>
 
                 {/* Growth Comparison Chart */}
-                <div className="bg-[#f4f8fe] border border-[#A4C6E8] rounded-[20px] p-4 sm:p-6">
+                <div className="bg-[#f4f8fe] border border-[#A4C6E8] rounded-[20px] p-6 sm:p-8 shadow-sm">
                   <div className="mb-6">
                     <p className="text-base sm: font-bold text-foreground mb-2">
                       {currentBrandData.name} vs Competitors
@@ -1055,40 +1105,58 @@ export default function BrandDetail() {
                       data={[
                         {
                           name: "Net Growth",
-                          brand: 20, // Mock data - can be replaced with actual data
-                          competitors: 15, // Mock data
+                          brand: (currentBrandData as any)?.profitability?.netGrowthScore ?? 20,
+                          competitors: (currentBrandData as any)?.profitability?.competitorsAverage ?? 15,
                         },
                       ]}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#dee8f2" />
-                      <XAxis dataKey="name" stroke="#8c9aa5" style={{ fontSize: '12px' }} />
-                      <YAxis stroke="#8c9aa5" style={{ fontSize: '12px' }} />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="brand" fill="#446786" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="competitors" fill="#54b936" radius={[4, 4, 0, 0]} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#dee8f2" vertical={false} />
+                      <XAxis 
+                        dataKey="name" 
+                        stroke="#8c9aa5" 
+                        style={{ fontSize: '12px' }}
+                        tick={{ fill: '#8c9aa5' }}
+                      />
+                      <YAxis 
+                        stroke="#8c9aa5" 
+                        style={{ fontSize: '12px' }}
+                        tick={{ fill: '#8c9aa5' }}
+                      />
+                      <ChartTooltip 
+                        content={<ChartTooltipContent />}
+                        cursor={{ fill: 'rgba(68, 103, 134, 0.1)' }}
+                      />
+                      <Bar dataKey="brand" fill="#446786" radius={[8, 8, 0, 0]} />
+                      <Bar dataKey="competitors" fill="#54b936" radius={[8, 8, 0, 0]} />
                     </BarChart>
                   </ChartContainer>
 
                   {/* Growth Metrics */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-                    <div className="bg-white border border-[#A4C6E8] rounded-[20px] p-4 text-center">
-                      <p className="text-2xl sm:text-3xl font-bold text-[#446786] mb-1">20</p>
-                      <p className="text-sm font-semibold text-foreground">{currentBrandData.name}</p>
+                    <div className="bg-white border border-[#A4C6E8] rounded-[20px] p-6 text-center shadow-sm hover:shadow-md transition-all duration-200">
+                      <p className="text-2xl sm:text-3xl font-bold text-[#446786] mb-1">
+                        {(currentBrandData as any)?.profitability?.netGrowthScore ?? 20}
+                      </p>
+                      <p className="text-sm font-semibold text-foreground">{currentBrandData?.name || "Brand"}</p>
                     </div>
-                    <div className="bg-white border border-[#A4C6E8] rounded-[20px] p-4 text-center">
-                      <p className="text-2xl sm:text-3xl font-bold text-[#54b936] mb-1">15</p>
+                    <div className="bg-white border border-[#A4C6E8] rounded-[20px] p-6 text-center shadow-sm hover:shadow-md transition-all duration-200">
+                      <p className="text-2xl sm:text-3xl font-bold text-[#54b936] mb-1">
+                        {(currentBrandData as any)?.profitability?.competitorsAverage ?? 15}
+                      </p>
                       <p className="text-sm font-semibold text-foreground">Competitors Average</p>
                     </div>
-                    <div className="bg-white border border-[#A4C6E8] rounded-[20px] p-4 text-center">
-                      <p className="text-2xl sm:text-3xl font-bold text-[#203d57] mb-1">+5</p>
+                    <div className="bg-white border border-[#A4C6E8] rounded-[20px] p-6 text-center shadow-sm hover:shadow-md transition-all duration-200">
+                      <p className="text-2xl sm:text-3xl font-bold text-[#203d57] mb-1">
+                        +{((currentBrandData as any)?.profitability?.netGrowthScore ?? 20) - ((currentBrandData as any)?.profitability?.competitorsAverage ?? 15)}
+                      </p>
                       <p className="text-sm font-semibold text-foreground">Above Average</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Explanation */}
-                <div className="bg-[#f4f8fe] border-l border-[#A4C6E8] rounded-r-[20px] p-4 sm:p-6">
+                <div className="bg-[#f4f8fe] border-l-4 border-[#54b936] rounded-r-[20px] p-6 sm:p-8 shadow-sm">
                   <p className="text-base font-semibold text-foreground mb-2">
                     What is Net Franchisee Growth?
                   </p>
@@ -1098,7 +1166,7 @@ export default function BrandDetail() {
                 </div>
 
                 {/* Questions to Ask */}
-                <div className="bg-white border border-[#A4C6E8] rounded-[20px] p-4 sm:p-6">
+                <div className="bg-white border border-[#A4C6E8] rounded-[20px] p-6 sm:p-8 shadow-sm hover:shadow-md transition-all duration-200">
                   <p className="text-base sm: font-bold text-foreground mb-4">
                     Make sure to ask...
                   </p>
@@ -1131,7 +1199,7 @@ export default function BrandDetail() {
                 </div>
 
                 {/* Did You Know Section */}
-                <div className="bg-[#f4f8fe] border border-[#A4C6E8] rounded-[20px] p-4 sm:p-6">
+                <div className="bg-[#f4f8fe] border border-[#A4C6E8] rounded-[20px] p-6 sm:p-8 shadow-sm">
                   <div className="flex items-start gap-3">
                     <div className="bg-[#54b936] rounded-full p-2 flex-shrink-0">
                       <FileText className="w-5 h-5 text-white" />
@@ -1152,7 +1220,7 @@ export default function BrandDetail() {
             {/* Profitability Section */}
             <div
               ref={(el) => (sectionRefs.current.profitability = el)}
-              className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-6 p-4 sm:p-6 lg:p-8 lg:order-5 order-8"
+              className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-6 p-6 sm:p-8 lg:p-10 lg:order-5 order-8 shadow-sm hover:shadow-md transition-all duration-200"
             >
               <div className="flex items-center gap-3">
                 <BarChart3 className="w-6 h-6 text-[#203d57]" />
@@ -1167,9 +1235,12 @@ export default function BrandDetail() {
                     <>
                       {" "}
                       Please{" "}
-                      <Link to={`/best-franchises/brand/${slug}/unlock`} className="font-bold text-[#54b936] underline">
+                      <button
+                        onClick={(e) => handleUnlockClick(e, "profitability")}
+                        className="font-bold text-[#54b936] underline hover:text-[#54b936]/80"
+                      >
                         unlock this franchise
-                      </Link>{" "}
+                      </button>{" "}
                       for more information.
                     </>
                   )}
@@ -1179,7 +1250,7 @@ export default function BrandDetail() {
               {/* Profitability Metrics - 3 boxes aligned */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
                 {/* Item 19 Disclosure */}
-                <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col items-start justify-center px-4 sm:px-6 lg:px-[29px] py-6 sm:py-8 w-full">
+                <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col items-start justify-center px-6 sm:px-8 lg:px-10 py-6 sm:py-8 w-full shadow-sm hover:shadow-md transition-all duration-200">
                   <div className="flex flex-col gap-2 items-start justify-center w-full">
                     <p className="text-sm sm:text-base font-bold text-foreground w-full">Item 19 Disclosure</p>
                     <p className="text-[23.855px] font-normal text-foreground">{currentBrandData.profitability?.item19Disclosed || "N/A"}</p>
@@ -1187,7 +1258,7 @@ export default function BrandDetail() {
                 </div>
 
                 {/* Benchmark */}
-                <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col items-start justify-center px-4 sm:px-6 lg:px-[29px] py-6 sm:py-8 w-full">
+                <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col items-start justify-center px-6 sm:px-8 lg:px-10 py-6 sm:py-8 w-full shadow-sm hover:shadow-md transition-all duration-200">
                   <div className="flex flex-col gap-2 items-start justify-center w-full">
                     <p className="text-sm sm:text-base font-bold text-foreground w-full">Benchmark vs Category</p>
                     <p className="text-[23.855px] font-normal text-foreground">{currentBrandData.profitability?.benchmarkVsCategory || "N/A"}</p>
@@ -1195,7 +1266,7 @@ export default function BrandDetail() {
                 </div>
 
                 {/* Owner Workload Impact */}
-                <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col items-start justify-center px-4 sm:px-6 lg:px-[29px] py-6 sm:py-8 w-full">
+                <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col items-start justify-center px-6 sm:px-8 lg:px-10 py-6 sm:py-8 w-full shadow-sm hover:shadow-md transition-all duration-200">
                   <div className="flex flex-col gap-2 items-start justify-center w-full">
                     <p className="text-sm sm:text-base font-bold text-foreground w-full">Owner Workload Impact</p>
                     <p className="text-[23.855px] font-normal text-foreground">{currentBrandData.profitability?.ownerWorkloadImpact || "N/A"}</p>
@@ -1312,7 +1383,7 @@ export default function BrandDetail() {
                   </div>
 
                   {/* Explanation */}
-                  <div className="bg-white border border-[#A4C6E8] rounded-[20px] p-4 sm:p-6 mb-4">
+                  <div className="bg-white border border-[#A4C6E8] rounded-[20px] p-6 sm:p-8 mb-6 shadow-sm hover:shadow-md transition-all duration-200">
                     <p className="text-sm sm:text-base text-foreground leading-relaxed mb-3">
                       <span className="font-semibold">Franchisee Turnover Rate</span> is calculated by adding transfers, terminations, non-renewals, reacquired and ceased operations, then dividing by currently operating outlets. This is a key indicator of system health.
                     </p>
@@ -1322,7 +1393,7 @@ export default function BrandDetail() {
                   </div>
 
                   {/* Did You Know */}
-                  <div className="bg-[#f4f8fe] border-l border-[#A4C6E8] rounded-r-[20px] p-4 sm:p-6">
+                  <div className="bg-[#f4f8fe] border-l-4 border-[#54b936] rounded-r-[20px] p-6 sm:p-8 shadow-sm">
                     <div className="flex items-start gap-3">
                       <FileText className="w-5 h-5 text-[#54b936] flex-shrink-0 mt-0.5" />
                       <div>
@@ -1340,7 +1411,7 @@ export default function BrandDetail() {
             {/* Comparison Section */}
             <div
               ref={(el) => (sectionRefs.current.comparison = el)}
-              className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-6 p-4 sm:p-6 lg:p-8 lg:order-5 order-10"
+              className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-6 p-6 sm:p-8 lg:p-10 lg:order-5 order-10 shadow-sm hover:shadow-md transition-all duration-200"
             >
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-6 sm:gap-4">
                 <div className="flex flex-col gap-4 sm:gap-5 items-start w-full min-w-0">
@@ -1376,7 +1447,7 @@ export default function BrandDetail() {
                   </div>
 
                   {/* Royalties Chart */}
-                  <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-4 p-4 sm:p-6 w-full">
+                  <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-4 p-6 sm:p-8 w-full shadow-sm hover:shadow-md transition-all duration-200">
                     <div className="flex items-center gap-4 mb-2">
                       <div className="flex items-center gap-2">
                         <div className="w-4 h-4 rounded bg-[#446786]" />
@@ -1402,21 +1473,29 @@ export default function BrandDetail() {
                     >
                       <BarChart
                         data={royaltiesComparisonData}
-                        margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
                       >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#dee8f2" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#dee8f2" vertical={false} />
                         <XAxis 
                           dataKey="name" 
                           stroke="#8c9aa5" 
-                          style={{ fontSize: '11px' }}
-                          angle={-45}
-                          textAnchor="end"
-                          height={80}
+                          style={{ fontSize: '12px' }}
+                          tick={{ fill: '#8c9aa5' }}
+                          height={60}
+                          interval={0}
                         />
-                        <YAxis stroke="#8c9aa5" style={{ fontSize: '12px' }} domain={[0, 8]} />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Bar dataKey="brand" fill="#446786" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="competitors" fill="#54b936" radius={[4, 4, 0, 0]} />
+                        <YAxis 
+                          stroke="#8c9aa5" 
+                          style={{ fontSize: '12px' }} 
+                          domain={[0, 8]}
+                          tick={{ fill: '#8c9aa5' }}
+                        />
+                        <ChartTooltip 
+                          content={<ChartTooltipContent />}
+                          cursor={{ fill: 'rgba(68, 103, 134, 0.1)' }}
+                        />
+                        <Bar dataKey="brand" fill="#446786" radius={[8, 8, 0, 0]} />
+                        <Bar dataKey="competitors" fill="#54b936" radius={[8, 8, 0, 0]} />
                       </BarChart>
                     </ChartContainer>
                     <p className="text-sm text-muted-foreground break-words">
@@ -1455,7 +1534,7 @@ export default function BrandDetail() {
                   </div>
 
                   {/* Terms Chart */}
-                  <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-4 p-4 sm:p-6 w-full">
+                  <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-4 p-6 sm:p-8 w-full shadow-sm hover:shadow-md transition-all duration-200">
                     <div className="flex items-center gap-4 mb-2">
                       <div className="flex items-center gap-2">
                         <div className="w-4 h-4 rounded bg-[#446786]" />
@@ -1481,21 +1560,29 @@ export default function BrandDetail() {
                     >
                       <BarChart
                         data={termsComparisonData}
-                        margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
                       >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#dee8f2" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#dee8f2" vertical={false} />
                         <XAxis 
                           dataKey="name" 
                           stroke="#8c9aa5" 
-                          style={{ fontSize: '11px' }}
-                          angle={-45}
-                          textAnchor="end"
-                          height={80}
+                          style={{ fontSize: '12px' }}
+                          tick={{ fill: '#8c9aa5' }}
+                          height={60}
+                          interval={0}
                         />
-                        <YAxis stroke="#8c9aa5" style={{ fontSize: '12px' }} domain={[0, 25]} />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                        <Bar dataKey="brand" fill="#446786" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="competitors" fill="#54b936" radius={[4, 4, 0, 0]} />
+                        <YAxis 
+                          stroke="#8c9aa5" 
+                          style={{ fontSize: '12px' }} 
+                          domain={[0, 25]}
+                          tick={{ fill: '#8c9aa5' }}
+                        />
+                        <ChartTooltip 
+                          content={<ChartTooltipContent />}
+                          cursor={{ fill: 'rgba(68, 103, 134, 0.1)' }}
+                        />
+                        <Bar dataKey="brand" fill="#446786" radius={[8, 8, 0, 0]} />
+                        <Bar dataKey="competitors" fill="#54b936" radius={[8, 8, 0, 0]} />
                       </BarChart>
                     </ChartContainer>
                     <p className="text-sm text-muted-foreground break-words">
@@ -1536,7 +1623,7 @@ export default function BrandDetail() {
                   {/* Charts Grid - 1 column on mobile, 2 columns on larger screens */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 w-full">
                     {/* Royalty Comparison Chart */}
-                    <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-4 p-4 sm:p-6 w-full min-w-0">
+                    <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-4 p-6 sm:p-8 w-full min-w-0 shadow-sm hover:shadow-md transition-all duration-200">
                       <p className="text-base sm: font-bold text-foreground">Royalty Rate</p>
                       <ChartContainer
                         config={{
@@ -1553,21 +1640,34 @@ export default function BrandDetail() {
                       >
                         <BarChart
                           data={simpleRoyaltyComparisonData}
-                          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                          margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
                         >
-                          <CartesianGrid strokeDasharray="3 3" stroke="#dee8f2" />
-                          <XAxis dataKey="name" stroke="#8c9aa5" style={{ fontSize: '12px' }} />
-                          <YAxis stroke="#8c9aa5" style={{ fontSize: '12px' }} domain={[0, 8]} />
-                          <ChartTooltip content={<ChartTooltipContent />} />
-                          <Bar dataKey="brand" fill="#446786" radius={[4, 4, 0, 0]} />
-                          <Bar dataKey="competitors" fill="#54b936" radius={[4, 4, 0, 0]} />
+                          <CartesianGrid strokeDasharray="3 3" stroke="#dee8f2" vertical={false} />
+                          <XAxis 
+                            dataKey="name" 
+                            stroke="#8c9aa5" 
+                            style={{ fontSize: '12px' }}
+                            tick={{ fill: '#8c9aa5' }}
+                          />
+                          <YAxis 
+                            stroke="#8c9aa5" 
+                            style={{ fontSize: '12px' }} 
+                            domain={[0, 8]}
+                            tick={{ fill: '#8c9aa5' }}
+                          />
+                          <ChartTooltip 
+                            content={<ChartTooltipContent />}
+                            cursor={{ fill: 'rgba(68, 103, 134, 0.1)' }}
+                          />
+                          <Bar dataKey="brand" fill="#446786" radius={[8, 8, 0, 0]} />
+                          <Bar dataKey="competitors" fill="#54b936" radius={[8, 8, 0, 0]} />
                         </BarChart>
                       </ChartContainer>
                       <p className="text-sm text-muted-foreground break-words">Note(s): {currentBrandData.investment.royalty || "N/A"} of Gross Revenues</p>
                     </div>
 
                     {/* Initial Term Comparison Chart */}
-                    <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-4 p-4 sm:p-6 w-full min-w-0">
+                    <div className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-4 p-6 sm:p-8 w-full min-w-0 shadow-sm hover:shadow-md transition-all duration-200">
                       <p className="text-base sm: font-bold text-foreground">Initial Term</p>
                       <ChartContainer
                         config={{
@@ -1584,14 +1684,27 @@ export default function BrandDetail() {
                       >
                         <BarChart
                           data={simpleInitialTermComparisonData}
-                          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                          margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
                         >
-                          <CartesianGrid strokeDasharray="3 3" stroke="#dee8f2" />
-                          <XAxis dataKey="name" stroke="#8c9aa5" style={{ fontSize: '12px' }} />
-                          <YAxis stroke="#8c9aa5" style={{ fontSize: '12px' }} domain={[0, 25]} />
-                          <ChartTooltip content={<ChartTooltipContent />} />
-                          <Bar dataKey="brand" fill="#446786" radius={[4, 4, 0, 0]} />
-                          <Bar dataKey="competitors" fill="#54b936" radius={[4, 4, 0, 0]} />
+                          <CartesianGrid strokeDasharray="3 3" stroke="#dee8f2" vertical={false} />
+                          <XAxis 
+                            dataKey="name" 
+                            stroke="#8c9aa5" 
+                            style={{ fontSize: '12px' }}
+                            tick={{ fill: '#8c9aa5' }}
+                          />
+                          <YAxis 
+                            stroke="#8c9aa5" 
+                            style={{ fontSize: '12px' }} 
+                            domain={[0, 25]}
+                            tick={{ fill: '#8c9aa5' }}
+                          />
+                          <ChartTooltip 
+                            content={<ChartTooltipContent />}
+                            cursor={{ fill: 'rgba(68, 103, 134, 0.1)' }}
+                          />
+                          <Bar dataKey="brand" fill="#446786" radius={[8, 8, 0, 0]} />
+                          <Bar dataKey="competitors" fill="#54b936" radius={[8, 8, 0, 0]} />
                         </BarChart>
                       </ChartContainer>
                       <p className="text-sm text-muted-foreground break-words">Note(s): {currentBrandData.investment.initialTerm || "N/A"}</p>
@@ -1601,7 +1714,12 @@ export default function BrandDetail() {
                   {/* CTAs */}
                   <div className="flex flex-col sm:flex-row gap-3 w-full">
                     <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-8 py-2 text-base font-bold text-white flex-1" asChild>
-                      <Link to={`/best-franchises/brand/${slug}/unlock`}>Unlock to see the complete graphics</Link>
+                      <button
+                        onClick={(e) => handleUnlockClick(e, "comparison")}
+                        className="w-full"
+                      >
+                        Unlock to see the complete graphics
+                      </button>
                     </Button>
                     <Button 
                       variant="outline" 
@@ -1630,7 +1748,7 @@ export default function BrandDetail() {
             {/* Territories Section */}
             <div
               ref={(el) => (sectionRefs.current.territories = el)}
-              className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-5 p-4 sm:p-6 lg:p-8 lg:order-6 order-12"
+              className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-6 p-6 sm:p-8 lg:p-10 lg:order-6 order-12 shadow-sm hover:shadow-md transition-all duration-200"
             >
               <div className="flex flex-col sm:flex-row gap-5 items-start w-full">
                 <div className="flex flex-col gap-5 items-start w-full sm:w-2/3">
@@ -1671,9 +1789,12 @@ export default function BrandDetail() {
                     <br />
                     This franchise is expanding into new markets and might be available near you. One of our franchise experts will have detailed knowledge about this brand.
                     {" "}
-                    <Link to={`/best-franchises/brand/${slug}/unlock`} className="font-bold text-[#54b936] underline">
+                    <button
+                      onClick={(e) => handleUnlockClick(e, "territories")}
+                      className="font-bold text-[#54b936] underline hover:text-[#54b936]/80"
+                    >
                       Unlock to learn more
-                    </Link>{" "}
+                    </button>{" "}
                     and connect with our experts.
                   </p>
                 </div>
@@ -1698,7 +1819,7 @@ export default function BrandDetail() {
                   <div className="mt-6 border-t border-[#A4C6E8] pt-6">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                       {/* Available Territories */}
-                      <div className="bg-[#f4f8fe] border border-[#A4C6E8] rounded-[20px] p-4 sm:p-6">
+                      <div className="bg-[#f4f8fe] border border-[#A4C6E8] rounded-[20px] p-6 sm:p-8 shadow-sm">
                         <div className="flex items-center gap-2 mb-4">
                           <div className="w-3 h-3 rounded-full bg-[#54b936]" />
                           <div className="flex items-center justify-between w-full">
@@ -1725,7 +1846,7 @@ export default function BrandDetail() {
                       </div>
 
                       {/* Sold-Out Territories */}
-                      <div className="bg-[#f4f8fe] border border-[#A4C6E8] rounded-[20px] p-4 sm:p-6">
+                      <div className="bg-[#f4f8fe] border border-[#A4C6E8] rounded-[20px] p-6 sm:p-8 shadow-sm">
                         <div className="flex items-center gap-2 mb-4">
                           <div className="w-3 h-3 rounded-full bg-[#a6a6a6]" />
                           <div className="flex items-center justify-between w-full">
@@ -1753,7 +1874,7 @@ export default function BrandDetail() {
                     </div>
 
                     {/* ZIP Code CTA */}
-                    <div className="bg-white border border-[#A4C6E8] rounded-[20px] p-4 sm:p-6 mt-6">
+                    <div className="bg-white border border-[#A4C6E8] rounded-[20px] p-6 sm:p-8 mt-6 shadow-sm hover:shadow-md transition-all duration-200">
                       <p className="text-base sm: font-semibold text-foreground mb-3 text-center">
                         Territories are limited. Enter your ZIP code to confirm availability in your market.
                       </p>
@@ -1793,7 +1914,7 @@ export default function BrandDetail() {
             {/* Requirements Section */}
             <div
               ref={(el) => (sectionRefs.current.requirements = el)}
-              className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-5 p-4 sm:p-6 lg:p-8 lg:order-7 order-[100]"
+              className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-6 p-6 sm:p-8 lg:p-10 lg:order-7 order-[100] shadow-sm hover:shadow-md transition-all duration-200"
             >
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-3 w-full">
                 <div className="flex items-center gap-3">
@@ -1805,8 +1926,11 @@ export default function BrandDetail() {
                   <h2 className="text-xl sm:text-2xl font-bold text-foreground">Requirements</h2>
                 </div>
                 {!isLoggedIn && (
-                  <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-5 py-2 text-base font-bold text-white w-full sm:w-auto" asChild>
-                    <Link to={`/best-franchises/brand/${slug}/unlock`}>Unlock This Brand</Link>
+                  <Button 
+                    className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-5 py-2 text-base font-bold text-white w-full sm:w-auto"
+                    onClick={(e) => handleUnlockClick(e, "requirements")}
+                  >
+                    Unlock This Brand
                   </Button>
                 )}
               </div>
@@ -1903,7 +2027,7 @@ export default function BrandDetail() {
             {/* Next Steps Section */}
             <div
               ref={(el) => (sectionRefs.current["next-steps"] = el)}
-              className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-5 p-4 sm:p-6 lg:p-8 lg:order-8 order-[101]"
+              className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-6 p-6 sm:p-8 lg:p-10 lg:order-8 order-[101] shadow-sm hover:shadow-md transition-all duration-200"
             >
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-3 w-full">
                 <div className="flex items-center gap-3">
@@ -1915,8 +2039,11 @@ export default function BrandDetail() {
                   <h2 className="text-xl sm:text-2xl font-bold text-foreground">Next Steps</h2>
                 </div>
                 {!isLoggedIn && (
-                  <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-5 py-2 text-base font-bold text-white w-full sm:w-auto" asChild>
-                    <Link to={`/best-franchises/brand/${slug}/unlock`}>Unlock This Brand</Link>
+                  <Button 
+                    className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-5 py-2 text-base font-bold text-white w-full sm:w-auto"
+                    onClick={(e) => handleUnlockClick(e, "requirements")}
+                  >
+                    Unlock This Brand
                   </Button>
                 )}
               </div>
@@ -2017,7 +2144,7 @@ export default function BrandDetail() {
                                     ))}
                                   </ul>
                                 </div>
-                                <div className="bg-[#f4f8fe] border-l border-[#A4C6E8] p-4 rounded-lg">
+                                <div className="bg-[#f4f8fe] border-l-4 border-[#54b936] p-6 rounded-lg shadow-sm">
                                   <p className="text-sm font-medium text-foreground">
                                     <strong className="text-foreground">Why this matters:</strong> Most buyers waste weeks chasing franchise reps before they understand their fit. Our tools help you focus on the right brands, and avoid costly mismatches.
                                   </p>
@@ -2071,7 +2198,7 @@ export default function BrandDetail() {
                                     ))}
                                   </ul>
                                 </div>
-                                <div className="bg-[#f4f8fe] border-l border-[#A4C6E8] p-4 rounded-lg">
+                                <div className="bg-[#f4f8fe] border-l-4 border-[#54b936] p-6 rounded-lg shadow-sm">
                                   <p className="text-sm font-medium text-foreground">
                                     <strong className="text-foreground">Why this matters:</strong> This step significantly improves your odds of choosing the right franchise, not just the one that calls you back first.
                                   </p>
@@ -2147,7 +2274,7 @@ export default function BrandDetail() {
                                     ))}
                                   </ul>
                                 </div>
-                                <div className="bg-[#f4f8fe] border-l border-[#A4C6E8] p-4 rounded-lg">
+                                <div className="bg-[#f4f8fe] border-l-4 border-[#54b936] p-6 rounded-lg shadow-sm">
                                   <p className="text-sm font-medium text-foreground">
                                     <strong className="text-foreground">Why it matters:</strong> Franchisors pre-screen based on financial and operational fit, this prep increases your approval odds.
                                   </p>
@@ -2227,7 +2354,7 @@ export default function BrandDetail() {
                                     ))}
                                   </ul>
                                 </div>
-                                <div className="bg-[#f4f8fe] border-l border-[#A4C6E8] p-4 rounded-lg">
+                                <div className="bg-[#f4f8fe] border-l-4 border-[#54b936] p-6 rounded-lg shadow-sm">
                                   <p className="text-sm font-medium text-foreground">
                                     Inside your Franchise Grade account, we give you a "Questions to Ask the Franchisor" guide so you get meaningful answers, not marketing fluff.
                                   </p>
@@ -2269,7 +2396,7 @@ export default function BrandDetail() {
                                     ))}
                                   </ul>
                                 </div>
-                                <div className="bg-[#f4f8fe] border-l border-[#A4C6E8] p-4 rounded-lg">
+                                <div className="bg-[#f4f8fe] border-l-4 border-[#54b936] p-6 rounded-lg shadow-sm">
                                   <p className="text-sm font-medium text-foreground">
                                     Use our FDD Study Guide + Advisor support to understand what most buyers overlook.
                                   </p>
@@ -2311,7 +2438,7 @@ export default function BrandDetail() {
                                     ))}
                                   </ul>
                                 </div>
-                                <div className="bg-[#f4f8fe] border-l border-[#A4C6E8] p-4 rounded-lg">
+                                <div className="bg-[#f4f8fe] border-l-4 border-[#54b936] p-6 rounded-lg shadow-sm">
                                   <p className="text-sm font-medium text-foreground">
                                     Get our Franchisee Validation Question Guide to go beyond surface-level questions and uncover the full story.
                                   </p>
@@ -2353,7 +2480,7 @@ export default function BrandDetail() {
                                     ))}
                                   </ul>
                                 </div>
-                                <div className="bg-[#f4f8fe] border-l border-[#A4C6E8] p-4 rounded-lg">
+                                <div className="bg-[#f4f8fe] border-l-4 border-[#54b936] p-6 rounded-lg shadow-sm">
                                   <p className="text-sm font-medium text-foreground">
                                     We provide a Discovery Day Prep Call to help you show up informed, confident, and ready to make a great impression.
                                   </p>
@@ -2395,7 +2522,7 @@ export default function BrandDetail() {
                                     ))}
                                   </ul>
                                 </div>
-                                <div className="bg-[#f4f8fe] border-l border-[#A4C6E8] p-4 rounded-lg">
+                                <div className="bg-[#f4f8fe] border-l-4 border-[#54b936] p-6 rounded-lg shadow-sm">
                                   <p className="text-sm font-medium text-foreground">
                                     Franchisors often have multiple candidates per territory, your prep sets you apart.
                                   </p>
@@ -2436,7 +2563,7 @@ export default function BrandDetail() {
                                     ))}
                                   </ul>
                                 </div>
-                                <div className="bg-[#f4f8fe] border-l border-[#A4C6E8] p-4 rounded-lg">
+                                <div className="bg-[#f4f8fe] border-l-4 border-[#54b936] p-6 rounded-lg shadow-sm">
                                   <p className="text-sm font-medium text-foreground">
                                     Welcome, you're now a {systemName} franchise owner.
                                   </p>
@@ -2455,7 +2582,7 @@ export default function BrandDetail() {
             {/* FAQs Section */}
             <div
               ref={(el) => (sectionRefs.current.faqs = el)}
-              className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-5 p-4 sm:p-6 lg:p-8 lg:order-9 order-[102]"
+              className="bg-white border border-[#A4C6E8] rounded-[20px] flex flex-col gap-6 p-6 sm:p-8 lg:p-10 lg:order-9 order-[102] shadow-sm hover:shadow-md transition-all duration-200"
             >
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-3 w-full">
                 <div className="flex items-center gap-3">
@@ -2530,8 +2657,11 @@ export default function BrandDetail() {
                             <Link to="#territories">Check your ZIP availability</Link>
                           </Button>
                         ) : (
-                          <Button className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-6 py-2 text-base font-bold text-white w-full sm:w-auto" asChild>
-                            <Link to={`/best-franchises/brand/${slug}/unlock`}>Check your ZIP availability</Link>
+                          <Button 
+                            className="bg-[#54b936] hover:bg-[#54b936]/90 rounded-[30px] px-6 py-2 text-base font-bold text-white w-full sm:w-auto"
+                            onClick={(e) => handleUnlockClick(e, "territories")}
+                          >
+                            Check your ZIP availability
                           </Button>
                         )}
                       </AccordionContent>

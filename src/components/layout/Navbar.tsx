@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEngagementTracking } from "@/hooks/useEngagementTracking";
+import { useSignInModal } from "@/contexts/SignInModalContext";
 import {
   Dialog,
   DialogContent,
@@ -57,7 +58,6 @@ const navLinks: NavLink[] = [
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [signInModalOpen, setSignInModalOpen] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
@@ -70,6 +70,7 @@ export function Navbar() {
   const location = useLocation();
   const { isLoggedIn, login, logout } = useAuth();
   const { trackSignIn } = useEngagementTracking();
+  const { isOpen: signInModalOpen, openModal, closeModal, pendingSectionId, clearPendingSection } = useSignInModal();
   const [isDesktop, setIsDesktop] = useState(false);
   
   // Check if desktop on mount and resize
@@ -120,11 +121,23 @@ export function Navbar() {
         await trackSignIn();
         
         console.log("Verification successful! Sign in data:", formData);
-        // Show welcome modal instead of closing
+        // Close verification form
         setShowVerification(false);
-        setShowWelcomeModal(true);
         setEnteredCode("");
         setVerificationCode("");
+        
+        // If there's a pending section, close modal immediately
+        // BrandDetail component will handle scrolling to the section
+        if (pendingSectionId) {
+          // Close the sign-in modal immediately
+          closeModal();
+          // Reset form
+          setFormData({ firstName: "", lastName: "", email: "" });
+          // Don't clear pending section here - let BrandDetail handle it after scrolling
+        } else {
+          // No pending section - show welcome modal
+          setShowWelcomeModal(true);
+        }
       } catch (error) {
         console.error("Login error:", error);
         alert("Failed to sign in. Please try again.");
@@ -137,22 +150,24 @@ export function Navbar() {
 
   const handleStartQuiz = () => {
     setShowWelcomeModal(false);
-    setSignInModalOpen(false);
+    closeModal();
+    // Reset form
+    setFormData({ firstName: "", lastName: "", email: "" });
     // Navigate to onboarding/quiz page
     window.location.href = "/onboarding";
   };
 
   const handleSkipQuiz = () => {
     setShowWelcomeModal(false);
-    setSignInModalOpen(false);
+    closeModal();
     // Reset form
     setFormData({ firstName: "", lastName: "", email: "" });
     // User is already logged in from handleVerificationSubmit
   };
 
   const handleModalClose = (open: boolean) => {
-    setSignInModalOpen(open);
     if (!open) {
+      closeModal();
       // Reset everything when modal closes
       setShowVerification(false);
       setShowWelcomeModal(false);
@@ -295,7 +310,7 @@ export function Navbar() {
                   variant="cta" 
                   size="sm" 
                   className="text-base font-normal tracking-normal px-9 py-2"
-                  onClick={() => setSignInModalOpen(true)}
+                  onClick={() => openModal()}
                 >
                   Sign In
                 </Button>

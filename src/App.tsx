@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { SignInModalProvider } from "@/contexts/SignInModalContext";
 import Index from "./pages/Index";
 import Browse from "./pages/Browse";
 import BrowseByLocation from "./pages/BrowseByLocation";
@@ -28,9 +29,10 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+        <SignInModalProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
           <ScrollToTop />
           <Routes>
           <Route path="/" element={<Index />} />
@@ -51,6 +53,7 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+        </SignInModalProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
